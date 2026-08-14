@@ -100,7 +100,7 @@ struct SuggestionTriggerTests {
     /// строку говорит, что это «один человек и одна мысль», — модель отвечала
     /// на начало склейки.
     @Test("Два вопроса подряд не склеиваются в один, если между ними было нажатие")
-    func aPressBreaksTheMerge() async {
+    func aPressBreaksTheMerge() async throws {
         let provider = StubLLMProvider(.fragments(["ответ"]))
         let call = SuggestionCall(
             provider: provider,
@@ -110,11 +110,11 @@ struct SuggestionTriggerTests {
 
         call.says(.them)
         call.engine.suggestInDetail()
-        #expect(await call.modelWasAsked(1))
+        try #require(await call.modelWasAsked(1))
 
         call.says(.them)
         call.engine.suggestBriefly()
-        #expect(await call.modelWasAsked(2))
+        try #require(await call.modelWasAsked(2))
 
         let lines = provider.requests[1].userPrompt
             .split(separator: "\n")
@@ -124,7 +124,7 @@ struct SuggestionTriggerTests {
     }
 
     @Test("Текущий вопрос назван отдельной строкой — гадать модели не приходится")
-    func theCurrentQuestionIsNamed() async {
+    func theCurrentQuestionIsNamed() async throws {
         let provider = StubLLMProvider(.fragments(["ответ"]))
         let call = SuggestionCall(
             provider: provider,
@@ -134,30 +134,30 @@ struct SuggestionTriggerTests {
 
         call.says(.them)
         call.engine.suggestBriefly()
-        #expect(await call.modelWasAsked(1))
+        try #require(await call.modelWasAsked(1))
         call.says(.them)
         call.engine.suggestBriefly()
-        #expect(await call.modelWasAsked(2))
+        try #require(await call.modelWasAsked(2))
 
         #expect(provider.requests[1].userPrompt.contains("Сейчас он спросил: «А чем any отличается от unknown?»"))
         #expect(provider.requests[0].userPrompt.contains("Сейчас он спросил: «Расскажите про event loop.»"))
     }
 
     @Test("Собеседник ещё не сказал ничего — строки про текущий вопрос нет вовсе")
-    func noQuestionMeansNoLine() async {
+    func noQuestionMeansNoLine() async throws {
         let provider = StubLLMProvider(.fragments(["ответ"]))
         let call = SuggestionCall(provider: provider, recognisesAs: "мои слова")
         call.listen()
 
         call.says(.you)
         call.engine.suggestBriefly()
-        #expect(await call.modelWasAsked(1))
+        try #require(await call.modelWasAsked(1))
 
         #expect(!provider.requests[0].userPrompt.contains("Сейчас он спросил"))
     }
 
     @Test("Второе нажатие отвечает на второй вопрос, а не на первый")
-    func aSecondPressAnswersTheSecondQuestion() async {
+    func aSecondPressAnswersTheSecondQuestion() async throws {
         let provider = StubLLMProvider(.fragments(["ответ"]))
         let call = SuggestionCall(
             provider: provider,
@@ -166,11 +166,11 @@ struct SuggestionTriggerTests {
 
         call.says(.them)
         call.engine.suggestInDetail()
-        #expect(await call.modelWasAsked(1))
+        try #require(await call.modelWasAsked(1))
 
         call.says(.them)
         call.engine.suggestBriefly()
-        #expect(await call.modelWasAsked(2))
+        try #require(await call.modelWasAsked(2))
 
         let second = provider.requests[1].userPrompt
         #expect(second.contains("Чем GiST отличается от GIN?"), "второй вопрос не доехал: \(second)")
@@ -182,7 +182,7 @@ struct SuggestionTriggerTests {
     /// ответила на предыдущий вопрос. Ответ выглядел обычным — связным и по
     /// теме, просто не про то, что спросили секунду назад.
     @Test("Слова не успели распознаться — запрос уходит, но об этом сказано")
-    func aLateRecognitionIsAnnounced() async {
+    func aLateRecognitionIsAnnounced() async throws {
         let provider = StubLLMProvider(.fragments(["ответ"]))
         let call = SuggestionCall(
             provider: provider,
@@ -192,26 +192,26 @@ struct SuggestionTriggerTests {
 
         call.says(.them)
         call.engine.suggestBriefly()
-        #expect(await call.modelWasAsked(1))
+        try #require(await call.modelWasAsked(1))
 
         call.says(.them)
         call.engine.suggestBriefly()
         await call.waitOutRecognitionBudget()
-        #expect(await call.modelWasAsked(2))
+        try #require(await call.modelWasAsked(2))
 
         let notice = call.engine.suggestions.last?.notice
         #expect(notice?.contains("ещё распознавались") == true, "молчать об этом нельзя")
     }
 
     @Test("Все слова успели — лишней строки над ответом нет")
-    func aTimelyRecognitionSaysNothing() async {
+    func aTimelyRecognitionSaysNothing() async throws {
         let provider = StubLLMProvider(.fragments(["ответ"]))
         let call = SuggestionCall(provider: provider, recognisesAs: "Что такое B-tree?")
         call.listen()
 
         call.says(.them)
         call.engine.suggestBriefly()
-        #expect(await call.modelWasAsked(1))
+        try #require(await call.modelWasAsked(1))
 
         #expect(call.engine.suggestions.last?.notice == nil)
     }
@@ -222,13 +222,13 @@ struct SuggestionTriggerTests {
     /// выглядела на карточке ровно как короткая — и разницу пользователь узнавал,
     /// уже произнося половину фразы вслух.
     @Test("Ответ оборвался — текст остаётся, а причина стоит под ним")
-    func aCutAnswerKeepsItsTextAndSaysWhy() async {
+    func aCutAnswerKeepsItsTextAndSaysWhy() async throws {
         let provider = StubLLMProvider(.manual)
         let call = SuggestionCall(provider: provider, recognisesAs: "что такое B-tree")
 
         call.says(.them)
         call.engine.suggestBriefly()
-        #expect(await call.modelWasAsked(1))
+        try #require(await call.modelWasAsked(1))
         provider.emit("Я бы взял составной индекс по статусу и дате, ")
         provider.cut(.connection)
         await call.engine.waitForSuggestion()
@@ -239,13 +239,13 @@ struct SuggestionTriggerTests {
     }
 
     @Test("Обрыв по бюджету — это не отказ: подсказка не помечается как несостоявшаяся")
-    func aBudgetCutIsNotAFailure() async {
+    func aBudgetCutIsNotAFailure() async throws {
         let provider = StubLLMProvider(.manual)
         let call = SuggestionCall(provider: provider, recognisesAs: "что такое B-tree")
 
         call.says(.them)
         call.engine.suggestBriefly()
-        #expect(await call.modelWasAsked(1))
+        try #require(await call.modelWasAsked(1))
         provider.emit("Половина ответа")
         provider.cut(.budget)
         await call.engine.waitForSuggestion()
@@ -256,13 +256,13 @@ struct SuggestionTriggerTests {
     }
 
     @Test("Модель не сказала ни слова — сказано, что ответ пуст, а не пустая карточка")
-    func anEmptyAnswerIsExplained() async {
+    func anEmptyAnswerIsExplained() async throws {
         let provider = StubLLMProvider(.manual)
         let call = SuggestionCall(provider: provider, recognisesAs: "что такое B-tree")
 
         call.says(.them)
         call.engine.suggestBriefly()
-        #expect(await call.modelWasAsked(1))
+        try #require(await call.modelWasAsked(1))
         provider.cut(.empty)
         await call.engine.waitForSuggestion()
 
@@ -305,13 +305,13 @@ struct SuggestionTriggerTests {
     // MARK: - Стриминг
 
     @Test("Ответ печатается по мере генерации, а не появляется целиком в конце")
-    func fragmentsArriveOneByOne() async {
+    func fragmentsArriveOneByOne() async throws {
         let provider = StubLLMProvider(.manual)
         let call = SuggestionCall(provider: provider, recognisesAs: "оцените сложность решения")
 
         call.says(.them)
         call.engine.suggestBriefly()
-        #expect(await call.modelWasAsked(1))
+        try #require(await call.modelWasAsked(1))
 
         #expect(call.engine.suggestions.count == 1, "подсказка должна появиться до первого фрагмента")
         #expect(call.engine.suggestions.first?.text.isEmpty == true)

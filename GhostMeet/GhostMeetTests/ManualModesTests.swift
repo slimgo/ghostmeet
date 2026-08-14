@@ -472,11 +472,11 @@ struct ManualRequestLifecycleTests {
     // MARK: - Вытеснение
 
     @Test("Собеседник заговорил — ответ на вопрос пользователя это не отменяет")
-    func aThemTurnLeavesTheAnswerAlone() async {
+    func aThemTurnLeavesTheAnswerAlone() async throws {
         let call = ManualCall(model: ManualModel(.manual), recognises: "а расскажите про индексы")
 
         call.engine.ask("что тут на экране?")
-        #expect(await call.modelWasAsked(1))
+        try #require(await call.modelWasAsked(1))
         call.model.emit("На экране ", into: 0)
         #expect(await call.textOfLatestReaches("На экране "))
 
@@ -494,11 +494,11 @@ struct ManualRequestLifecycleTests {
     }
 
     @Test("Своя речь ответ не отменяет")
-    func aYouTurnCancelsNothing() async {
+    func aYouTurnCancelsNothing() async throws {
         let call = ManualCall(model: ManualModel(.manual), recognises: "сейчас посмотрю")
 
         call.engine.ask("что тут на экране?")
-        #expect(await call.modelWasAsked(1))
+        try #require(await call.modelWasAsked(1))
         call.model.emit("Это ", into: 0)
         #expect(await call.textOfLatestReaches("Это "))
 
@@ -518,17 +518,17 @@ struct ManualRequestLifecycleTests {
     }
 
     @Test("Solve поверх начатого ответа — две генерации в одну ленту не пишут")
-    func solveSupersedesTheAnswerInFlight() async {
+    func solveSupersedesTheAnswerInFlight() async throws {
         let call = ManualCall(model: ManualModel(.manual), recognises: "расскажите про транзакции")
 
         call.says(.them)
         call.engine.suggestBriefly()
-        #expect(await call.modelWasAsked(1))
+        try #require(await call.modelWasAsked(1))
         call.model.emit("Транзакция — ", into: 0)
         #expect(await call.textOfLatestReaches("Транзакция — "))
 
         call.engine.solveOnScreen()
-        #expect(await call.modelWasAsked(2))
+        try #require(await call.modelWasAsked(2))
 
         #expect(await call.model.streamWasCancelled(0), "предыдущий ответ обязан оборваться")
         #expect(call.engine.suggestions.count == 2)

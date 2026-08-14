@@ -28,7 +28,7 @@ struct SuggestionLifecycleTests {
     // MARK: - Нажатие во время генерации
 
     @Test("Нажали ещё раз — предыдущий ответ перестаёт расти, но остаётся на экране")
-    func aSecondPressSupersedesTheAnswerInFlight() async {
+    func aSecondPressSupersedesTheAnswerInFlight() async throws {
         let call = LifecycleCall(
             model: ScriptedModel(.manual),
             recognises: ["расскажите про", "ваш опыт с шардированием"]
@@ -36,7 +36,7 @@ struct SuggestionLifecycleTests {
 
         call.says(.them)
         call.engine.suggestBriefly()
-        #expect(await call.modelWasAsked(1))
+        try #require(await call.modelWasAsked(1))
         call.model.emit("Шардирование — это ", into: 0)
         #expect(await call.textOfLatestReaches("Шардирование — это "))
 
@@ -44,7 +44,7 @@ struct SuggestionLifecycleTests {
         // и пользователь нажал заново.
         call.says(.them)
         call.engine.suggestBriefly()
-        #expect(await call.modelWasAsked(2))
+        try #require(await call.modelWasAsked(2))
 
         #expect(
             await call.model.streamWasCancelled(0),
@@ -94,7 +94,7 @@ struct SuggestionLifecycleTests {
     }
 
     @Test("Вытесненную подсказку не дописывают: отменённый поток больше не растит её")
-    func aCancelledStreamNeverAppendsAgain() async {
+    func aCancelledStreamNeverAppendsAgain() async throws {
         let call = LifecycleCall(
             model: ScriptedModel(.manual),
             recognises: ["первая половина", "вторая половина"]
@@ -102,13 +102,13 @@ struct SuggestionLifecycleTests {
 
         call.says(.them)
         call.engine.suggestBriefly()
-        #expect(await call.modelWasAsked(1))
+        try #require(await call.modelWasAsked(1))
         call.model.emit("Половина ответа", into: 0)
         #expect(await call.textOfLatestReaches("Половина ответа"))
 
         call.says(.them)
         call.engine.suggestBriefly()
-        #expect(await call.modelWasAsked(2))
+        try #require(await call.modelWasAsked(2))
         #expect(await call.model.streamWasCancelled(0))
 
         // Провайдер, не заметивший отмены, продолжает писать в старый поток.
@@ -185,7 +185,7 @@ struct SuggestionLifecycleTests {
     }
 
     @Test("Собеседник заговорил, пока модель пишет — подсказка не отменяется")
-    func aThemTurnDuringGenerationCancelsNothing() async {
+    func aThemTurnDuringGenerationCancelsNothing() async throws {
         let call = LifecycleCall(
             model: ScriptedModel(.manual),
             recognises: ["чем транзакция отличается от блокировки", "и ещё вопрос"]
@@ -193,7 +193,7 @@ struct SuggestionLifecycleTests {
 
         call.says(.them)
         call.engine.suggestBriefly()
-        #expect(await call.modelWasAsked(1))
+        try #require(await call.modelWasAsked(1))
         call.model.emit("Транзакция ", into: 0)
         #expect(await call.textOfLatestReaches("Транзакция "))
 
@@ -215,7 +215,7 @@ struct SuggestionLifecycleTests {
     // MARK: - Реплика You
 
     @Test("Пользователь заговорил, пока модель пишет — подсказка дописывается до конца")
-    func aYouTurnDuringGenerationCancelsNothing() async {
+    func aYouTurnDuringGenerationCancelsNothing() async throws {
         let call = LifecycleCall(
             model: ScriptedModel(.manual),
             recognises: ["чем транзакция отличается от блокировки", "сейчас расскажу"]
@@ -223,7 +223,7 @@ struct SuggestionLifecycleTests {
 
         call.says(.them)
         call.engine.suggestBriefly()
-        #expect(await call.modelWasAsked(1))
+        try #require(await call.modelWasAsked(1))
         call.model.emit("Транзакция ", into: 0)
         #expect(await call.textOfLatestReaches("Транзакция "))
 
@@ -275,7 +275,7 @@ struct SuggestionLifecycleTests {
     // MARK: - Транскрипт переживает отмену
 
     @Test("Отмена забирает ответ, но не слова: обе половины вопроса остаются в транскрипте")
-    func supersedingKeepsTheTranscript() async {
+    func supersedingKeepsTheTranscript() async throws {
         let call = LifecycleCall(
             model: ScriptedModel(.manual),
             recognises: ["расскажите про", "ваш опыт с шардированием"]
@@ -283,10 +283,10 @@ struct SuggestionLifecycleTests {
 
         call.says(.them)
         call.engine.suggestBriefly()
-        #expect(await call.modelWasAsked(1))
+        try #require(await call.modelWasAsked(1))
         call.says(.them)
         call.engine.suggestBriefly()
-        #expect(await call.modelWasAsked(2))
+        try #require(await call.modelWasAsked(2))
 
         #expect(call.engine.transcript.count == 2)
         #expect(
