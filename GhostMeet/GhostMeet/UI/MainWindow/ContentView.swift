@@ -48,6 +48,11 @@ struct ContentView: View {
     /// way in.
     let openSettings: OpenSettings
 
+    /// Why the last save did not happen, or `nil`. Local to the view on purpose:
+    /// it is about an action the user just took, not about the state of the
+    /// session, and the session has no business remembering it.
+    @State private var saveFailure: String?
+
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
             header
@@ -64,6 +69,7 @@ struct ContentView: View {
             askBar
             Divider().opacity(0.4)
             transcript
+            saveRow
             Divider().opacity(0.4)
             footer
         }
@@ -558,6 +564,84 @@ struct ContentView: View {
     private var transcript: some View {
         TranscriptView(turns: session.transcript)
             .frame(maxWidth: .infinity, minHeight: 96, maxHeight: 132, alignment: .topLeading)
+    }
+
+    // MARK: - Сохранение диалога
+
+    /// Saving the call to a file, under the transcript it saves.
+    ///
+    /// **Under the dialogue and not in the header.** The header already carries
+    /// the indicators, the visibility switch, «Слушать» and the gear; a fifth
+    /// control there would squeeze the readiness strip. This one belongs next to
+    /// what it acts on anyway.
+    ///
+    /// Available while listening as well as after it. Forbidding it mid-call
+    /// would protect nothing — the file is a copy of what is already on screen —
+    /// and would need explaining, which is worse than the button being there.
+    @ViewBuilder
+    private var saveRow: some View {
+        HStack(spacing: 8) {
+            Button {
+                saveTranscript()
+            } label: {
+                Label("Сохранить диалог", systemImage: "square.and.arrow.down")
+                    .font(.system(size: 11))
+            }
+            .controlSize(.small)
+            .disabled(session.transcript.isEmpty)
+            .help(session.transcript.isEmpty
+                  ? "Пока нечего сохранять: в разговоре ни одной реплики."
+                  : "Сохранить весь разговор в файл: обе стороны, ответы модели, без реплик, признанных протечкой.")
+
+            if let saveFailure {
+                Text(saveFailure)
+                    .font(.system(size: 10))
+                    .foregroundStyle(.orange)
+                    .lineLimit(2)
+            }
+
+            Spacer(minLength: 0)
+        }
+        .padding(.horizontal, 12)
+        .padding(.vertical, 6)
+    }
+
+    /// Builds the file and hands it to the save panel.
+    ///
+    /// The anchor is taken **here**, at the moment of saving, because that is the
+    /// only place where both clocks can be read at once — see
+    /// `TranscriptExport.Anchor` for why one of them is uptime and the other a
+    /// date, and what happens to the ordering without the pair.
+    private func saveTranscript() {
+        let now = Date()
+        let readiness = settings.map { PrecallReadiness.make(settings: $0) }
+
+        let markdown = TranscriptExport.markdown(
+            turns: session.transcript,
+            suggestions: session.suggestions,
+            metadata: TranscriptExport.Metadata(
+                savedAt: now,
+                profile: stated(readiness?.profile),
+                provider: stated(readiness?.provider),
+                source: stated(readiness?.source)
+            ),
+            anchor: TranscriptExport.Anchor(uptime: ProcessInfo.processInfo.systemUptime, date: now)
+        )
+
+        saveFailure = TranscriptSaving.save(
+            markdown,
+            suggestedName: TranscriptSaving.suggestedName(for: now)
+        )
+    }
+
+    /// A readiness field worth writing down, or nil.
+    ///
+    /// A gap — no source picked, no key stored — reads in the strip as «не
+    /// выбрано», and that is right on screen and wrong in a file: a caption with
+    /// a placeholder under it looks like a fact about the call.
+    private func stated(_ item: ReadinessItem?) -> String? {
+        guard let item, !item.isMissing else { return nil }
+        return item.value
     }
 
     // MARK: - Footer
