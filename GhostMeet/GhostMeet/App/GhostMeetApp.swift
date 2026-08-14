@@ -124,7 +124,21 @@ final class GhostMeetAppDelegate: NSObject, NSApplicationDelegate {
         // means the first thing said in every session is lost, which in an
         // interview is the opening question. The model is already on disk by
         // then, so this only pays for loading it into memory.
-        recognition.prepare()
+        // ...but not under tests, and that exception was paid for. The suite
+        // hosts itself inside this app, so every `xcodebuild test` launched the
+        // whole launch path — including a WhisperKit model being fetched and
+        // loaded onto the Neural Engine. On a CI runner that is a download, a
+        // few hundred megabytes of memory and minutes of work behind a test
+        // process that is meanwhile expected to answer in milliseconds; the host
+        // died mid-run and the suites that never got to start reported
+        // «Test run with 0 tests», which reads like success.
+        //
+        // Nothing is lost by skipping it: no test asserts that a real model is
+        // fetched at launch — `SpeechModelStatus` is exercised through
+        // `FakeSpeechModelProvider`, which is the seam built for exactly this.
+        if !AppDefaults.isRunningTests() {
+            recognition.prepare()
+        }
 
         // How far preparation has got is reported in the overlay and nowhere
         // else. GhostMeet posts no system notifications at all — macOS draws

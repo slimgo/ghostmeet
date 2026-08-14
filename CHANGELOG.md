@@ -15,7 +15,22 @@ Design decisions referenced below live in [docs/adr/](docs/adr/); the product sp
 
 ## [Unreleased]
 
-Nothing yet.
+### Added
+
+- **Saving a call to a file** — the first user request this project has had. A button under the
+  transcript writes both sides of the conversation and the model's answers into one Markdown file,
+  in the order they happened, with a header naming the profile, the provider and the source app.
+
+  Turns marked as speaker leakage are left out, and **the number dropped is stated in the header**.
+  That line is not decoration: `LeakDedup` needs five matched words before it marks anything, so a
+  short leak is never marked at all — and a silent clean-up would make «протечек не было»
+  indistinguishable from «фильтр их не увидел».
+
+  Cut, superseded and failed answers are saved with their reason rather than skipped: half an
+  answer is what the user actually read out loud.
+
+  Nothing is written anywhere until the save panel returns a location. Until this feature the app
+  wrote nothing to disk at all, and that is still true of everything else.
 
 ## [0.2.0] — 2026-08-14
 

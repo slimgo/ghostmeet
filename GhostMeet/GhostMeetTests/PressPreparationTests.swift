@@ -161,7 +161,7 @@ struct PressPreparationTests {
     }
 
     @Test("Дозакрытая реплика остаётся в транскрипте, даже если ответ на неё вытеснят")
-    func theClosedTailSurvivesASupersededAnswer() async {
+    func theClosedTailSurvivesASupersededAnswer() async throws {
         let call = PressCall(
             model: PressModel(.manual),
             recognises: "с Postgres",
@@ -170,11 +170,11 @@ struct PressPreparationTests {
 
         call.speaks(.them, for: 0.4)
         call.engine.suggestBriefly()
-        #expect(await call.modelWasAsked(1))
+        try #require(await call.modelWasAsked(1))
 
         // Передумали и нажали ещё раз.
         call.engine.suggestBriefly()
-        #expect(await call.modelWasAsked(2))
+        try #require(await call.modelWasAsked(2))
 
         #expect(call.engine.transcript.map(\.text) == ["с Postgres"], "слова не зависят от судьбы подсказки")
         #expect(call.engine.suggestions[0].state == .superseded)
@@ -329,7 +329,7 @@ struct PressPreparationTests {
     }
 
     @Test("Повторное нажатие вытесняет предыдущий ответ, а не запускает второй параллельно")
-    func asecondPressSupersedesTheFirstAnswer() async {
+    func asecondPressSupersedesTheFirstAnswer() async throws {
         let call = PressCall(
             model: PressModel(.manual),
             recognises: "расскажите про индексы",
@@ -338,12 +338,12 @@ struct PressPreparationTests {
 
         call.says(.them)
         call.engine.suggestBriefly()
-        #expect(await call.modelWasAsked(1))
+        try #require(await call.modelWasAsked(1))
         call.model.emit("Индекс — это ", into: 0)
         #expect(await call.textOfLatestReaches("Индекс — это "))
 
         call.engine.suggestInDetail()
-        #expect(await call.modelWasAsked(2))
+        try #require(await call.modelWasAsked(2))
 
         #expect(
             await call.model.streamWasCancelled(0),

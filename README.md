@@ -126,6 +126,10 @@ Two traps worth knowing before you touch the project file:
   will receive the text and says whether it leaves the machine.
 - Logging is lifecycle-only. There is no per-frame logging anywhere, deliberately: in this app a
   per-frame log writes the conversation to disk.
+- **Saving a call is the one thing that writes to disk, and only you can start it.** The button
+  under the transcript builds a Markdown file — both sides of the conversation and the model's
+  answers — and hands it to a save panel, so the file exists where you pointed rather than in a
+  folder of ours. It is the whole conversation in plain text; treat it accordingly.
 - **One request is not yours: the update check.** At launch the app asks GitHub for the latest
   published version and shows one line if it is newer. It carries an IP address and the running
   version, nothing else, and the answer is a page anyone can open. On by default because there is
@@ -161,6 +165,10 @@ Both are spelled out in [CLAUDE.md](CLAUDE.md).
 
 The spec and the decision records are written in Russian; code identifiers and comments follow
 normal Swift conventions in English.
+
+**The app's interface is in Russian.** Worth knowing before you download it: the buttons say
+«Слушать» and «Настройки». What the model *answers* is not forced to any language — a suggestion
+follows the language of the call, so an English-language interview is answered in English today.
 
 ## Releasing
 
