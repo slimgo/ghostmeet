@@ -467,6 +467,10 @@ struct ManualRequestLifecycleTests {
 
         #expect(call.engine.suggestions.count == 1)
         #expect(call.engine.suggestions[0].state == .failed(LLMFailure.missingKey.message))
+        #expect(
+            call.engine.suggestions[0].kind == .screenTask,
+            "нажатие состоялось, и в сохранённом звонке видно, о чём просили впустую"
+        )
     }
 
     // MARK: - Вытеснение

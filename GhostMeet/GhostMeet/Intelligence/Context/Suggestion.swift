@@ -13,6 +13,37 @@ import Foundation
 /// before it is finished — `text` grows and `state` settles.
 nonisolated struct Suggestion: Identifiable, Equatable, Sendable {
 
+    /// Вид подсказки: which of the four things a `Нажатие` may ask for produced
+    /// this one.
+    ///
+    /// **Not the same as `Жанр подсказки`, and the difference is the reason this
+    /// type is not called a genre.** Genres are two — коротко and подробно, the
+    /// same request in two sizes. Kinds are four: the two genres plus `Ask` and
+    /// `Solve on screen`, which answer something else entirely. `Solve on screen`
+    /// reads no conversation at all, so a card carrying it is not a short answer
+    /// to the call — it is an answer to a different question.
+    ///
+    /// **A mirror of `SuggestionAsk`, deliberately.** The original lives in the
+    /// App layer beside the composer, because deciding which prompt an ask uses is
+    /// the prompt layer's business. This layer holds a value of its own and `App`
+    /// maps into it; the arrow may not point the other way, or the context layer
+    /// would learn what a prompt is (ADR-0001).
+    ///
+    /// `question` carries the text the user typed rather than just marking the
+    /// mode. In a saved call «Ask: почему не Mongo?» is worth more than «Ask»: the
+    /// answer below it is unreadable without knowing what was asked, and unlike a
+    /// genre press there is no `Them` turn above it that would say.
+    nonisolated enum Kind: Equatable, Sendable {
+        /// Жанр «коротко» — the default press.
+        case brief
+        /// Жанр «подробно».
+        case detailed
+        /// Mode `Ask`, with the question the user typed.
+        case question(String)
+        /// Mode `Solve on screen`.
+        case screenTask
+    }
+
     nonisolated enum State: Equatable, Sendable {
         /// The model is still writing. `text` keeps growing.
         case streaming
@@ -55,18 +86,28 @@ nonisolated struct Suggestion: Identifiable, Equatable, Sendable {
     /// When generation started, for ordering in the feed.
     let startedAt: Date
 
+    /// What the press asked for, or `nil` when nobody said.
+    ///
+    /// Optional because it is a record and not a requirement: a `Подсказка` is
+    /// whole without it — it has text, a state and a time — and every test that
+    /// builds one to check the feed would otherwise have to name a kind it does
+    /// not care about. The app itself always fills it in.
+    let kind: Kind?
+
     init(
         id: UUID = UUID(),
         text: String = "",
         state: State = .streaming,
         notice: String? = nil,
-        startedAt: Date
+        startedAt: Date,
+        kind: Kind? = nil
     ) {
         self.id = id
         self.text = text
         self.state = state
         self.notice = notice
         self.startedAt = startedAt
+        self.kind = kind
     }
 
     /// Whether anything more may still be appended.

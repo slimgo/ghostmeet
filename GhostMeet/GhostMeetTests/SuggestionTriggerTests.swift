@@ -407,6 +407,78 @@ struct SuggestionTriggerTests {
     }
 }
 
+// MARK: - Чем попросили
+
+/// Нажатие знает, о чём просило, — и с этого момента знает и подсказка.
+///
+/// Нужно это одному потребителю, сохранённому диалогу: в нём все ответы модели
+/// выглядели одинаково, хотя просить можно четыре разные вещи. Живёт свойство в
+/// слое контекста, а `SuggestionAsk` отображается в него здесь — стрелка только в
+/// эту сторону, иначе хранилище ответов узнало бы про сборку промптов.
+@Suite("Подсказка помнит, чем её попросили")
+@MainActor
+struct SuggestionKindTests {
+
+    @Test("Каждое из четырёх нажатий записывает свой вид")
+    func everyPressRecordsItsKind() async {
+        let call = SuggestionCall(provider: StubLLMProvider(.fragments(["готово"])))
+
+        call.engine.suggestBriefly()
+        await call.engine.waitForSuggestion()
+        call.engine.suggestInDetail()
+        await call.engine.waitForSuggestion()
+        call.engine.ask("почему не Mongo?")
+        await call.engine.waitForSuggestion()
+        call.engine.solveOnScreen()
+        await call.engine.waitForSuggestion()
+
+        #expect(call.engine.suggestions.map(\.kind) == [
+            .brief,
+            .detailed,
+            .question("почему не Mongo?"),
+            .screenTask,
+        ])
+    }
+
+    @Test("Вопрос сохраняется тем же, каким ушёл в модель, — обрезанным")
+    func theRecordedQuestionIsTheOneAsked() async {
+        // Две записи одного вопроса, разойдись они пробелом, читались бы в файле
+        // как ответ не на тот вопрос, который видела модель.
+        let call = SuggestionCall(provider: StubLLMProvider())
+
+        call.engine.ask("  чем крыть про шардинг?\n ")
+        await call.engine.waitForSuggestion()
+
+        #expect(call.engine.suggestions.first?.kind == .question("чем крыть про шардинг?"))
+        #expect(
+            call.provider.requests.first?.userPrompt.hasSuffix("Вопрос: чем крыть про шардинг?") == true
+        )
+    }
+
+    @Test("Перебитая подсказка вид не теряет")
+    func asupersededAnswerKeepsItsKind() async throws {
+        let call = SuggestionCall(provider: StubLLMProvider(.manual))
+
+        call.engine.suggestInDetail()
+        try #require(await call.modelWasAsked(1))
+        call.provider.emit("Начал разбирать")
+        #expect(await call.textOfLatestReaches("Начал разбирать"))
+
+        call.engine.suggestBriefly()
+        try #require(await call.modelWasAsked(2))
+        call.provider.finish()
+        await call.engine.waitForSuggestion()
+
+        #expect(call.engine.suggestions.count == 2)
+        #expect(call.engine.suggestions[0].state == .superseded)
+        #expect(
+            call.engine.suggestions[0].kind == .detailed,
+            "недочитанный разбор остаётся в ленте разбором, а не превращается в короткий ответ"
+        )
+        #expect(call.engine.suggestions[1].kind == .brief)
+    }
+}
+
 // MARK: - Обстановка звонка
 
 /// A call whose model is a stub: speech goes in, presses go in, requests and

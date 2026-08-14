@@ -43,6 +43,25 @@ nonisolated enum SuggestionAsk: Equatable, Sendable {
         case .screenTask: false
         }
     }
+
+    /// The same ask as the context layer records it on a `Подсказка`.
+    ///
+    /// The mapping lives here and only here, and the direction is the whole point:
+    /// `App` knows about `Intelligence`, never the reverse (ADR-0001). Were
+    /// `Suggestion` to hold a `SuggestionAsk` outright, the layer that stores what
+    /// the model said would depend on the layer that decides which prompt to send
+    /// it — and a saved call would stop being buildable without the prompts.
+    ///
+    /// Deliberately exhaustive rather than defaulted: a fifth thing to press for
+    /// must not silently arrive in the file as one of the four already here.
+    var kind: Suggestion.Kind {
+        switch self {
+        case .brief: .brief
+        case .detailed: .detailed
+        case .question(let text): .question(text)
+        case .screenTask: .screenTask
+        }
+    }
 }
 
 /// Turns what the user asked for into a request a provider can take.

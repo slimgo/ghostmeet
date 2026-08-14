@@ -508,7 +508,7 @@ final class SessionEngine {
         closeOpenTurns()
 
         guard provider != nil else {
-            reportNothingToAnswerWith()
+            reportNothingToAnswerWith(ask)
             return
         }
         supersedeAnswerInFlight()
@@ -596,7 +596,8 @@ final class SessionEngine {
             request,
             from: provider,
             screen: screen,
-            notice: notice(for: ask, heardEverything: heardEverything)
+            notice: notice(for: ask, heardEverything: heardEverything),
+            kind: ask.kind
         )
     }
 
@@ -636,9 +637,18 @@ final class SessionEngine {
     /// Reported because the user pressed: silence in answer to a press reads as a
     /// broken app. Inside the window and nowhere else, like every other failure
     /// (ADR-0004).
-    private func reportNothingToAnswerWith() {
+    ///
+    /// Carries the kind even though there is no answer to describe: in a saved
+    /// call «не было ключа на просьбу решить задачу с экрана» and «не было ключа
+    /// на короткое нажатие» are different accounts of the same evening, and the
+    /// press happened either way.
+    private func reportNothingToAnswerWith(_ ask: SuggestionAsk) {
         suggestions.append(
-            Suggestion(state: .failed(LLMFailure.missingKey.message), startedAt: Date())
+            Suggestion(
+                state: .failed(LLMFailure.missingKey.message),
+                startedAt: Date(),
+                kind: ask.kind
+            )
         )
     }
 
@@ -662,7 +672,8 @@ final class SessionEngine {
         _ request: SuggestionRequest,
         from provider: any LLMProvider,
         screen: ScreenContext,
-        notice: String?
+        notice: String?,
+        kind: Suggestion.Kind
     ) {
         // A screen that could not be grabbed is reported and then stepped over:
         // the request goes out without a picture rather than not at all. The
@@ -675,7 +686,7 @@ final class SessionEngine {
         // `start()` and there is no session to report into.
         lastError = screen.failure
 
-        let suggestion = Suggestion(notice: notice, startedAt: Date())
+        let suggestion = Suggestion(notice: notice, startedAt: Date(), kind: kind)
         suggestions.append(suggestion)
 
         // The request leaves before the task that reads it is scheduled: the user
