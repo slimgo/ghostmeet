@@ -15,6 +15,10 @@ Design decisions referenced below live in [docs/adr/](docs/adr/); the product sp
 
 ## [Unreleased]
 
+Nothing yet.
+
+## [0.3.0] — 2026-08-14
+
 ### Added
 
 - **Saving a call to a file** — the first user request this project has had. A button under the
@@ -31,6 +35,25 @@ Design decisions referenced below live in [docs/adr/](docs/adr/); the product sp
 
   Nothing is written anywhere until the save panel returns a location. Until this feature the app
   wrote nothing to disk at all, and that is still true of everything else.
+
+### Fixed
+
+- The test suite stopped killing itself, and with it two days of red CI. A wait that timed out on a
+  cold machine let its test carry on into an array nothing had filled; `Array` traps on the index,
+  the trap takes the process, and every suite that had not started yet reports «Test run with 0
+  tests» — a line that reads as success. Whichever timing-sensitive test lost the race first
+  decided which part of the suite looked broken, which is why the cause appeared to move every run.
+  Those waits now use `#require`, which stops its own test instead of the host.
+- The app no longer loads a speech model when it is being used as a test host. It was fetching
+  WhisperKit on every `xcodebuild test` — network, hundreds of megabytes and the Neural Engine —
+  behind a process the suite expects to answer in milliseconds. The local suite went from 10–14
+  seconds to under two.
+
+### Changed
+
+- CI runs on every branch rather than only on `main`, keeps the crash report when the host dies,
+  and states the toolchain it used. Work happens in branches now; `main` and tags move under a
+  release.
 
 ## [0.2.0] — 2026-08-14
 
@@ -210,7 +233,8 @@ The MVP feature set, complete end to end for the first time.
 - The design record: [CONTEXT.md](CONTEXT.md) as the glossary, ADRs 0001–0004, the product spec,
   and the MVP ticket set for one scenario — a technical interview where the user is the candidate.
 
-[Unreleased]: https://github.com/slimgo/ghostmeet/compare/v0.2.0...HEAD
+[Unreleased]: https://github.com/slimgo/ghostmeet/compare/v0.3.0...HEAD
+[0.3.0]: https://github.com/slimgo/ghostmeet/compare/v0.2.0...v0.3.0
 [0.2.0]: https://github.com/slimgo/ghostmeet/compare/v0.1.0...v0.2.0
 [0.1.0]: https://github.com/slimgo/ghostmeet/compare/v0.0.6...v0.1.0
 [0.0.6]: https://github.com/slimgo/ghostmeet/compare/v0.0.5...v0.0.6

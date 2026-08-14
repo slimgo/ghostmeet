@@ -10,7 +10,7 @@ while staying out of screen sharing.
 
 Русская версия — [README.ru.md](README.ru.md).
 
-> **Status: 0.2.0.** The MVP is closed and was walked end to end on a live call. It is a personal
+> **Status: 0.3.0.** The MVP is closed and was walked end to end on a live call. It is a personal
 > BYOK tool, not a product: there is no backend of ours, no account, and no notarised build.
 
 ---
