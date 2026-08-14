@@ -141,6 +141,22 @@ jobs:
           echo "::notice title=Тесты::$summary"
           echo "$summary"
 
+      # Отчёт о падении host-процесса — единственное, что отвечает на вопрос
+      # «почему ноль тестов». Собирается рядом с логами, потому что искать его
+      # постфактум негде: раннер уничтожается вместе с ответом.
+      - name: Отчёт о падении, если host умер
+        if: failure()
+        run: |
+          mkdir -p .build/crashes
+          cp ~/Library/Logs/DiagnosticReports/GhostMeet-*.ips .build/crashes/ 2>/dev/null || true
+          count=$(ls .build/crashes 2>/dev/null | wc -l | tr -d ' ')
+          if [ "$count" = 0 ]; then
+            echo "::notice title=Падения::Отчётов о падении нет — host не падал, дело в чём-то другом"
+          else
+            echo "::error title=Падения::Host падал, отчётов: $count. Первые строки ниже"
+            head -30 .build/crashes/*.ips | sed 's/^/  /'
+          fi
+
       - name: Логи прогона
         if: failure()
         uses: actions/upload-artifact@v4
@@ -149,6 +165,7 @@ jobs:
           path: |
             .build/ci-tests.log
             .build/ci-result.xcresult
+            .build/crashes
           retention-days: 7
 
   version:
