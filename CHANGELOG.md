@@ -35,6 +35,17 @@ Nothing yet.
   optional, so an answer that does not say is still written as plain «Подсказка» rather than being
   given a kind nobody asked for.
 
+### Fixed
+
+- Ten timing-sensitive tests no longer fail on a busy machine. The release script runs the suite
+  twice — once for `--dry-run`, once for real — and the second run starts right after a Release
+  build and a disk image, which is the most loaded the machine gets all cycle. The whole suite
+  stretched from 1.7 to 3.4 seconds and a two-second wait in one of the fixtures ran out; the same
+  suite alone passes in 0.117 s. The sibling fixture had always allowed eight seconds for the same
+  operation, and the two disagreeing was an oversight rather than a decision. A wait in a fixture
+  measures nothing — the loop exits the moment its condition holds — so the longer bound is free on
+  working code and only ever spends time on broken code.
+
 ## [0.3.0] — 2026-08-14
 
 ### Added
