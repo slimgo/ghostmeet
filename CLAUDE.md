@@ -12,11 +12,17 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Current state
 
-**The MVP is closed: it was walked end to end on a live run (11 August 2026)** — the window stayed out of a screen recording, a headset swapped mid-call was survived, both genres and `Solve on screen` answered, the answers came from the user's заготовки, and a full mock interview on claude-haiku produced no cut streams. The MVP pipeline runs end to end: both channels are captured, turns are cut on pauses, speech is recognised locally into a live transcript — and a suggestion is generated when the user presses a chord, never on its own. **706 tests** across 101 suites (Swift Testing, target `GhostMeetTests`).
+**The MVP is closed: it was walked end to end on a live run (11 August 2026)** — the window stayed out of a screen recording, a headset swapped mid-call was survived, both genres and `Solve on screen` answered, the answers came from the user's заготовки, and a full mock interview on claude-haiku produced no cut streams. The MVP pipeline runs end to end: both channels are captured, turns are cut on pauses, speech is recognised locally into a live transcript — and a suggestion is generated when the user presses a chord, never on its own. The suite is around **700 tests** in roughly a hundred suites (Swift Testing, target `GhostMeetTests`) — the order of magnitude is the point, not the exact figure: a run reporting a handful, or zero, is a broken host and not a pass.
 
 Done: project skeleton and test target, microphone capture, turn segmentation, WhisperKit recognition with model selection, the overlay window, the `Them` channel (both backends, SCK by default), settings with per-provider keys, the full provider router (OpenAI-compatible family, Gemini, CLI tools) with streaming, screenshot and OCR on every request, the press-driven suggestion lifecycle (a new press supersedes the answer in flight), two genres of suggestion plus `Ask` and `Solve on screen`, global hotkeys and per-channel indicators, several named profiles with one selected per call and filled in either by hand or from a resume, the `Контекст собеседования` beside them, the readiness strip in the overlay header, markup in the suggestion card, and saving the call to a file — both channels and the answers in one list, each answer naming the **вид подсказки** it was asked for, marked leaks left out but counted in the header.
 
-Two ticket sets are done and awaiting human review: `.scratch/interview-mvp/` (the original MVP) and `.scratch/hotkey-first/` (the switch to hotkey-triggered suggestions and three ideas taken from cue — question kinds inside the prompt, interview context above the profile, markup in the card). What is left is the v1.0 list in [docs/GhostMeet.md](docs/GhostMeet.md). The background Summarizer is **deliberately not** on the critical path any more: a whole interview is ~10k tokens and fits in one request, so `{{#if summary}}` stays present and empty until a use case longer than an interview appears.
+Every feature is a directory under `.scratch/`, and the truth about what is open lives in the tickets rather than here — a list of them in this file goes stale the week it is written. What is open right now:
+
+```bash
+grep -rL '^\*\*Status:\*\* done' .scratch/*/issues/*.md
+```
+
+What is left at the product level is the v1.0 list in [docs/GhostMeet.md](docs/GhostMeet.md). The background Summarizer is **deliberately not** on the critical path any more: a whole interview is ~10k tokens and fits in one request, so `{{#if summary}}` stays present and empty until a use case longer than an interview appears.
 
 The audio investigation is over and its scaffolding is gone: no diagnostics object, no level probes, no environment flags of our own. What survived it are the fixes it found — `MicCaptureService.firstChannel`, `ProcessTap.DeliveryFormat`, `PCMMixdown`, the mic tap installed with `format: nil` — and their regression tests. Logging is lifecycle-only now: capture start and failure (`SessionEngine`), `Them` channel status (`SessionController`), recognition model phase (`SpeechModelStatus`). Nothing per frame, nothing anybody said. Keep it that way — a per-frame log in this app writes the conversation to disk.
 
@@ -140,8 +146,8 @@ The app is signed with a **stable Apple Development identity** (personal team). 
 - `docs/GhostMeet-Prompts.md` — авторитетные тексты промптов. Промпт в коде и промпт здесь обязаны совпадать дословно; правятся одним изменением.
 - `CONTEXT.md` — глоссарий. Новое понятие в коде без термина в глоссарии — источник будущего расползания синонимов.
 - `CLAUDE.md` — этот файл: состояние проекта, грабли, инварианты.
-- `.scratch/interview-mvp/` — тикеты и спека: статусы, критерии, комментарии о найденном.
-- **Ссылки между документами.** Относительные пути легко ломаются; из `.scratch/interview-mvp/issues/` до корня три уровня, а не два. Проверяй, что каждая ссылка ведёт в существующий файл.
+- `.scratch/<фича>/` — спека и тикеты той фичи, над которой идёт работа: статусы, критерии, комментарии о найденном. Спека правится тем же изменением, что и код: посылка, которую опровергло измерение, переписывается не молча — старая формулировка остаётся, а рядом встаёт то, что показали числа.
+- **Ссылки между документами.** Относительные пути легко ломаются; из `.scratch/<фича>/issues/` до корня три уровня, а не два. Проверяй, что каждая ссылка ведёт в существующий файл.
 
 Отдельно: если по ходу работы выяснился факт, который стоил времени — неочевидное поведение системы, ловушка API, причина молчаливого отказа, — он идёт в документы. Час отладки, не оставивший следа в тексте, будет потрачен снова.
 
@@ -163,40 +169,20 @@ A macOS always-on-top overlay that assists during video calls (Meet, Telemost, Z
 
 ## Версии и релизы
 
-Семантическое версионирование с **0.1.0**; пока мажорная — ноль, ломающее несёт минорная. Версия живёт в `MARKETING_VERSION`, **во всех четырёх конфигурациях** pbxproj (два таргета × Debug/Release), и расхождение ловится в трёх местах — `set-version.sh`, CI и `release.sh`. Порядок выпуска и его основания — [docs/releasing.md](docs/releasing.md).
+Порядок выпуска, схема версий, что делает CI и почему нет нотаризации — **[docs/releasing.md](docs/releasing.md)**, целиком и в одном месте. Здесь этого нет намеренно: пересказ рядом с источником — это два описания одного порядка, и расходиться они начинают на первой же правке.
 
-```bash
-./scripts/set-version.sh 0.2.0   # версия в проекте + номер сборки
-#   ← раздел ## [0.2.0] в CHANGELOG.md, затем коммит
-./scripts/release.sh 0.2.0       # проверки → тесты → DMG → тег → публикация
-```
+Достаточно знать три вещи, чтобы не сломать выпуск, не читая ничего:
 
-Версии `0.0.1`–`0.0.6` реконструированы задним числом по истории: проект шёл без версий до закрытия MVP. Это запись вех, а не выпущенные сборки — DMG собирался только для `0.1.0`.
-
-**CI собирает и прогоняет тесты, но ничего не подписывает и не публикует.** Разрешения macOS привязаны к подписи, сертификат у проекта личный (Apple Development), и его закрытая часть в secrets означала бы, что подписывать этим именем может всякий, кто получит доступ к репозиторию. Релиз собирает и подписывает машина разработчика.
-
-## Отдать сборку коллегам
-
-```bash
-./scripts/make-dmg.sh
-```
-
-Собирает Release, проверяет подпись и наличие всех четырёх строк разрешений в `Info.plist`, кладёт в `dist/` образ с приложением, ярлыком «Программы» и инструкцией. Отдельно от `release.sh` нужен для сборки без тега — показать коллеге промежуточное состояние.
-
-**Нотаризации нет и не будет без Developer ID** — у проекта только сертификат Apple Development, и `spctl` такую сборку отклоняет. Подпись при этом настоящая и стабильная, и это важнее ad-hoc: разрешения macOS привязаны к подписи, при ad-hoc каждая новая сборка спрашивала бы микрофон и запись экрана заново. Цена — карантин, снимается одной командой, и она напечатана и в выводе скрипта, и в файле внутри образа:
-
-```bash
-xattr -dr com.apple.quarantine /Applications/GhostMeet.app
-```
-
-Стенды для тестирования собираются отдельно — `python3 .scratch/interview-packs/build.py` даёт семь паков по специализациям и архив; см. [.scratch/interview-packs/README.md](.scratch/interview-packs/README.md).
+- **`main` и теги двигаются только под релиз**, по слову владельца (правило 0 ниже).
+- Версия живёт в `MARKETING_VERSION` **во всех четырёх конфигурациях** pbxproj; правит её `./scripts/set-version.sh`, руками — нет.
+- **CI ничего не подписывает и не публикует.** Разрешения macOS привязаны к подписи, а сертификат у проекта личный; релиз собирает и подписывает машина разработчика.
 
 ## Where decisions live
 
 Design decisions from the grilling session are recorded, not just implied by the code — read them before reopening a settled question:
 
 - [CONTEXT.md](CONTEXT.md) — the glossary. `You`, `Them`, `Реплика`, `Подсказка`, `Профиль` have precise definitions; use those words and don't drift to synonyms.
-- [docs/adr/](docs/adr/) — [0001](docs/adr/0001-swappable-backends-behind-protocols.md) swappable backends, [0002](docs/adr/0002-stt-engine-choice.md) STT engine choice, [0004](docs/adr/0004-invisibility-scope.md) the limits of invisibility, [0006](docs/adr/0006-screencapturekit-default-for-them.md) SCK as the default `Them` backend, [0008](docs/adr/0008-hotkey-triggered-suggestions.md) suggestions on a hotkey, [0009](docs/adr/0009-no-vpio-echo-is-ours-to-handle.md) no VPIO, ever, [0010](docs/adr/0010-update-check-at-launch.md) the update check at launch, [0011](docs/adr/0011-visibility-switch-in-the-window.md) the visibility switch in the window. Superseded ones stay in the directory for the reasoning they carry: [0003](docs/adr/0003-proactive-suggestion-loop.md) (by 0008), [0005](docs/adr/0005-vpio-and-process-tap-cannot-coexist.md) (by [0007](docs/adr/0007-vpio-and-process-tap-do-coexist.md)), and 0007 in its «VPIO always on» half (by 0009 — the rest of it still holds).
+- [docs/adr/README.md](docs/adr/README.md) — the index: one line per decision, which ones are superseded, and which to read for the task in hand. **Go through the index rather than the directory** — three of the eleven are superseded in whole or in part, and read cold they describe an app that no longer exists. The list is not repeated here on purpose: two copies of it would disagree within a month.
 
 The spec in `docs/` has been reconciled with these; where an older reference project (cue) disagrees, the ADRs win.
 

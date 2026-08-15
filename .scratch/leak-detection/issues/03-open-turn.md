@@ -68,6 +68,8 @@
 - всякая правка строгого режима оценена **обеими** ценами сразу: сколько протечек
   ловит и сколько честных реплик теряет.
 
+**Читать:** [ADR-0009](../../../docs/adr/0009-no-vpio-echo-is-ours-to-handle.md) · `SessionEngine.isLeakFromSpeakers` · [CONTEXT.md](../../../CONTEXT.md), «Строгий режим»
+
 **Blocked by:** 02.
 
 **Status:** ready-for-agent

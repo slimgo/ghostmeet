@@ -11,6 +11,35 @@ Work is tracked entirely in-repo, deliberately: the repository has a remote, but
 - Implementation issues are one file per ticket at `.scratch/<feature-slug>/issues/<NN>-<slug>.md`, numbered from `01` — never a single combined tickets file
 - Triage state is recorded as a `Status:` line near the top of each issue file (see `triage-labels.md` for the role strings)
 - Comments and conversation history append to the bottom of the file under a `## Comments` heading
+- A **`Читать:`** line names the two or three documents this ticket actually needs — see below
+
+## `Читать:` — the reading list of a ticket
+
+Every ticket names, in one line, what has to be read before it is picked up, and
+nothing more:
+
+```
+**Читать:** [спека](../spec.md) · [ADR-0009](../../../docs/adr/0009-no-vpio-echo-is-ours-to-handle.md) · `LeakDedup.swift`
+```
+
+The line exists because an agent that is not told what to read has two options and
+both are bad. Read everything, and half the context window is gone before the first
+edit — this repository is around 2 500 lines of documentation, and a ticket
+typically needs under a tenth of it. Read nothing, and repeat a mistake somebody
+already paid for: this project has ADRs precisely because its settled questions
+look reopenable from the outside.
+
+Two rules keep the line useful rather than decorative:
+
+- **Three entries, not ten.** A reading list nobody can finish is a reading list
+  nobody starts. If a ticket genuinely needs ten documents, it is two tickets.
+- **Name the specific file, not the directory.** `docs/adr/` is not an answer;
+  `ADR-0009` is. The point is to spare the reader a search, and a directory hands
+  the search back.
+
+`CLAUDE.md` and `CONTEXT.md` are never listed: the first is loaded into every
+session anyway, and the second is the glossary, which is read the moment a term is
+unclear rather than up front.
 
 ## When a skill says "publish to the issue tracker"
 

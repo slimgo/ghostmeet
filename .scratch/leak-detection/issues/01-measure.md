@@ -48,6 +48,8 @@
 - ничего не пишется в `.scratch/leak-calls/`, кроме файла разметки, и ничего
   оттуда не попадает в git.
 
+**Читать:** [спека](../spec.md) · [материал](../../leak-calls/README.md) · `TranscriptExport.swift` (формат файла)
+
 **Blocked by:** файлы от владельца.
 
 **Status:** ready-for-human

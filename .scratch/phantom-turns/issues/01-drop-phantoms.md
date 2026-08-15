@@ -42,6 +42,8 @@
 - список и его правило отбора задокументированы в коде так же, как задокументированы
   пороги `LeakDedup`.
 
+**Читать:** [спека](../spec.md) · `WhisperSpeechRecognizer.swift` · `Turn.swift`
+
 **Blocked by:** None.
 
 **Status:** needs-triage

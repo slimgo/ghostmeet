@@ -128,7 +128,8 @@ Two traps worth knowing before you touch the project file:
   per-frame log writes the conversation to disk.
 - **Saving a call is the one thing that writes to disk, and only you can start it.** The button
   under the transcript builds a Markdown file — both sides of the conversation and the model's
-  answers — and hands it to a save panel, so the file exists where you pointed rather than in a
+  answers, each naming what it was asked for — and hands it to a save panel, so the file exists
+  where you pointed rather than in a
   folder of ours. It is the whole conversation in plain text; treat it accordingly.
 - **One request is not yours: the update check.** At launch the app asks GitHub for the latest
   published version and shows one line if it is newer. It carries an IP address and the running
