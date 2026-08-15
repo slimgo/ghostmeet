@@ -22,11 +22,49 @@ private final class FakeThemStream: ThemAudioStream, @unchecked Sendable {
     private var _scope: SCKAudioScope?
     private var _onBuffer: (@Sendable (AVAudioPCMBuffer) -> Void)?
     private var _stops = 0
+    private var _starts = 0
+    private var _failuresRemaining = 0
     private var _failure: Error?
 
     init(applications: [ShareableApplication] = [], failure: Error? = nil) {
         _applications = applications
         _failure = failure
+    }
+
+    /// What the next attach does. Settable so a scenario can break the stream
+    /// and then let it come back — which is the whole shape of a recovery.
+    var failure: Error? {
+        get {
+            lock.lock(); defer { lock.unlock() }
+            return _failure
+        }
+        set {
+            lock.lock()
+            _failure = newValue
+            lock.unlock()
+        }
+    }
+
+    /// Applications ScreenCaptureKit is currently offering.
+    var applications: [ShareableApplication] {
+        get {
+            lock.lock(); defer { lock.unlock() }
+            return _applications
+        }
+        set {
+            lock.lock()
+            _applications = newValue
+            lock.unlock()
+        }
+    }
+
+    /// The stream dies under the service, the way `SCStream` reports it.
+    func breaks(with error: Error) {
+        lock.lock()
+        let handler = onFailure
+        _onBuffer = nil
+        lock.unlock()
+        handler?(error)
     }
 
     func shareableApplications() async throws -> [ShareableApplication] {
@@ -40,7 +78,15 @@ private final class FakeThemStream: ThemAudioStream, @unchecked Sendable {
         onBuffer: @escaping @Sendable (AVAudioPCMBuffer) -> Void
     ) async throws {
         lock.lock()
-        let failure = _failure
+        _starts += 1
+        // A scripted run of failures: the first `_failuresRemaining` attempts
+        // refuse, the ones after that work. Lets a scenario check the retry rule
+        // itself instead of racing a flag.
+        var failure = _failure
+        if _failuresRemaining > 0 {
+            _failuresRemaining -= 1
+            failure = failure ?? StreamBroke()
+        }
         if failure == nil {
             _scope = scope
             _onBuffer = onBuffer
@@ -64,6 +110,19 @@ private final class FakeThemStream: ThemAudioStream, @unchecked Sendable {
     var stops: Int {
         lock.lock(); defer { lock.unlock() }
         return _stops
+    }
+
+    /// How many times the service tried to attach a stream.
+    var starts: Int {
+        lock.lock(); defer { lock.unlock() }
+        return _starts
+    }
+
+    /// Makes the next `count` attach attempts refuse.
+    func refuseNextAttempts(_ count: Int) {
+        lock.lock()
+        _failuresRemaining = count
+        lock.unlock()
     }
 
     func deliver(_ buffer: AVAudioPCMBuffer) {
@@ -396,6 +455,250 @@ struct SCKCaptureServiceTests {
         #expect(service.status == .idle)
         #expect(!service.isRunning)
         #expect(stream.stops > 0, "поток обязан быть остановлен, иначе SCStream переживёт сессию")
+    }
+}
+
+// MARK: - Оборвавшийся поток
+
+/// Обрыв «прерванного подключения», ровно как его сообщил `SCStream` вживую.
+private struct StreamBroke: LocalizedError {
+    var errorDescription: String? { "Произошел сбой трансляции из‑за прерванного подключения к приложению" }
+}
+
+/// Ждёт того, что вот-вот случится на другой задаче, не засыпая вслепую.
+private func eventually(_ condition: @Sendable () -> Bool) async -> Bool {
+    let deadline = ContinuousClock.now + TestWait.budget
+    while ContinuousClock.now < deadline {
+        if condition() { return true }
+        await Task.yield()
+    }
+    return condition()
+}
+
+@Suite("Канал Them возвращается после обрыва")
+struct ThemRecoveryTests {
+
+    /// Сервис, у которого паузы между попытками не стоят времени.
+    private func service(
+        stream: FakeThemStream,
+        attempts: Int = 3
+    ) -> SCKCaptureService {
+        SCKCaptureService(
+            sourceApplicationID: "com.google.Chrome",
+            stream: stream,
+            retryDelays: Array(repeating: 0, count: attempts),
+            pause: { _ in }
+        )
+    }
+
+    @Test("Поток оборвался — канал поднимается заново и снова слушает")
+    func abrokenStreamComesBack() async throws {
+        // 15 августа 2026: поток прожил 1.1 секунды, Chrome остался жив, список
+        // процессов не двинулся — и канал молчал 37 минут, пока голос
+        // собеседника писался в You через динамики.
+        let stream = FakeThemStream(applications: [Fixtures.chrome])
+        let service = service(stream: stream)
+
+        try service.start { _ in }
+        await service.waitForAttach()
+        #expect(service.status == .capturing(application: "Google Chrome"))
+
+        stream.breaks(with: StreamBroke())
+        await service.waitForRecovery()
+        defer { service.stop() }
+
+        #expect(
+            service.status == .capturing(application: "Google Chrome"),
+            "обрыв обязан поднимать канал, а не хоронить его до конца звонка"
+        )
+    }
+
+    @Test("Обрыв не сдаётся с первой попытки")
+    func recoveryRetriesRatherThanGivingUpAtOnce() async throws {
+        let stream = FakeThemStream(applications: [Fixtures.chrome])
+        let service = service(stream: stream)
+
+        try service.start { _ in }
+        await service.waitForAttach()
+        let attachesBefore = stream.starts
+
+        // Первая попытка попадает в ту же секунду, в которую поток умер, — ради
+        // этого случая задержки и заведены. Отказывает ровно одна попытка,
+        // вторая обязана состояться.
+        stream.refuseNextAttempts(1)
+        stream.breaks(with: StreamBroke())
+        await service.waitForRecovery()
+        defer { service.stop() }
+
+        #expect(service.status == .capturing(application: "Google Chrome"))
+        #expect(
+            stream.starts - attachesBefore == 2,
+            "первая попытка отказала — вторая обязана быть, иначе канал хоронится с одного отказа"
+        )
+    }
+
+    @Test("Источник закрыт в момент обрыва — канал ждёт его, а не объявляет поломку")
+    func aClosedSourceIsWaitedForRatherThanDeclaredBroken() async throws {
+        let stream = FakeThemStream(applications: [Fixtures.chrome])
+        let service = service(stream: stream)
+
+        try service.start { _ in }
+        await service.waitForAttach()
+
+        // Браузер закрылся вместе с потоком: дальше канал поднимет наблюдатель
+        // списка процессов, и попытки на этом прекращаются.
+        stream.applications = []
+        stream.breaks(with: StreamBroke())
+        await service.waitForRecovery()
+        defer { service.stop() }
+
+        #expect(service.status == .waitingForSource(application: "Google Chrome"))
+    }
+
+    @Test("Попытки исчерпаны — сказано, что случилось и что нажать")
+    func anExhaustedRecoverySaysWhatIsWrong() async throws {
+        let stream = FakeThemStream(applications: [Fixtures.chrome])
+        let service = service(stream: stream)
+
+        try service.start { _ in }
+        await service.waitForAttach()
+        let attachesBefore = stream.starts
+
+        // Отказывают все три попытки, которые есть у этого стенда.
+        stream.refuseNextAttempts(3)
+        stream.breaks(with: StreamBroke())
+        await service.waitForRecovery()
+        defer { service.stop() }
+
+        #expect(stream.starts - attachesBefore == 3, "бюджет попыток израсходован целиком")
+        #expect(service.status == .failed(reason: SCKCaptureService.lostMessage))
+        #expect(service.status.isFailure)
+        #expect(
+            SCKCaptureService.lostMessage.contains("«Слушать»"),
+            "сказано, что нажать; следствие добавляет окно — см. «Молчащий Them назван следствием»"
+        )
+    }
+
+    @Test("Остановка посреди восстановления не оставляет канал воскресать в одиночестве")
+    func stoppingCancelsRecovery() async throws {
+        let stream = FakeThemStream(applications: [Fixtures.chrome])
+        let service = service(stream: stream)
+
+        try service.start { _ in }
+        await service.waitForAttach()
+
+        stream.refuseNextAttempts(3)
+        stream.breaks(with: StreamBroke())
+        service.stop()
+        await service.waitForRecovery()
+
+        #expect(service.status == .idle, "пользователь ушёл со звонка — канал не поднимается сам")
+        #expect(!service.isRunning)
+    }
+
+    @Test("Два обрыва подряд — одно восстановление, а не гонка двух")
+    func aBurstOfFailuresStartsOneRecovery() async throws {
+        // Ворота держат восстановление на паузе, пока второй обрыв не приехал:
+        // без них два `breaks` подряд могли бы разойтись во времени и тест
+        // проверял бы удачу, а не правило.
+        let stream = FakeThemStream(applications: [Fixtures.chrome])
+        let gate = Gate()
+        let service = SCKCaptureService(
+            sourceApplicationID: "com.google.Chrome",
+            stream: stream,
+            retryDelays: [0, 0, 0],
+            pause: { _ in await gate.wait() }
+        )
+
+        try service.start { _ in }
+        await service.waitForAttach()
+        let attachesBefore = stream.starts
+
+        stream.breaks(with: StreamBroke())
+        #expect(
+            await eventually { service.status == .restarting(attempt: 1) },
+            "восстановление обязано начаться и ждать своей паузы"
+        )
+        stream.breaks(with: StreamBroke())
+
+        await gate.open()
+        await service.waitForRecovery()
+        defer { service.stop() }
+
+        #expect(service.status == .capturing(application: "Google Chrome"))
+        #expect(
+            stream.starts - attachesBefore == 1,
+            "две ошибки об одном сломанном потоке — это один сломанный поток"
+        )
+    }
+
+    @Test("Восстановление — это ожидание, а не отказ: пользователя никуда не зовут")
+    func recoveryReadsAsWaiting() {
+        let restarting = ThemCaptureStatus.restarting(attempt: 2)
+
+        #expect(!restarting.isFailure)
+        #expect(restarting.message.contains("2"), "видно, которая это попытка")
+        #expect(ThemCaptureStatus.failed(reason: "…").isFailure)
+    }
+}
+
+// MARK: - Как о мёртвом канале сказано в окне
+
+@Suite("Молчащий Them назван следствием, а не кодом ошибки")
+struct DeafThemNoticeTests {
+
+    private func indicators(isListening: Bool, them: ThemCaptureStatus) -> SessionIndicators {
+        SessionIndicators.make(
+            isListening: isListening,
+            failure: nil,
+            recognition: .ready,
+            themStatus: them,
+            isGenerating: false,
+            suggestionFailure: nil
+        )
+    }
+
+    @Test("Во время звонка сказано, что чужая речь пишется как ваша")
+    func aDeadChannelDuringACallNamesWhatItCosts() {
+        // Системная формулировка в тот вечер на экране была — и была прочитана
+        // мимо: из «сбоя трансляции» не следует, что транскрипт врёт.
+        let them = indicators(
+            isListening: true,
+            them: .failed(reason: "Произошел сбой трансляции из‑за прерванного подключения к приложению")
+        ).them
+
+        #expect(them.state == .failed)
+        #expect(them.detail.hasPrefix(SessionIndicators.deafConsequence), "следствие идёт первым")
+        #expect(them.detail.contains("сбой трансляции"), "причина остаётся — по ней разбираются потом")
+    }
+
+    @Test("До звонка следствия нет: писать в транскрипт ещё нечего")
+    func beforeTheCallOnlyTheReasonIsShown() {
+        let them = indicators(
+            isListening: false,
+            them: .failed(reason: ThemCaptureBackend.screenRecordingHelp)
+        ).them
+
+        #expect(them.detail == ThemCaptureBackend.screenRecordingHelp)
+        #expect(!them.detail.contains(SessionIndicators.deafConsequence))
+    }
+
+    @Test("Канал восстанавливается — это объясняют, но не пугают отказом")
+    func aRecoveringChannelIsExplainedWithoutAlarm() {
+        let them = indicators(isListening: true, them: .restarting(attempt: 1)).them
+
+        #expect(them.state == .waiting, "канал поднимает себя сам — звать пользователя не за чем")
+        #expect(them.state.deservesAnExplanation, "но молчание объяснено")
+        #expect(!them.detail.contains(SessionIndicators.deafConsequence))
+    }
+
+    @Test("Канал вернулся — от предупреждения не остаётся следа")
+    func arecoveredChannelLeavesNoWarningBehind() {
+        let them = indicators(isListening: true, them: .capturing(application: "Google Chrome")).them
+
+        #expect(them.state == .listening)
+        #expect(!them.state.deservesAnExplanation)
+        #expect(!them.detail.contains(SessionIndicators.deafConsequence))
     }
 }
 

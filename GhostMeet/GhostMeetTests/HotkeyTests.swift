@@ -819,17 +819,20 @@ struct SessionIndicatorTests {
         #expect(state.them.state.deservesAnExplanation, "это не место для всплывающей подсказки — текст должен быть в окне")
     }
 
-    @Test("Все три состояния канала Them доезжают до пользователя своими словами")
+    @Test("Все состояния канала Them доезжают до пользователя своими словами")
     func everyThemStatusIsSpelledOut() {
         let cases: [(ThemCaptureStatus, IndicatorState)] = [
             (.idle, .waiting),
             (.waitingForSource(application: "Google Chrome"), .waiting),
+            (.restarting(attempt: 2), .waiting),
             (.failed(reason: "аудиоустройство исчезло"), .failed)
         ]
         for (status, expected) in cases {
             let state = indicators(isListening: true, themStatus: status)
             #expect(state.them.state == expected)
-            #expect(state.them.detail == status.message)
+            // Причина сохраняется дословно; у отказа посреди звонка перед ней
+            // встаёт то, чего в причине нет, — чем это состояние обходится.
+            #expect(state.them.detail.contains(status.message))
             #expect(state.them.detail.count > 15, "«\(state.them.detail)» — это не объяснение")
         }
     }

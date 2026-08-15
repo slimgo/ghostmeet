@@ -264,6 +264,7 @@ GhostMeet/GhostMeet/          ← синхронизированная груп�
 │   ├── AudioRoute.swift              # маршрут звука: течёт / не течёт / неизвестно
 │   ├── AudioRouteMonitor.swift       # слежение за сменой устройств на лету
 │   ├── CaptureRecovery.swift         # пережить чужое переключение режима устройства
+│                                     # (канал Them поднимает себя сам в SCKCaptureService)
 │   ├── ThemAudioSource.swift         # контракт канала Them + выбор бэкенда
 │   ├── SwitchableThemSource.swift    # подмена бэкенда на лету
 │   ├── SCKCaptureService.swift       # Them через ScreenCaptureKit (дефолт)
