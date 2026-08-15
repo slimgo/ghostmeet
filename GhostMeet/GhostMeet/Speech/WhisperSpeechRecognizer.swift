@@ -164,6 +164,14 @@ actor WhisperSpeechRecognizer: SpeechRecognizer {
         guard !samples.isEmpty else { throw RecognitionError.emptyAudio }
 
         let text = try await session.transcribe(samples)
-        return text.trimmingCharacters(in: .whitespacesAndNewlines)
+            .trimmingCharacters(in: .whitespacesAndNewlines)
+
+        // A `Фантомная реплика` is dropped here and not further up, because this
+        // is the layer that knows Whisper is behind it: inventing a subtitle
+        // sign-off on a stretch of silence is a behaviour of this model family,
+        // and the second engine ADR-0002 promises does not share it. Returning no
+        // words leaves the turn in the transcript without any — the same state a
+        // failed pass leaves it in, and the prompt layer already skips it.
+        return PhantomSpeech.isPhantom(text) ? "" : text
     }
 }
