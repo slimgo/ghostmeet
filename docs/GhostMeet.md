@@ -235,7 +235,8 @@ GhostMeet/                    ← корень репозитория
 ├── README.md, README.ru.md   # английский основной, русский рядом
 ├── CHANGELOG.md              # Keep a Changelog, версии с 0.0.1 ретроспективно
 ├── CLAUDE.md, CONTEXT.md     # правила работы и глоссарий
-├── docs/                     # спека, промпты, ADR, releasing.md
+├── docs/                     # спека, промпты, ADR (см. adr/README.md — указатель),
+│                             # releasing.md, audio-traps.md, lessons-from-live-runs.md
 ├── scripts/                  # set-version.sh → release.sh → make-dmg.sh
 ├── .github/workflows/        # CI: сборка и тесты, без подписи и публикации
 ├── .scratch/                 # тикеты, стенды, паки собеседований
