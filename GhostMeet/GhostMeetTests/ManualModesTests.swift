@@ -684,13 +684,13 @@ private struct ManualCall {
         feed(seconds: TurnSegmentationConfig.default.pauseThreshold + 0.2) { AudioFrames.silence(channel: channel, duration: frameLength) }
     }
 
-    func textOfLatestReaches(_ text: String, within timeout: Duration = .seconds(8)) async -> Bool {
+    func textOfLatestReaches(_ text: String, within timeout: Duration = TestWait.budget) async -> Bool {
         await settling(within: timeout) { engine.suggestions.last?.text == text }
     }
 
     /// Waits until the model has been asked `count` times. A manual request goes
     /// through a screenshot first, so it lands a hop later rather than instantly.
-    func modelWasAsked(_ count: Int, within timeout: Duration = .seconds(8)) async -> Bool {
+    func modelWasAsked(_ count: Int, within timeout: Duration = TestWait.budget) async -> Bool {
         await settling(within: timeout) { model.requests.count == count }
     }
 
@@ -830,7 +830,7 @@ private final class ManualModel: LLMProvider, @unchecked Sendable {
     /// Whether the n-th stream was terminated by its consumer rather than by the
     /// answer ending.
     @MainActor
-    func streamWasCancelled(_ index: Int, within timeout: Duration = .seconds(8)) async -> Bool {
+    func streamWasCancelled(_ index: Int, within timeout: Duration = TestWait.budget) async -> Bool {
         await settling(within: timeout) { self.cancelledStreams.contains(index) }
     }
 

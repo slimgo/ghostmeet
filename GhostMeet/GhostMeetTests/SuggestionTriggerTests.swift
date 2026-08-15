@@ -545,7 +545,7 @@ private struct SuggestionCall {
     /// Fragments cross a task boundary, so they land a hop later rather than
     /// instantly; the loop is bounded so a stalled stream fails the test instead
     /// of hanging it.
-    func textOfLatestReaches(_ text: String, within timeout: Duration = .seconds(8)) async -> Bool {
+    func textOfLatestReaches(_ text: String, within timeout: Duration = TestWait.budget) async -> Bool {
         await settling(within: timeout) { engine.suggestions.last?.text == text }
     }
 
@@ -553,23 +553,10 @@ private struct SuggestionCall {
     /// the screenshot and the wait for words first, so the request lands a hop
     /// later rather than instantly.
     ///
-    /// **Восемь секунд, а не две, и число здесь ничего не измеряет.** Бюджет
-    /// ожидания в тесте — это только предел, после которого зависший поток валит
-    /// свой тест вместо того, чтобы повесить прогон: цикл выходит в тот же
-    /// момент, когда условие стало верным, поэтому на исправном коде длинный
-    /// предел не стоит ничего. Платит за него один-единственный случай —
-    /// по-настоящему сломанный код, — и платит секундами один раз.
-    ///
-    /// Двух секунд не хватило на загруженной машине: те же тесты прошли за
-    /// 0.117 с в одиночку и посыпались десятком таймаутов сразу после сборки
-    /// Release и образа, когда весь прогон растянулся с 1.7 до 3.4 секунды.
-    /// Диагноз при этом читался как «флак» — ровно та ловушка, которую
-    /// docs/releasing.md описывает и велит не принимать за загадку.
-    ///
-    /// Соседний стенд `ManualCall` держит те же восемь секунд для той же
-    /// операции. Расхождение двух пределов было не решением, а недосмотром, и
-    /// сломалось оно на первом же прогоне под настоящей нагрузкой.
-    func modelWasAsked(_ count: Int, within timeout: Duration = .seconds(8)) async -> Bool {
+    /// Предел — общий `TestWait.budget`, и почему он именно такой, написано там.
+    /// Здесь этот стенд держал две секунды, ронял CI начиная с 0.2.0 и сорвал
+    /// публикацию 0.3.1.
+    func modelWasAsked(_ count: Int, within timeout: Duration = TestWait.budget) async -> Bool {
         await settling(within: timeout) { provider.requests.count == count }
     }
 

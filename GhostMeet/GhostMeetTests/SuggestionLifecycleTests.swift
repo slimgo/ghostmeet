@@ -352,13 +352,13 @@ private struct LifecycleCall {
     /// Fragments cross a task boundary, so they land a hop later rather than
     /// instantly; the loop is bounded so a stalled stream fails the test instead
     /// of hanging it.
-    func textOfLatestReaches(_ text: String, within timeout: Duration = .seconds(2)) async -> Bool {
+    func textOfLatestReaches(_ text: String, within timeout: Duration = TestWait.budget) async -> Bool {
         await eventually(within: timeout) { engine.suggestions.last?.text == text }
     }
 
     /// Waits until the model has been asked `count` times. A press waits for the
     /// words and the screen first, so the request lands a hop later.
-    func modelWasAsked(_ count: Int, within timeout: Duration = .seconds(2)) async -> Bool {
+    func modelWasAsked(_ count: Int, within timeout: Duration = TestWait.budget) async -> Bool {
         await eventually(within: timeout) { model.requests.count == count }
     }
 
@@ -466,14 +466,14 @@ private final class HeldScreenCapturer: ScreenCapturer, @unchecked Sendable {
 
     /// Whether the engine has already asked for the screen.
     @MainActor
-    func startedCapturing(within timeout: Duration = .seconds(2)) async -> Bool {
+    func startedCapturing(within timeout: Duration = TestWait.budget) async -> Bool {
         await eventually(within: timeout) { self.lock.withLock { self.started > 0 } }
     }
 
     /// Whether the held capture was cut short — the observable half of "the
     /// screenshot really was abandoned".
     @MainActor
-    func wasCancelled(within timeout: Duration = .seconds(2)) async -> Bool {
+    func wasCancelled(within timeout: Duration = TestWait.budget) async -> Bool {
         await eventually(within: timeout) { self.lock.withLock { self.cancelled > 0 } }
     }
 }
@@ -551,7 +551,7 @@ private final class ScriptedModel: LLMProvider, @unchecked Sendable {
     /// Whether the n-th stream was terminated by its consumer rather than by the
     /// answer ending.
     @MainActor
-    func streamWasCancelled(_ index: Int, within timeout: Duration = .seconds(2)) async -> Bool {
+    func streamWasCancelled(_ index: Int, within timeout: Duration = TestWait.budget) async -> Bool {
         await eventually(within: timeout) { self.cancelledStreams.contains(index) }
     }
 

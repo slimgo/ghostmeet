@@ -15,7 +15,18 @@ Design decisions referenced below live in [docs/adr/](docs/adr/); the product sp
 
 ## [Unreleased]
 
-Nothing yet.
+### Fixed
+
+- CI is green on `main` again, for the first time since `0.2.0`. The wait that `0.3.1` raised in one
+  fixture was too short in three others, and the runner is slower than this machine: every red run
+  since `0.2.0` was the same handful of `modelWasAsked` waits timing out, in different tests each
+  time — which is what made it read as a flake rather than one cause.
+
+  The four engine fixtures now share one documented budget instead of each keeping a number of its
+  own. Two of them said eight seconds and two said two, and nobody had chosen that: one simply
+  fell behind. A constant that lives in one place has nothing to drift from. The provider fixtures
+  keep their own, shorter waits — they wait on a stubbed stream rather than on the press path, and
+  they have never failed.
 
 ## [0.3.1] — 2026-08-15
 

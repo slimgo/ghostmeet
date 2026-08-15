@@ -418,11 +418,11 @@ private struct PressCall {
         feed(seconds: seconds) { AudioFrames.silence(channel: channel, duration: frameLength) }
     }
 
-    func textOfLatestReaches(_ text: String, within timeout: Duration = .seconds(2)) async -> Bool {
+    func textOfLatestReaches(_ text: String, within timeout: Duration = TestWait.budget) async -> Bool {
         await settling(within: timeout) { engine.suggestions.last?.text == text }
     }
 
-    func modelWasAsked(_ count: Int, within timeout: Duration = .seconds(2)) async -> Bool {
+    func modelWasAsked(_ count: Int, within timeout: Duration = TestWait.budget) async -> Bool {
         await settling(within: timeout) { model.requests.count == count }
     }
 
@@ -503,7 +503,7 @@ private final class RecordingCapturer: ScreenCapturer, @unchecked Sendable {
     }
 
     @MainActor
-    func startedCapturing(within timeout: Duration = .seconds(2)) async -> Bool {
+    func startedCapturing(within timeout: Duration = TestWait.budget) async -> Bool {
         await settling(within: timeout) { self.lock.withLock { self.asked } }
     }
 }
@@ -574,7 +574,7 @@ private final class PressModel: LLMProvider, @unchecked Sendable {
     }
 
     @MainActor
-    func streamWasCancelled(_ index: Int, within timeout: Duration = .seconds(2)) async -> Bool {
+    func streamWasCancelled(_ index: Int, within timeout: Duration = TestWait.budget) async -> Bool {
         await settling(within: timeout) { self.cancelledStreams.contains(index) }
     }
 
