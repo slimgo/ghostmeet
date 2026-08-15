@@ -15,6 +15,10 @@ Design decisions referenced below live in [docs/adr/](docs/adr/); the product sp
 
 ## [Unreleased]
 
+Nothing yet.
+
+## [0.3.1] — 2026-08-15
+
 ### Added
 
 - **A saved call says what each answer was asked for.** Until now every answer in the file looked
