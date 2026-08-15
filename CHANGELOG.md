@@ -17,6 +17,30 @@ Design decisions referenced below live in [docs/adr/](docs/adr/); the product sp
 
 Nothing yet.
 
+## [0.3.3] — 2026-08-15
+
+### Fixed
+
+- The `Them` channel comes back when its stream breaks, instead of staying silent for the rest of
+  the call. Found live and painfully: the stream died 1.1 seconds after it started («сбой
+  трансляции из‑за прерванного подключения к приложению»), Chrome stayed alive so nothing woke the
+  channel, and every word the interviewer said for the next 37 minutes was recorded in `You` —
+  reaching the microphone through the speakers, exactly as designed, because a channel is decided
+  by the source of its audio. The transcript did not look broken; it looked normal and named the
+  wrong speaker throughout.
+
+  Re-attaching after a source change and after the browser restarting was already handled — a
+  stream that simply broke was the one event the service only reported. It now retries on the
+  microphone's delays and, if the channel really is gone, says so once.
+
+- A silent `Them` says what it costs, not what the framework noticed. The window did show
+  «Произошел сбой трансляции…» that evening and it was read straight past, which is the right
+  reaction to a sentence that carries no consequence. During a call the notice now leads with
+  «Собеседника сейчас не слышно — его слова пишутся как ваша речь» and keeps the technical reason
+  behind it. This matters more than a status line usually would: while `Them` is dead, both
+  defences against channel leak are inert by construction — strict mode waits for loud `Them`
+  frames, and the text deduplication has no `Them` turns to compare against.
+
 ## [0.3.2] — 2026-08-15
 
 ### Fixed
@@ -298,7 +322,8 @@ The MVP feature set, complete end to end for the first time.
 - The design record: [CONTEXT.md](CONTEXT.md) as the glossary, ADRs 0001–0004, the product spec,
   and the MVP ticket set for one scenario — a technical interview where the user is the candidate.
 
-[Unreleased]: https://github.com/slimgo/ghostmeet/compare/v0.3.2...HEAD
+[Unreleased]: https://github.com/slimgo/ghostmeet/compare/v0.3.3...HEAD
+[0.3.3]: https://github.com/slimgo/ghostmeet/compare/v0.3.2...v0.3.3
 [0.3.2]: https://github.com/slimgo/ghostmeet/compare/v0.3.1...v0.3.2
 [0.3.1]: https://github.com/slimgo/ghostmeet/compare/v0.3.0...v0.3.1
 [0.3.0]: https://github.com/slimgo/ghostmeet/compare/v0.2.0...v0.3.0

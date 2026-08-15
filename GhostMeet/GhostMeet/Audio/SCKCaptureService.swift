@@ -42,7 +42,13 @@ nonisolated final class SCKCaptureService: ThemAudioSource, @unchecked Sendable 
     private var sourceFormat: AVAudioFormat?
     private var lastKnownName: String?
     private var attachTask: Task<Void, Never>?
+    private var recoveryTask: Task<Void, Never>?
     private var listener: AudioObjectPropertyListenerBlock?
+
+    /// How long to wait before each attempt to bring the stream back.
+    private let retryDelays: [TimeInterval]
+    /// Injected so the retry rule can be checked without waiting it out.
+    private let pause: @Sendable (TimeInterval) async -> Void
 
     /// - Parameters:
     ///   - sourceApplicationID: stable id of the chosen application, or `nil`
@@ -53,10 +59,14 @@ nonisolated final class SCKCaptureService: ThemAudioSource, @unchecked Sendable 
     init(
         sourceApplicationID: String? = nil,
         stream: any ThemAudioStream = SCKAudioStream(),
-        sampleRate: Double = 16_000
+        sampleRate: Double = 16_000,
+        retryDelays: [TimeInterval] = CaptureRecovery.defaultDelays,
+        pause: @escaping @Sendable (TimeInterval) async -> Void = SCKCaptureService.sleep
     ) {
         self._sourceApplicationID = sourceApplicationID
         self.stream = stream
+        self.retryDelays = retryDelays.isEmpty ? CaptureRecovery.defaultDelays : retryDelays
+        self.pause = pause
         self.targetFormat = AVAudioFormat(
             commonFormat: .pcmFormatFloat32,
             sampleRate: sampleRate,
@@ -65,8 +75,13 @@ nonisolated final class SCKCaptureService: ThemAudioSource, @unchecked Sendable 
         )!
 
         stream.onFailure = { [weak self] error in
-            self?.publish(.failed(reason: error.localizedDescription))
+            self?.recover(from: error)
         }
+    }
+
+    /// Default pause between attempts.
+    static let sleep: @Sendable (TimeInterval) async -> Void = { seconds in
+        try? await Task.sleep(for: .seconds(seconds))
     }
 
     deinit { stream.stop() }
@@ -126,15 +141,30 @@ nonisolated final class SCKCaptureService: ThemAudioSource, @unchecked Sendable 
         _isRunning = false
         onFrame = nil
         let task = attachTask
+        let recovery = recoveryTask
         attachTask = nil
+        recoveryTask = nil
         converter = nil
         sourceFormat = nil
         lock.unlock()
 
         task?.cancel()
+        // A recovery in flight has to die with the session, not outlive it: the
+        // user left the call, and a channel that comes back afterwards would
+        // start recording a room nobody asked it to record.
+        recovery?.cancel()
         stopObservingProcessList()
         stream.stop()
         publish(.idle)
+    }
+
+    /// Waits for a recovery in flight, if any. The seam that lets a test drive
+    /// the whole «поток оборвался и вернулся» scenario without sleeping.
+    func waitForRecovery() async {
+        lock.lock()
+        let task = recoveryTask
+        lock.unlock()
+        await task?.value
     }
 
     /// Waits for the attach that is already in flight.
@@ -213,6 +243,83 @@ nonisolated final class SCKCaptureService: ThemAudioSource, @unchecked Sendable 
         } catch {
             publish(.failed(reason: error.localizedDescription))
         }
+    }
+
+    // MARK: - Восстановление после обрыва
+
+    /// What a channel that never came back is called in the window.
+    ///
+    /// Says what happened and what to press, and deliberately **not** what it
+    /// costs: the consequence — the interviewer being recorded as the user — is
+    /// added by `SessionIndicators` for every dead `Them` during a call, whatever
+    /// killed it, so that it is stated once and cannot be forgotten in one of the
+    /// places a failure is published.
+    static let lostMessage = """
+        Звук собеседника оборвался и не вернулся. \
+        Выключите и включите «Слушать» или выберите источник заново.
+        """
+
+    /// Takes one broken stream and tries to get the channel back.
+    ///
+    /// **This is the event the service used to only report.** Two other reasons
+    /// to re-attach were already handled — the user re-pointing the source, and
+    /// the process list moving when the browser restarts — and a stream that
+    /// simply broke was not one of them. Measured live on 15 August 2026: the
+    /// stream died 1.1 seconds after it started, Chrome stayed alive, the process
+    /// list never moved, and the channel was silent for the remaining 37 minutes
+    /// while the interviewer's voice went into `You` through the speakers. See
+    /// `.scratch/them-recovery/spec.md`.
+    ///
+    /// One recovery at a time: a burst of failures is one broken stream, not
+    /// three, and three races would leave two orphaned `SCStream`s behind.
+    private func recover(from error: Error) {
+        lock.lock()
+        guard _isRunning, recoveryTask == nil else { lock.unlock(); return }
+        let task = Task { [weak self] in
+            guard let self else { return }
+            await self.retryAttach(after: error)
+        }
+        recoveryTask = task
+        lock.unlock()
+    }
+
+    /// The retry rule itself.
+    ///
+    /// The delays are `CaptureRecovery.defaultDelays` — the microphone's, and
+    /// deliberately not a second set of numbers about the same thing. The
+    /// **mechanics** could not be shared: `CaptureRecovery` restarts an
+    /// `AVAudioEngine` synchronously and learns there and then whether it
+    /// worked, while attaching an `SCStream` is asynchronous from end to end and
+    /// reports through `status`. Sharing the numbers and not the machinery is the
+    /// honest half of that; do not try to merge the rest.
+    ///
+    /// Anything other than `.failed` ends the attempts, `.waitingForSource`
+    /// included: a source that is closed right now is a channel waiting, not a
+    /// channel broken, and the process-list observer is what wakes it.
+    private func retryAttach(after error: Error) async {
+        defer { finishRecovery() }
+
+        for (index, delay) in retryDelays.enumerated() {
+            guard isRunning, !Task.isCancelled else { return }
+            publish(.restarting(attempt: index + 1))
+
+            await pause(delay)
+            guard isRunning, !Task.isCancelled else { return }
+
+            scheduleAttach()
+            await waitForAttach()
+            guard isRunning, !Task.isCancelled else { return }
+
+            if case .failed = status {} else { return }
+        }
+
+        publish(.failed(reason: Self.lostMessage))
+    }
+
+    private func finishRecovery() {
+        lock.lock()
+        recoveryTask = nil
+        lock.unlock()
     }
 
     private func publish(_ status: ThemCaptureStatus) {

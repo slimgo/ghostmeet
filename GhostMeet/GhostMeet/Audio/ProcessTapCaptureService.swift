@@ -23,6 +23,10 @@ nonisolated enum ThemCaptureStatus: Equatable, Sendable {
     /// The application was chosen but is not running — quit, restarted, or not
     /// started yet. Capture resumes on its own as soon as it comes back.
     case waitingForSource(application: String)
+    /// The stream broke under us and is being brought back. `attempt` counts
+    /// from 1. Mirrors `MicCaptureStatus.restarting`: the two channels break
+    /// differently and are reported the same way.
+    case restarting(attempt: Int)
     /// Capture broke and will not recover by itself.
     case failed(reason: String)
 
@@ -34,9 +38,23 @@ nonisolated enum ThemCaptureStatus: Equatable, Sendable {
             "Слушаем «\(application)»."
         case .waitingForSource(let application):
             "«\(application)» сейчас не выдаёт звук. Захват включится сам, как только приложение вернётся."
+        case .restarting(let attempt):
+            "Звук собеседника оборвался — восстанавливаю канал Them (попытка \(attempt))."
         case .failed(let reason):
             reason
         }
+    }
+
+    /// Whether the user has to be told about this and act on it.
+    ///
+    /// Same question `MicCaptureStatus.isFailure` answers, and the answer here
+    /// costs more: a microphone that stopped means «меня не слышно» and gives
+    /// itself away in seconds, while a `Them` that stopped means a transcript
+    /// that goes on looking right while recording the interviewer's words as the
+    /// user's own.
+    var isFailure: Bool {
+        if case .failed = self { return true }
+        return false
     }
 }
 

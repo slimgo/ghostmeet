@@ -142,9 +142,30 @@ struct SessionIndicators: Equatable, Sendable {
     /// A broken capture is reported even while the session is stopped: it is
     /// usually a missing Screen Recording grant, and that is worth knowing
     /// *before* the call rather than during it.
+    /// What a dead `Them` costs, said in front of the reason that caused it.
+    ///
+    /// **The reason alone is not enough, and that was measured the hard way.** On
+    /// 15 August 2026 the stream broke a second after it started; the window did
+    /// say «Произошел сбой трансляции из‑за прерванного подключения к
+    /// приложению», and the user read straight past it — as anyone would, because
+    /// nothing in that sentence says the transcript is now recording the
+    /// interviewer under the user's own name. A system error message describes
+    /// what the framework noticed. This describes what it costs, which is the
+    /// half the user can act on.
+    ///
+    /// Added here rather than in each capture backend on purpose: a failure is
+    /// published from several places, and a consequence written out at each of
+    /// them is a consequence that goes missing at one of them.
+    static let deafConsequence = "Собеседника сейчас не слышно — его слова пишутся как ваша речь."
+
     private static func themIndicator(isListening: Bool, status: ThemCaptureStatus) -> Indicator {
         if case .failed = status {
-            return Indicator(id: "them", name: "Them", state: .failed, detail: status.message)
+            // Пока звонок идёт, следствие важнее причины и потому стоит первым:
+            // канал молчит, а транскрипт продолжает выглядеть правдоподобно.
+            let detail = isListening
+                ? "\(deafConsequence) \(status.message)"
+                : status.message
+            return Indicator(id: "them", name: "Them", state: .failed, detail: detail)
         }
         guard isListening else {
             return Indicator(
@@ -157,7 +178,9 @@ struct SessionIndicators: Equatable, Sendable {
         switch status {
         case .capturing:
             return Indicator(id: "them", name: "Them", state: .listening, detail: status.message)
-        case .idle, .waitingForSource:
+        case .idle, .waitingForSource, .restarting:
+            // Восстановление — это ожидание, а не отказ: канал сейчас молчит, но
+            // сам себя поднимает, и звать пользователя что-то делать не за чем.
             return Indicator(id: "them", name: "Them", state: .waiting, detail: status.message)
         case .failed:
             return Indicator(id: "them", name: "Them", state: .failed, detail: status.message)
