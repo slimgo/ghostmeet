@@ -591,8 +591,14 @@ private func drainStream(
 }
 
 /// Waits for something that happens on another task, without sleeping blindly.
+///
+/// Предел — общий `TestWait.budget`, а не своё число: до 0.3.2 здесь стояли две
+/// секунды, и на релизном прогоне 0.3.2 они не выдержали ровно так, как
+/// предсказано в `TestWait` — три отмены подряд в трёх провайдерских сюитах,
+/// на второй сборке за цикл. Стенд ждёт заглушку потока и выходит в тот же
+/// момент, когда условие стало верным; длинный предел не стоит ничего.
 private func waitUntil(
-    within timeout: Duration = .seconds(2),
+    within timeout: Duration = TestWait.budget,
     _ condition: @Sendable () async -> Bool
 ) async -> Bool {
     let deadline = ContinuousClock.now + timeout

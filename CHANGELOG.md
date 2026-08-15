@@ -34,6 +34,14 @@ Nothing yet.
   place. An answer built on a transcript missing the question comes out coherent, on topic, and
   about something else, which is indistinguishable from the model misunderstanding.
 
+- Every test fixture now waits on the one shared budget, and the budget is 30 seconds. The three
+  provider suites were the last holdouts at two seconds, and they fell during this very release —
+  `TestWait` had said they would be converted when a failure showed up, and one did. Eight seconds
+  then turned out to be too short as well, on a machine sitting at `load average` 25 with nothing
+  of ours on it: eleven waits timed out while the same suite run alone finished in 0.312 s. A wait
+  limit measures nothing, so it is now picked for the slowest imaginable machine rather than the
+  fastest.
+
 - CI is green on `main` again, for the first time since `0.2.0`. The wait that `0.3.1` raised in one
   fixture was too short in three others, and the runner is slower than this machine: every red run
   since `0.2.0` was the same handful of `modelWasAsked` waits timing out, in different tests each

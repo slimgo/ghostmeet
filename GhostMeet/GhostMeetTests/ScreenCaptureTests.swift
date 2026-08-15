@@ -139,7 +139,7 @@ struct ScreenCaptureTests {
         call.says(.them)
         call.engine.suggestBriefly()
         #expect(
-            await capturer.startedCapturing(within: .seconds(2)),
+            await capturer.startedCapturing(within: TestWait.budget),
             "захват экрана обязан идти параллельно распознаванию, а не после него"
         )
 

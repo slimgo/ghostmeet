@@ -381,8 +381,12 @@ private func drainStream(
 }
 
 /// Waits for something that happens on another task, without sleeping blindly.
+///
+/// Предел — общий `TestWait.budget`: свои пять секунд этот стенд пережил, но
+/// расхождение чисел между стендами уже однажды и было причиной — одно из них
+/// просто отставало (см. `TestWait`).
 private func waitUntil(
-    within timeout: Duration = .seconds(5),
+    within timeout: Duration = TestWait.budget,
     _ condition: @Sendable () async -> Bool
 ) async -> Bool {
     let deadline = ContinuousClock.now + timeout
