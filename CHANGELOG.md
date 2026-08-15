@@ -15,7 +15,21 @@ Design decisions referenced below live in [docs/adr/](docs/adr/); the product sp
 
 ## [Unreleased]
 
-Nothing yet.
+### Added
+
+- **A saved call says what each answer was asked for.** Until now every answer in the file looked
+  alike, though pressing can ask for four different things: the missing piece at ~512 tokens, a
+  subject unfamiliar whole at 4 000, a typed question, and the task on screen — which reads none of
+  the conversation the rest of the file is made of. Reading back an answer that ignores the
+  question above it is bewildering until the words «задача с экрана» explain it.
+
+  `Ask` carries the question itself, because there is no `Them` turn above such an answer to say
+  what it was about. A failed press records its kind too: the press happened either way.
+
+  The kind is a value of the context layer that `App` maps its `SuggestionAsk` into, never the
+  reverse — the store of what the model said must not learn what a prompt is (ADR-0001). It is
+  optional, so an answer that does not say is still written as plain «Подсказка» rather than being
+  given a kind nobody asked for.
 
 ## [0.3.0] — 2026-08-14
 

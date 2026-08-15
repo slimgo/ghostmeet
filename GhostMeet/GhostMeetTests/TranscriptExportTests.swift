@@ -27,13 +27,15 @@ private func suggestion(
     _ text: String,
     at offset: TimeInterval,
     state: Suggestion.State = .complete,
-    notice: String? = nil
+    notice: String? = nil,
+    kind: Suggestion.Kind? = nil
 ) -> Suggestion {
     Suggestion(
         text: text,
         state: state,
         notice: notice,
-        startedAt: origin.addingTimeInterval(offset)
+        startedAt: origin.addingTimeInterval(offset),
+        kind: kind
     )
 }
 
@@ -231,6 +233,71 @@ struct TranscriptExportHeaderTests {
         let text = export(turns: [turn(.them, "", at: 1_000)])
 
         #expect(text.contains("не распознано"))
+    }
+}
+
+// MARK: - Вид подсказки
+
+/// В файле все ответы модели выглядели одинаково, хотя это разные вещи: 512
+/// токенов недостающего куска, разбор темы на 4k и решение задачи с экрана,
+/// которое разговора не читало вовсе.
+@Suite("В файле видно, чем подсказку попросили")
+struct TranscriptExportKindTests {
+
+    @Test("Каждый из четырёх видов назван в файле своим словом")
+    func everyKindIsNamed() {
+        let text = export(suggestions: [
+            suggestion("недостающий кусок", at: 0, kind: .brief),
+            suggestion("разбор темы", at: 60, kind: .detailed),
+            suggestion("почему не Mongo", at: 120, kind: .question("почему не Mongo?")),
+            suggestion("def two_sum", at: 180, kind: .screenTask),
+        ])
+
+        #expect(text.contains("**Подсказка · коротко** · 00:00"))
+        #expect(text.contains("**Подсказка · подробно** · 01:00"))
+        #expect(text.contains("**Подсказка · Ask: почему не Mongo?** · 02:00"))
+        #expect(text.contains("**Подсказка · задача с экрана** · 03:00"))
+    }
+
+    @Test("У Ask виден сам вопрос: без него ответ под ним нечем объяснить")
+    func askCarriesTheQuestion() {
+        // У жанра над ответом стоит реплика Them, у Ask — ничего: вопрос напечатан
+        // и нигде больше в файле не появится.
+        let text = export(
+            turns: [turn(.them, "а какая у вас база?", at: 1_000)],
+            suggestions: [suggestion("Postgres", at: 30, kind: .question("чем крыть вопрос про Mongo?"))]
+        )
+
+        #expect(text.contains("Ask: чем крыть вопрос про Mongo?"))
+    }
+
+    @Test("Подсказка без вида остаётся просто подсказкой — вид не выдумывается")
+    func anUnknownKindStaysSilent() {
+        let text = export(suggestions: [suggestion("ответ", at: 0)])
+
+        #expect(text.contains("**Подсказка** · 00:00"))
+        #expect(!text.contains("Подсказка ·"), "приписать «коротко» ответу, которого так не просили, — соврать")
+    }
+
+    @Test("Вопрос в две строки не разваливает файл на две записи")
+    func aMultilineQuestionStaysOneHeading() {
+        // Перевод строки в заголовке не портит вид, а заканчивает запись: всё
+        // после него читается как ещё одна реплика.
+        let text = export(suggestions: [
+            suggestion("ответ", at: 0, kind: .question("почему не Mongo?\nи чем крыть про шардинг?"))
+        ])
+
+        #expect(text.contains("**Подсказка · Ask: почему не Mongo? и чем крыть про шардинг?** · 00:00"))
+    }
+
+    @Test("Ответа не было — вид всё равно записан: нажатие-то состоялось")
+    func afailedAnswerStillNamesTheKind() {
+        let text = export(suggestions: [
+            suggestion("", at: 0, state: .failed("не задан ключ"), kind: .screenTask)
+        ])
+
+        #expect(text.contains("**Подсказка · задача с экрана** · 00:00"))
+        #expect(text.contains("_Ответа не было: не задан ключ_"))
     }
 }
 

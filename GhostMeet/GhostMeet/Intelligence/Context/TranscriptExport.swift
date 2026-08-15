@@ -125,10 +125,51 @@ nonisolated enum TranscriptExport {
         }
 
         let answered = suggestions.map { suggestion in
-            Entry(at: suggestion.startedAt, title: "Подсказка", body: body(of: suggestion))
+            Entry(at: suggestion.startedAt, title: title(of: suggestion), body: body(of: suggestion))
         }
 
         return (spoken + answered).sorted { $0.at < $1.at }
+    }
+
+    /// The heading of an answer: «Подсказка», and what was asked for when the
+    /// suggestion remembers it.
+    ///
+    /// Worth a line of its own because on the page all four look alike, and they
+    /// are not: 512 tokens of the missing piece for somebody already talking,
+    /// 4 000 on a subject unfamiliar whole, and `Solve on screen`, which read
+    /// none of the conversation the file is otherwise made of. Reading back an
+    /// answer that ignores the question above it is bewildering until the word
+    /// «с экрана» explains it.
+    ///
+    /// Falls back to the bare word rather than inventing a kind: a `Подсказка`
+    /// that does not say is older than this field or built by a test, and
+    /// «Подсказка · коротко» about an answer nobody asked briefly for would be a
+    /// worse file than one that stays quiet.
+    private static func title(of suggestion: Suggestion) -> String {
+        guard let kind = suggestion.kind else { return "Подсказка" }
+        return "Подсказка · \(caption(of: kind))"
+    }
+
+    /// The words of the glossary and not new ones: `коротко` and `подробно` are
+    /// the two `жанры`, and the other two modes are named as `Нажатие` names them.
+    private static func caption(of kind: Suggestion.Kind) -> String {
+        switch kind {
+        case .brief: "коротко"
+        case .detailed: "подробно"
+        case .question(let text): "Ask: \(oneLine(text))"
+        case .screenTask: "задача с экрана"
+        }
+    }
+
+    /// The user's question folded onto one line.
+    ///
+    /// A newline inside it would not merely look wrong — it would end the heading
+    /// and start what reads as another record, so a pasted two-line question would
+    /// silently restructure the file. Nothing else is escaped: `*` and `_` in a
+    /// question render oddly and lose nothing, exactly as they already do in the
+    /// text of a `Реплика`.
+    private static func oneLine(_ text: String) -> String {
+        text.split(whereSeparator: \.isWhitespace).joined(separator: " ")
     }
 
     /// The answer as it ended up, with the reason underneath when there is one.
