@@ -17,6 +17,19 @@ Design decisions referenced below live in [docs/adr/](docs/adr/); the product sp
 
 ### Fixed
 
+- Lines nobody said no longer appear in the transcript. Handed a stretch of audio with sound but no
+  speech in it — a breath, a keystroke, a headset click — Whisper answers with a phrase frequent in
+  its training material, and one 37-minute call collected four of them: `Thank you.` twice, a bare
+  `you`, and `Продолжение следует...`. Recognised text that is *entirely* one of those known
+  phrases is now dropped, and the turn stays in the transcript without words like any other
+  unrecognised one. Speech that merely contains such a phrase is kept untouched, and `Спасибо.` —
+  said constantly, and as a whole turn — is deliberately not on the list.
+
+  The one in the `Them` channel is why this is a fix and not a tidy-up: a second interviewer had
+  just asked about liveness and readiness probes, and the invented phrase took that question's
+  place. An answer built on a transcript missing the question comes out coherent, on topic, and
+  about something else, which is indistinguishable from the model misunderstanding.
+
 - CI is green on `main` again, for the first time since `0.2.0`. The wait that `0.3.1` raised in one
   fixture was too short in three others, and the runner is slower than this machine: every red run
   since `0.2.0` was the same handful of `modelWasAsked` waits timing out, in different tests each
