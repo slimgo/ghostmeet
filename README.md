@@ -81,6 +81,14 @@ cleared. The signature is real and stable, which matters more than it
 looks: macOS permission grants are keyed to the signature, and an ad-hoc-signed build would
 re-prompt for the microphone and the screen on every update.
 
+**You need it once, for this install.** From 0.4.0 the app updates itself: it offers the new
+version on one line in its own window and puts it in place without a terminal and without dragging
+anything. Quarantine is applied by whoever downloads the file — a browser does, an application does
+not — so an update the app installs never carries it
+([ADR-0012](docs/adr/0012-sparkle-installs-the-update.md)). Note that 0.4.0 itself still has to be
+installed by hand: the version before it has nothing to update with, so the first automatic update
+is the one *after* this one.
+
 The app runs as an accessory — **no Dock icon and no ⌘-Tab entry.** Launch it from Spotlight or
 from the Applications folder, not from Launchpad, where it does not appear.
 
@@ -131,11 +139,16 @@ Two traps worth knowing before you touch the project file:
   answers, each naming what it was asked for — and hands it to a save panel, so the file exists
   where you pointed rather than in a
   folder of ours. It is the whole conversation in plain text; treat it accordingly.
-- **One request is not yours: the update check.** At launch the app asks GitHub for the latest
-  published version and shows one line if it is newer. It carries an IP address and the running
-  version, nothing else, and the answer is a page anyone can open. On by default because there is
-  no updater and no other way to learn a new build exists; one switch in settings turns it off, and
-  off means no request at all. See [ADR-0010](docs/adr/0010-update-check-at-launch.md).
+- **One request is not yours: the update feed.** At launch the app asks for the `appcast.xml`
+  published beside the latest release and shows one line if there is a newer version. It carries an
+  IP address and the running version, nothing else, and the answer is a file anyone can open —
+  Sparkle's optional system profiling is off, from the app's Info.plist and from the code, and the
+  built bundle is checked for it on every release. On by default because nothing else tells a
+  machine it is out of date; one switch in settings turns it off, and off means the updater is
+  never built at all. Pressing «обновить» downloads the image, verifies its EdDSA signature and
+  replaces the app — never during a call. See
+  [ADR-0010](docs/adr/0010-update-check-at-launch.md) and
+  [ADR-0012](docs/adr/0012-sparkle-installs-the-update.md).
 
 ## Limits
 
