@@ -48,57 +48,77 @@ struct SettingsView: View {
     /// a setting, and what capture actually shares with it is only the stored id.
     @State private var catalog = SourceApplicationCatalog()
 
-    /// The last request already scrolled to. Without it, every redraw of the
-    /// form would drag the user back to the section they arrived at.
-    @State private var revealed: Int = 0
+    /// Which page is on screen.
+    ///
+    /// Owned by the screen and not by `SettingsNavigation`: the user switches
+    /// pages far more often than the readiness strip asks for one, and a request
+    /// that lives on would drag them back to it at every redraw.
+    @State private var tab: SettingsTab = .profile
 
     var body: some View {
-        // Each section is tagged with its own anchor so that a press on the
-        // readiness strip lands on the control it named rather than at the top
-        // of a form eight sections long. `Form` on macOS lays every section out
-        // — none of this is lazy — so all eight anchors exist to be scrolled to.
-        ScrollViewReader { proxy in
-            Form {
+        // Pages, not one scroll nine sections long. The readiness strip still
+        // names a *section*, so a press does two things: brings its page up, and
+        // — inside that page — scrolls to the control it named. Without the
+        // second half a press on «нарезка» would land at the top of a page it
+        // shares with two other sections.
+        TabView(selection: $tab) {
+            page(.profile) {
                 profileSection.id(SettingsSection.profile)
                 interviewContextSection.id(SettingsSection.interviewContext)
+            }
+            page(.sound) {
                 captureBackendSection.id(SettingsSection.captureBackend)
                 sourceApplicationSection.id(SettingsSection.sourceApplication)
+                segmentationSection.id(SettingsSection.segmentation)
+            }
+            page(.recognition) {
                 recognitionSection.id(SettingsSection.recognition)
+            }
+            page(.model) {
                 providerSection.id(SettingsSection.provider)
                 providerKeySection.id(SettingsSection.providerKey)
-                segmentationSection.id(SettingsSection.segmentation)
+            }
+            page(.about) {
                 updatesSection.id(SettingsSection.updates)
             }
-            .formStyle(.grouped)
-            .frame(minWidth: 480, minHeight: 620)
-            .onAppear {
-                catalog.backend = store.themCaptureBackend
-                catalog.startTracking()
-                // The window is built the moment it is first asked for, so the
-                // very first request arrives before this view exists and no
-                // change ever fires for it.
-                reveal(with: proxy)
-            }
-            .onChange(of: navigation.request) { reveal(with: proxy) }
-            // The two lists are not the same list, so the picker below has to be
-            // rebuilt for the backend the user just chose — otherwise it keeps
-            // offering applications this backend cannot see, and the channel goes
-            // silent with nothing on screen to explain it.
-            .onChange(of: store.themCaptureBackend) { catalog.backend = store.themCaptureBackend }
         }
+        // One size for every page, so switching tabs does not resize the window.
+        // Height is now the tallest page rather than the sum of everything.
+        .frame(width: SettingsMetrics.windowWidth, height: SettingsMetrics.windowHeight)
+        .onAppear {
+            catalog.backend = store.themCaptureBackend
+            catalog.startTracking()
+            // The window is built the moment it is first asked for, so the very
+            // first request arrives before this view exists and no change ever
+            // fires for it.
+            selectRequestedTab()
+        }
+        .onChange(of: navigation.request) { selectRequestedTab() }
+        // The two lists are not the same list, so the source picker has to be
+        // rebuilt for the backend the user just chose — otherwise it keeps
+        // offering applications this backend cannot see, and the channel goes
+        // silent with nothing on screen to explain it.
+        .onChange(of: store.themCaptureBackend) { catalog.backend = store.themCaptureBackend }
     }
 
-    /// Scrolls to the section asked for, once per request.
+    /// One page of the window, tagged so that `SettingsSection.tab` can select it.
+    private func page<Content: View>(
+        _ tab: SettingsTab,
+        @ViewBuilder content: () -> Content
+    ) -> some View {
+        SettingsTabPage(navigation: navigation, tab: tab, content: content)
+            .tabItem { Label(tab.title, systemImage: tab.symbol) }
+            .tag(tab)
+    }
+
+    /// Brings up the page holding the section that was asked for.
     ///
-    /// A hop through the main queue on purpose: at `onAppear` the form has not
-    /// been laid out yet, and scrolling to an anchor that has no place yet does
-    /// nothing at all.
-    private func reveal(with proxy: ScrollViewProxy) {
-        guard let request = navigation.request, request.token != revealed else { return }
-        revealed = request.token
-        Task { @MainActor in
-            withAnimation { proxy.scrollTo(request.section, anchor: .top) }
-        }
+    /// Scrolling to the section within that page is the page's own job — it can
+    /// only be done once the page exists, and a page that is not selected has not
+    /// been laid out.
+    private func selectRequestedTab() {
+        guard let request = navigation.request else { return }
+        tab = request.section.tab
     }
 
     // MARK: - Capture backend
@@ -112,9 +132,11 @@ struct SettingsView: View {
     /// the user is the only one who knows what this machine allows.
     private var captureBackendSection: some View {
         Section("Захват канала Them") {
-            Picker("Бэкенд", selection: $store.themCaptureBackend) {
-                ForEach(ThemCaptureBackend.allCases, id: \.self) { backend in
-                    Text(backend.displayName).tag(backend)
+            SettingsRow("Бэкенд") {
+                Picker("Бэкенд", selection: $store.themCaptureBackend) {
+                    ForEach(ThemCaptureBackend.allCases, id: \.self) { backend in
+                        Text(backend.displayName).tag(backend)
+                    }
                 }
             }
 
@@ -188,17 +210,19 @@ struct SettingsView: View {
     /// something the running backend cannot see.
     private var sourceApplicationSection: some View {
         Section("Приложение-источник") {
-            Picker("Слушать", selection: sourceSelection) {
-                Text("Не выбрано").tag(String?.none)
-                ForEach(catalog.applications) { application in
-                    Text(application.isPlayingAudio ? "\(application.name) · звучит" : application.name)
-                        .tag(String?.some(application.id))
-                }
-                // A source picked earlier keeps its place in the list even while
-                // its application is closed — otherwise reopening the settings
-                // before the browser is up would silently drop the choice.
-                if let missing = missingSelection {
-                    Text("\(missing) · \(missingSelectionNote)").tag(String?.some(missing))
+            SettingsRow("Слушать") {
+                Picker("Слушать", selection: sourceSelection) {
+                    Text("Не выбрано").tag(String?.none)
+                    ForEach(catalog.applications) { application in
+                        Text(application.isPlayingAudio ? "\(application.name) · звучит" : application.name)
+                            .tag(String?.some(application.id))
+                    }
+                    // A source picked earlier keeps its place in the list even
+                    // while its application is closed — otherwise reopening the
+                    // settings before the browser is up would silently drop it.
+                    if let missing = missingSelection {
+                        Text("\(missing) · \(missingSelectionNote)").tag(String?.some(missing))
+                    }
                 }
             }
 
@@ -290,9 +314,11 @@ struct SettingsView: View {
     /// downloading happens in the recogniser, and the form stays usable.
     private var recognitionSection: some View {
         Section("Распознавание речи") {
-            Picker("Модель", selection: modelSelection) {
-                ForEach(WhisperModel.allCases) { model in
-                    Text("\(model.title) · \(model.approximateDownloadSize)").tag(model)
+            SettingsRow("Модель") {
+                Picker("Модель", selection: modelSelection) {
+                    ForEach(WhisperModel.allCases) { model in
+                        Text("\(model.title) · \(model.approximateDownloadSize)").tag(model)
+                    }
                 }
             }
 
@@ -361,14 +387,16 @@ struct SettingsView: View {
     /// own value as its placeholder rather than pre-filling it.
     private var providerSection: some View {
         Section("Провайдер") {
-            Picker("Провайдер", selection: $store.providerSelection.presetID) {
-                ForEach(ProviderFactory.presets) { preset in
-                    Text(preset.name).tag(preset.id)
+            SettingsRow("Провайдер") {
+                Picker("Провайдер", selection: $store.providerSelection.presetID) {
+                    ForEach(ProviderFactory.presets) { preset in
+                        Text(preset.name).tag(preset.id)
+                    }
                 }
             }
 
             if store.providerPreset.transport == .cli {
-                LabeledContent("Команда") {
+                SettingsRow("Команда") {
                     TextField(
                         store.providerPreset.command.joined(separator: " "),
                         text: $store.providerSelection.commandOverride
@@ -380,14 +408,14 @@ struct SettingsView: View {
                     .font(.footnote)
                     .foregroundStyle(.secondary)
             } else {
-                LabeledContent("Базовый адрес") {
+                SettingsRow("Базовый адрес") {
                     TextField(
                         store.providerPreset.defaultBaseURL,
                         text: $store.providerSelection.baseURL
                     )
                     .textFieldStyle(.roundedBorder)
                 }
-                LabeledContent("Модель") {
+                SettingsRow("Модель") {
                     TextField(
                         store.providerPreset.defaultModel,
                         text: $store.providerSelection.model
@@ -444,9 +472,11 @@ struct SettingsView: View {
     private var providerKeySection: some View {
         Section("Ключ · \(store.providerPreset.name)") {
             if store.providerRequiresKey {
-                SecureField("API-ключ", text: $providerKeyDraft)
-                    .textFieldStyle(.roundedBorder)
-                    .onSubmit(saveProviderKey)
+                SettingsRow("API-ключ") {
+                    SecureField("", text: $providerKeyDraft)
+                        .textFieldStyle(.roundedBorder)
+                        .onSubmit(saveProviderKey)
+                }
 
                 HStack {
                     Button("Сохранить", action: saveProviderKey)
@@ -557,6 +587,7 @@ struct SettingsView: View {
     private var updatesSection: some View {
         Section("Обновления") {
             Toggle("Проверять и ставить обновления", isOn: $store.checksForUpdates)
+                .settingsFullWidth()
             Text("""
                 Один запрос при старте — за номером последней версии. \
                 Уходит IP и версия приложения; разговор, профиль и заготовки не уходят никуда. \

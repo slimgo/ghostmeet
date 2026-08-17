@@ -44,9 +44,11 @@ struct ProfileSectionView: View {
     /// wrong one is precisely the failure the profile exists to prevent.
     @ViewBuilder
     private var profilePicker: some View {
-        Picker("Активный профиль", selection: $store.selectedProfileID) {
-            ForEach(store.profiles) { profile in
-                Text(profile.displayName).tag(profile.id)
+        SettingsRow("Активный профиль") {
+            Picker("Активный профиль", selection: $store.selectedProfileID) {
+                ForEach(store.profiles) { profile in
+                    Text(profile.displayName).tag(profile.id)
+                }
             }
         }
 
@@ -63,15 +65,15 @@ struct ProfileSectionView: View {
 
     @ViewBuilder
     private var profileFields: some View {
-        LabeledContent("Название") {
+        SettingsRow("Название") {
             TextField("Например: тимлид", text: $store.profile.name)
                 .textFieldStyle(.roundedBorder)
         }
-        LabeledContent("Роль") {
+        SettingsRow("Роль") {
             TextField("Например: backend-разработчик", text: $store.profile.role)
                 .textFieldStyle(.roundedBorder)
         }
-        LabeledContent("Опыт") {
+        SettingsParagraphRow("Опыт") {
             TextField(
                 "Например: 6 лет, финтех и высоконагруженные сервисы",
                 text: $store.profile.experience,
@@ -80,7 +82,7 @@ struct ProfileSectionView: View {
             .lineLimit(2...5)
             .textFieldStyle(.roundedBorder)
         }
-        LabeledContent("Стек") {
+        SettingsParagraphRow("Стек") {
             TextField(
                 "Например: Go, PostgreSQL, Kubernetes",
                 text: $store.profile.stack,
@@ -208,20 +210,20 @@ private struct ResumeReviewSheet: View {
             }
 
             Form {
-                LabeledContent("Название") {
+                SettingsRow("Название") {
                     TextField("Название профиля", text: $importer.draft.name)
                         .textFieldStyle(.roundedBorder)
                 }
-                LabeledContent("Роль") {
+                SettingsRow("Роль") {
                     TextField("Роль", text: $importer.draft.role)
                         .textFieldStyle(.roundedBorder)
                 }
-                LabeledContent("Опыт") {
+                SettingsParagraphRow("Опыт") {
                     TextField("Опыт", text: $importer.draft.experience, axis: .vertical)
                         .lineLimit(3...8)
                         .textFieldStyle(.roundedBorder)
                 }
-                LabeledContent("Стек") {
+                SettingsParagraphRow("Стек") {
                     TextField("Стек", text: $importer.draft.stack, axis: .vertical)
                         .lineLimit(2...6)
                         .textFieldStyle(.roundedBorder)

@@ -296,6 +296,43 @@ struct PrecallStripTargetsTests {
         #expect(navigation.request?.section == .providerKey)
         #expect(navigation.request != first)
     }
+
+    /// Строка готовности предлагает поправить факт нажатием, и предложение
+    /// обязано вести туда, где это можно сделать. С тех пор как окно настроек
+    /// разложено по вкладкам, «туда» — это вкладка: секция без вкладки была бы
+    /// контролом, который строка предлагает, а окно показать не может.
+    @Test("У каждой секции настроек есть своя вкладка")
+    func everySectionHasATab() {
+        for section in SettingsSection.allCases {
+            // Отношение тотальное по устройству типа; тест ловит не nil, а
+            // забытую секцию: новая, дописанная в enum, обязана получить место.
+            #expect(SettingsTab.allCases.contains(section.tab), "\(section) некуда открыть")
+        }
+    }
+
+    /// Обратная сторона того же: вкладка, на которую ничто не ведёт, — это
+    /// страница, до которой пользователь доберётся только случайно.
+    @Test("На каждой вкладке есть хотя бы одна секция")
+    func everyTabHoldsASection() {
+        for tab in SettingsTab.allCases {
+            #expect(
+                SettingsSection.allCases.contains { $0.tab == tab },
+                "вкладка \(tab) пуста"
+            )
+        }
+    }
+
+    @Test("Секции, которые трогают вместе, лежат вместе")
+    func sectionsReachedTogetherShareAPage() {
+        // Пороги нарезки трогают тогда же, когда бэкенд захвата, — по одной и
+        // той же жалобе «собеседника не слышно».
+        #expect(SettingsSection.segmentation.tab == SettingsSection.captureBackend.tab)
+        #expect(SettingsSection.sourceApplication.tab == SettingsSection.captureBackend.tab)
+        // Ключ — это про провайдера, а не про безопасность вообще.
+        #expect(SettingsSection.providerKey.tab == SettingsSection.provider.tab)
+        // «Кто я» и «куда иду» — один вопрос, заданный дважды.
+        #expect(SettingsSection.interviewContext.tab == SettingsSection.profile.tab)
+    }
 }
 
 // MARK: - Переключение профиля
