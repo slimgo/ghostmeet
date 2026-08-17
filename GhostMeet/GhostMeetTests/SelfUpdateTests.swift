@@ -362,6 +362,51 @@ struct InstallBlockTests {
     }
 }
 
+// MARK: - Видимость строки
+
+@MainActor
+@Suite("Во время звонка обновления не видно вовсе")
+struct UpdateNoticeVisibilityTests {
+
+    @Test("Пока звонок идёт — не показывается ничего, ни новость, ни прогресс")
+    func hiddenWhileListening() {
+        let phases: [UpdatePhase] = [
+            .checking,
+            .available(anUpdate),
+            .downloading(fraction: 0.5),
+            .preparing,
+            .installing,
+            .upToDate,
+            .failed("что угодно")
+        ]
+        for phase in phases {
+            #expect(phase.isVisible(whileListening: true) == false, "\(phase) не должно быть видно во время звонка")
+        }
+    }
+
+    @Test("До звонка показывается всё, кроме «сказать нечего»")
+    func visibleBeforeTheCall() {
+        #expect(UpdatePhase.idle.isVisible(whileListening: false) == false)
+        #expect(UpdatePhase.available(anUpdate).isVisible(whileListening: false))
+        #expect(UpdatePhase.downloading(fraction: nil).isVisible(whileListening: false))
+        #expect(UpdatePhase.failed("не вышло").isVisible(whileListening: false))
+    }
+
+    /// Спрятать строку во время звонка можно только потому, что вердикт её
+    /// переживает: иначе «поставить не вышло, шёл звонок» никто бы не прочёл.
+    @Test("Скрытый во время звонка отказ читается после него")
+    func theRefusalIsReadableAfterTheCall() {
+        let status = UpdateStatus()
+        status.offer(anUpdate) { _ in }
+        status.install()
+        status.failed("идёт прослушивание. Обновление не установлено")
+        status.finished()
+
+        #expect(status.phase.isVisible(whileListening: true) == false)
+        #expect(status.phase.isVisible(whileListening: false))
+    }
+}
+
 // MARK: - Ответ на предложение
 
 @MainActor

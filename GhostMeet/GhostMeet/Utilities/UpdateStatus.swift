@@ -48,6 +48,25 @@ enum UpdatePhase: Equatable, Sendable {
     case failed(String)
 }
 
+extension UpdatePhase {
+
+    /// Whether the overlay shows its update line at all.
+    ///
+    /// **Nothing about updating is visible during a call**, and since 0.4.0 that
+    /// is a stronger statement than it used to be: the line is no longer only
+    /// news, it carries the button that replaces the application. Hiding it while
+    /// listening removes the button from a window that sits a hand's width from
+    /// chords pressed without looking (ADR-0010, ADR-0012).
+    ///
+    /// Nothing is lost by hiding it. A verdict survives the call — `finished()`
+    /// keeps `.failed` and `.upToDate` — so «поставить не вышло, шёл звонок»
+    /// is read afterwards rather than missed.
+    func isVisible(whileListening isListening: Bool) -> Bool {
+        guard self != .idle else { return false }
+        return !isListening
+    }
+}
+
 /// The state of updating, and the only thing the overlay reads.
 ///
 /// **Deliberately knows nothing about Sparkle.** Everything here is driven from

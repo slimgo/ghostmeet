@@ -33,13 +33,18 @@ done
 
 fail() { echo "✗ $1"; exit 1; }
 
-# Адрес ленты обновлений. Записан здесь и в SUFeedURL приложения, и обе записи
-# обязаны совпадать: приложение спрашивает по вшитому адресу, а выкладывает
-# ассет под этим именем сюда. GitHub по .../releases/latest/download/<имя>
-# всегда отдаёт ассет последнего релиза, не зная его номера, — потому адрес и
-# постоянный, чего требует вшитость.
-APPCAST_NAME="appcast.xml"
-FEED_URL="https://github.com/slimgo/ghostmeet/releases/latest/download/$APPCAST_NAME"
+# Адрес ленты обновлений — один на всё, и живёт он там, где его читает
+# приложение. Записать его здесь вторым экземпляром значило бы завести два
+# адреса, которые обязаны совпадать: приложение спрашивает по вшитому, а ассет
+# выкладывается под именем отсюда, и разойдясь однажды они дадут установленным
+# копиям тихое «обновлений нет».
+#
+# GitHub по .../releases/latest/download/<имя> всегда отдаёт ассет последнего
+# релиза, не зная его номера, — потому адрес и может быть вшит в сборку.
+FEED_URL="$(plutil -extract SUFeedURL raw -o - "$ROOT/GhostMeet/Info.plist" 2>/dev/null || true)"
+[ -n "$FEED_URL" ] \
+  || { echo "✗ В GhostMeet/Info.plist нет SUFeedURL — обновлять по чему-то надо"; exit 1; }
+APPCAST_NAME="${FEED_URL##*/}"
 PRODUCT_LINK="https://github.com/slimgo/ghostmeet"
 
 [ -n "$VERSION" ] || fail "Укажите версию: ./scripts/release.sh 0.2.0"

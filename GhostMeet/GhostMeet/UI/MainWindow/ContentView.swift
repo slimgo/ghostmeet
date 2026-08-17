@@ -186,7 +186,7 @@ struct ContentView: View {
     /// mid-call cannot leave something running unseen.
     @ViewBuilder
     private var updateNotice: some View {
-        if let updates, updates.status.phase != .idle, !session.isListening {
+        if let updates, updates.status.phase.isVisible(whileListening: session.isListening) {
             UpdateNoticeView(
                 phase: updates.status.phase,
                 install: { updates.status.install() },

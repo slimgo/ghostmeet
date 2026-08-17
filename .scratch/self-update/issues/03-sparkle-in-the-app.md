@@ -45,4 +45,4 @@ Sparkle со своей лентой — такой же запрос; оста�
 
 **Blocked by:** 02.
 
-**Status:** ready-for-agent
+**Status:** done

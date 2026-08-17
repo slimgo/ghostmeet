@@ -39,7 +39,22 @@ APP="$DERIVED/Build/Products/Release/GhostMeet.app"
 
 echo "▸ Проверка подписи…"
 codesign --verify --deep --strict "$APP"
-codesign -dv "$APP" 2>&1 | grep -E "Authority=Apple Development|TeamIdentifier" | sed 's/^/  /'
+codesign -dv --verbose=2 "$APP" 2>&1 | grep -E "Authority=Apple Development|TeamIdentifier" | sed 's/^/  /'
+
+# Designated requirement — это то, по чему TCC узнаёт приложение: не версия и не
+# хеш, а идентификатор бандла плюс сертификат. Пока он тот же, обновление
+# сохраняет микрофон и запись экрана; сменись он — и каждая установленная копия
+# при первом же обновлении спросит разрешения заново, а пользователь решит, что
+# сборка сломана. Ad-hoc-подпись даёт требование по cdhash, то есть своё на
+# каждую сборку, и ловится здесь.
+REQUIREMENT="$(codesign -d -r- "$APP" 2>&1 | sed -n 's/^designated => //p')"
+case "$REQUIREMENT" in
+  *"Apple Development: "*) echo "  requirement тот же, что у прошлых сборок" ;;
+  *) echo "✗ Designated requirement не от Apple Development:"
+     echo "    ${REQUIREMENT:-пусто}"
+     echo "  Такая сборка заново спросит микрофон и запись экрана у всех, кто обновится."
+     exit 1 ;;
+esac
 
 # Пустой Info.plist ловится здесь, а не у коллеги: строки разрешений в этом
 # проекте уже пропадали молча — Xcode выкидывает неизвестные ему INFOPLIST_KEY_*
