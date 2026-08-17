@@ -326,9 +326,11 @@ GhostMeet/GhostMeet/          ← синхронизированная груп�
 │   │                                 # SuggestionFeedEntry — свёртка повторяющихся отказов
 │   │                                 # UpdateNoticeView — строка обновления, до звонка
 │   │                                 # TranscriptSaving — панель сохранения и запись файла
-│   └── Settings/                     # экран настроек; ProfileSectionView — профили и резюме
+│   └── Settings/                     # экран настроек, пять вкладок; ProfileSectionView — профили и резюме
 │                                     # InterviewContextSectionView — заготовки к звонку
-│                                     # SettingsSection — якоря разделов для перехода из строки готовности
+│                                     # SettingsSection — разделы и их раскладка по вкладкам (SettingsTab)
+│                                     # SettingsTabPage — одна вкладка: форма и переход к нужному разделу
+│                                     # SettingsRow — колонка подписей; SettingsParagraphRow — подпись сверху
 └── Utilities/                        # часы, Keychain, геометрия окна
     ├── AppVersion.swift              # MAJOR.MINOR.PATCH: разбор, сравнение, своя версия
     ├── AppUpdater.swift              # можно ли обновляться и когда; UpdateInstaller как шов
