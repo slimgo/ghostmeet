@@ -52,6 +52,31 @@ for key in NSMicrophoneUsageDescription NSAudioCaptureUsageDescription \
 done
 echo "  все четыре на месте"
 
+# Та же ловушка, что и выше, но дороже. Без SUPublicEDKey приложению нечем
+# проверить подпись обновления, а generate_appcast в этом случае отдаёт
+# неподписанную ленту молча и с кодом 0 — он подписывает, только если нашёл
+# этот ключ в бандле. Двойная тишина: ключ пропал без предупреждения, лента
+# вышла без подписи без предупреждения, и узналось бы это на машине
+# пользователя. Проверяется здесь, в собранном бандле.
+echo "▸ Проверка ключей Sparkle…"
+for key in SUFeedURL SUPublicEDKey; do
+  value="$(plutil -extract "$key" raw -o - "$APP/Contents/Info.plist" 2>/dev/null)" \
+    || { echo "✗ В Info.plist нет $key — обновление сломано (см. CLAUDE.md про INFOPLIST_KEY_*)"; exit 1; }
+  [ -n "$value" ] \
+    || { echo "✗ $key в Info.plist пустой"; exit 1; }
+done
+
+# Обещание «наружу уходит IP и версия и больше ничего» проверяется, а не
+# подразумевается. Гейтит отправку профиля SUSendProfileInfo; SUEnableSystemProfiling
+# заведён рядом, чтобы задокументированный ключ не обещал обратного.
+for key in SUSendProfileInfo SUEnableSystemProfiling SUEnableAutomaticChecks; do
+  value="$(plutil -extract "$key" raw -o - "$APP/Contents/Info.plist" 2>/dev/null)" \
+    || { echo "✗ В Info.plist нет $key"; exit 1; }
+  [ "$value" = "false" ] \
+    || { echo "✗ $key в Info.plist = $value, а должен быть false"; exit 1; }
+done
+echo "  лента, открытый ключ и три запрета на месте"
+
 echo "▸ Сборка образа…"
 mkdir -p "$STAGE" "$DIST"
 cp -R "$APP" "$STAGE/"
