@@ -62,9 +62,22 @@ echo "▸ Проверки перед релизом…"
 # подписанное этим ключом обновление приложение поставит само, не спросив
 # пользователя. Ключ живёт в Keychain, и в дереве ему взяться неоткуда — значит
 # любое совпадение здесь означает, что что-то пошло не так.
+#
+# Ищем только там, где мог бы оказаться **наш** ключ. Каталоги, которые git
+# игнорирует целиком, — это кеши инструментов, а не наше дерево: в `.spm/`
+# лежат исходники зависимостей, и у Sparkle там свои тестовые ключи, вполне
+# открытые. Список каталогов не пишется руками, а спрашивается у git, потому
+# что следующий кеш появится без предупреждения — на этом проверка уже один раз
+# и споткнулась.
 KEY_PATTERNS=(-name '*.pem' -o -name '*.p12' -o -name '*private*key*' -o -name '*_private_key*')
-STRAY_KEYS="$(find . -type f \( "${KEY_PATTERNS[@]}" \) \
-  -not -path './.git/*' -not -path './.build/*' -not -path './dist/*' 2>/dev/null)"
+PRUNE=(-path ./.git -prune)
+shopt -s dotglob nullglob
+for entry in *; do
+  [ -d "$entry" ] || continue
+  git check-ignore -q "$entry" && PRUNE+=(-o -path "./$entry" -prune)
+done
+shopt -u dotglob nullglob
+STRAY_KEYS="$(find . \( "${PRUNE[@]}" \) -o -type f \( "${KEY_PATTERNS[@]}" \) -print 2>/dev/null)"
 TRACKED_KEYS="$(git ls-files -- '*.pem' '*.p12' '*private*key*' '*_private_key*')"
 if [ -n "$STRAY_KEYS$TRACKED_KEYS" ]; then
   echo "✗ В дереве найден файл, похожий на закрытый ключ:"
