@@ -20,7 +20,7 @@ Design decisions referenced below live in [docs/adr/](docs/adr/); the product sp
 
 Nothing yet.
 
-## [0.4.0] — unreleased
+## [0.4.0] — 2026-08-17
 
 ### Added
 
