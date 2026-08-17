@@ -20,6 +20,60 @@ Design decisions referenced below live in [docs/adr/](docs/adr/); the product sp
 
 Nothing yet.
 
+## [0.4.0] — unreleased
+
+### Added
+
+- **GhostMeet installs its own updates.** A new version is no longer the whole first install over
+  again. The window shows one line — «Вышла версия …» — and one press downloads the image, verifies
+  its signature and replaces the app. No dragging into Программы, no terminal.
+
+  **The point is the quarantine, not the button.** Until now every install — and therefore every
+  update — needed `xattr -dr com.apple.quarantine` typed into a terminal. That is a wall a
+  non-technical user does not climb: they see «программу нельзя открыть», they do not open a
+  terminal, and they stay on the old version forever. Quarantine is applied by whoever downloads the
+  file: a browser does, an application does not. So an update the app installs never carries it, and
+  the command is needed exactly once, for the first install
+  ([ADR-0012](docs/adr/0012-sparkle-installs-the-update.md)).
+
+  Microphone and screen-recording grants survive an update: macOS recognises the app by its
+  signature and bundle identifier, not by its version.
+
+  **0.4.0 itself still has to be installed by hand.** 0.3.3 has nothing to update with, so the first
+  automatic update is the one *after* this version.
+
+- **A «Проверить сейчас» button in settings.** Until now a switch just turned on meant nothing until
+  the next launch, while looking as though it meant something.
+
+### Changed
+
+- **The updates switch is named for what it does** — «Проверять и ставить обновления» instead of
+  «Проверять новую версию при запуске». It was always the consent for the request; it is now the
+  consent for the install as well, and a switch that understates what it permits is worse than no
+  switch.
+
+  Off means what it meant, only more strictly: **no request at all.** With the switch off the
+  updater is never built — not built and quiet, not built.
+
+- **Nothing about updating happens during a call.** The app already refuses to quit while listening;
+  installing is the same restart, only not asked for by a human, and the refusal now covers it
+  whole. The update line is not shown during a call at all: it carries the button that replaces the
+  application, and the window sits a hand's width from chords pressed without looking.
+
+- **No window outside GhostMeet's own.** The update mechanism ships a full interface of windows and
+  system notifications; all of it is off, and everything updating has to say is said on one line
+  inside the app's window ([ADR-0004](docs/adr/0004-invisibility-scope.md)).
+
+- **The old version check is gone rather than kept alongside.** Exactly one request in this app is
+  not the user's own, and it is now the update feed
+  ([ADR-0010](docs/adr/0010-update-check-at-launch.md)). The optional system profiling the mechanism
+  is capable of is turned off — and checked against the built application on every release, rather
+  than against a constant of our own.
+
+- **A failed update now says how it ended.** «Every failure is silence» still holds for the request
+  nobody asked for. But the outcome of a press has to be named: a silent failed install leaves
+  somebody certain they have updated, walking into an interview on the old build.
+
 ## [0.3.3] — 2026-08-15
 
 ### Fixed

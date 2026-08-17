@@ -34,9 +34,10 @@ struct ContentView: View {
     /// nothing true to say is better absent than filled with placeholders.
     let settings: SettingsStore?
 
-    /// Whether a newer build has been published. Optional for the same reason as
-    /// the store above: the window-plumbing tests build this view without one.
-    var updates: UpdateCheck?
+    /// Whether a newer build has been published, and how far installing it has
+    /// got. Optional for the same reason as the store above: the window-plumbing
+    /// tests build this view without one.
+    var updates: AppUpdater?
 
     /// The global chords and their bindings. Shown here so that the one thing a
     /// user needs after pressing the panic key — the chord that brings the window
@@ -179,10 +180,18 @@ struct ContentView: View {
     /// least urgent thing on this window, and the call is what the window is
     /// for. Before the call it is read, during the call it would be one line of
     /// the suggestion feed spent on news.
+    ///
+    /// Hiding it is safe in a way it would not be if the line ever drove itself:
+    /// nothing about updating happens without a press, so a line taken off screen
+    /// mid-call cannot leave something running unseen.
     @ViewBuilder
     private var updateNotice: some View {
-        if let updates, let release = updates.available, !session.isListening {
-            UpdateNoticeView(release: release) { updates.dismiss() }
+        if let updates, updates.status.phase.isVisible(whileListening: session.isListening) {
+            UpdateNoticeView(
+                phase: updates.status.phase,
+                install: { updates.status.install() },
+                dismiss: { updates.status.dismiss() }
+            )
         }
     }
 

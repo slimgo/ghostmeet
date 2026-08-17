@@ -29,6 +29,16 @@ struct SettingsView: View {
     /// where it was without a word.
     let navigation: SettingsNavigation
 
+    /// Asks the feed now, because somebody pressed the button below.
+    ///
+    /// A closure and not the updater itself: this screen has no business showing
+    /// the answer. Updating says what it has to say on one line of the overlay
+    /// and nowhere else — the overlay floats above this window, so the result is
+    /// visible the moment it arrives, and there is exactly one place to look for
+    /// it (ADR-0012). Defaulted to nothing so the preview and the screen tests
+    /// need no updater.
+    var checkForUpdates: () -> Void = {}
+
     /// Holds the key only while the user is typing it. Cleared as soon as it
     /// reaches the keychain so the secret does not linger in view state.
     @State private var providerKeyDraft: String = ""
@@ -534,21 +544,40 @@ struct SettingsView: View {
     /// provider the user chose.
     ///
     /// It says what leaves the machine rather than promising that nothing does.
-    /// The app is delivered as a disk image with no updater, so the check is on
-    /// by default — and a default that reaches out deserves to be stated in
-    /// plain words next to the switch that turns it off, not buried in a privacy
-    /// section nobody opens.
+    /// The app is delivered as a disk image, so this is the only way a machine
+    /// ever learns it is out of date — the check is on by default, and a default
+    /// that reaches out deserves to be stated in plain words next to the switch
+    /// that turns it off, not buried in a privacy section nobody opens.
+    ///
+    /// **The wording changed with the mechanism** (ADR-0012). It used to promise
+    /// a check, and a check was all it did: the app looked, said a version
+    /// existed, and left the rest — image, «Программы», `xattr` in a terminal —
+    /// to the user. Now the same switch also permits the install, and a switch
+    /// whose label understates what it allows is worse than no label.
     private var updatesSection: some View {
         Section("Обновления") {
-            Toggle("Проверять новую версию при запуске", isOn: $store.checksForUpdates)
+            Toggle("Проверять и ставить обновления", isOn: $store.checksForUpdates)
             Text("""
-                Один запрос к GitHub при старте — за номером последней версии. \
+                Один запрос при старте — за номером последней версии. \
                 Уходит IP и версия приложения; разговор, профиль и заготовки не уходят никуда. \
-                Выключенная проверка не делает запроса вовсе.
+                Выключенный переключатель не делает запроса вовсе.
+                """)
+                .font(.footnote)
+                .foregroundStyle(.secondary)
+            Text("""
+                Найденная версия предлагается строкой в окне и ставится только по нажатию — \
+                во время звонка не ставится никогда. Подпись обновления проверяется до установки.
                 """)
                 .font(.footnote)
                 .foregroundStyle(.secondary)
             Text("Установлена версия \(installedVersion)")
+                .font(.footnote)
+                .foregroundStyle(.secondary)
+            // Без этой кнопки только что включённый переключатель не значит
+            // ничего до следующего запуска, а выглядит так, будто значит.
+            Button("Проверить сейчас", action: checkForUpdates)
+                .disabled(!store.checksForUpdates)
+            Text("Ответ появится строкой в окне GhostMeet — оно поверх этого.")
                 .font(.footnote)
                 .foregroundStyle(.secondary)
         }

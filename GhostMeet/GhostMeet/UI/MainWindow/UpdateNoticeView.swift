@@ -3,10 +3,9 @@
 //  GhostMeet
 //
 
-import AppKit
 import SwiftUI
 
-/// One quiet line saying a newer GhostMeet exists, and where to read about it.
+/// One quiet line about updating, and the only place updating is ever visible.
 ///
 /// **Not a fourth field in the readiness strip.** That strip answers «чем я
 /// вооружён» in one line across 420 points and truncates already; a fourth field
@@ -20,61 +19,120 @@ import SwiftUI
 /// over the suggestion feed for an hour is the nagging kind of honesty that gets
 /// ignored. Nothing about it is urgent — the build in hand keeps working.
 ///
-/// The link opens the release page in a browser, which brings that browser
-/// forward. That is the reason it is a link and not a download button: during a
-/// call the answer to «обновиться прямо сейчас» is no, and the click has to be
-/// deliberate enough to be worth it.
+/// **Everything updating has to say, it says here.** Sparkle's own windows are
+/// turned off (`OverlayUpdateDriver`), because a window of somebody else's on top
+/// of a shared screen is precisely the failure this app is built to avoid
+/// (ADR-0004). So the download, the failure and the «сейчас перезапущусь» all
+/// arrive on this line.
 struct UpdateNoticeView: View {
 
-    let release: PublishedRelease
+    let phase: UpdatePhase
 
-    /// Puts the line away for this launch — see `UpdateCheck.dismiss()`.
+    /// «Обновить» — downloads, verifies and replaces the app.
+    let install: () -> Void
+
+    /// Puts the line away for this launch — see `UpdateStatus.dismiss()`.
     let dismiss: () -> Void
-
-    /// How a URL is opened. Injected so a preview — and anything that runs
-    /// without a browser — does not launch one.
-    var open: (URL) -> Void = { NSWorkspace.shared.open($0) }
 
     var body: some View {
         HStack(spacing: 6) {
             Label {
-                Text("Вышла версия \(release.version.description)")
+                Text(message)
             } icon: {
-                Image(systemName: "arrow.down.circle")
+                Image(systemName: icon)
             }
 
-            Button("что нового") { open(release.page) }
-                .buttonStyle(.link)
-                .font(.system(size: 10))
+            if case .available = phase {
+                Button("обновить", action: install)
+                    .buttonStyle(.link)
+                    .font(.system(size: 10))
+            }
 
             Spacer(minLength: 0)
 
-            Button {
-                dismiss()
-            } label: {
-                Image(systemName: "xmark")
+            if isDismissable {
+                Button(action: dismiss) {
+                    Image(systemName: "xmark")
+                }
+                .buttonStyle(.plain)
+                .help("Скрыть до следующего запуска")
+                .accessibilityLabel("Скрыть сообщение об обновлении")
             }
-            .buttonStyle(.plain)
-            .help("Скрыть до следующего запуска")
-            .accessibilityLabel("Скрыть уведомление о новой версии")
         }
         .font(.system(size: 10))
-        .foregroundStyle(.secondary)
+        .foregroundStyle(isFailure ? AnyShapeStyle(.orange) : AnyShapeStyle(.secondary))
         .lineLimit(1)
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(.horizontal, 12)
         .padding(.vertical, 4)
     }
+
+    /// What the line says, in the words the user needs rather than the words the
+    /// framework used.
+    private var message: String {
+        switch phase {
+        case .idle:
+            ""
+        case .checking:
+            "Проверяю, есть ли новая версия…"
+        case .available(let update):
+            "Вышла версия \(update.version)"
+        case .downloading(let fraction):
+            fraction.map { "Загружаю обновление — \(Int($0 * 100))%" } ?? "Загружаю обновление…"
+        case .preparing:
+            "Готовлю обновление…"
+        case .installing:
+            "Ставлю обновление — приложение сейчас перезапустится"
+        case .upToDate:
+            "Установлена последняя версия"
+        case .failed(let reason):
+            "Обновиться не вышло: \(reason)"
+        }
+    }
+
+    private var icon: String {
+        switch phase {
+        case .failed: "exclamationmark.triangle"
+        case .upToDate: "checkmark.circle"
+        case .installing, .preparing: "gearshape"
+        default: "arrow.down.circle"
+        }
+    }
+
+    /// Progress cannot be put away, because putting it away would leave the app
+    /// replacing itself with nothing on screen saying so.
+    private var isDismissable: Bool {
+        switch phase {
+        case .available, .upToDate, .failed: true
+        case .idle, .checking, .downloading, .preparing, .installing: false
+        }
+    }
+
+    private var isFailure: Bool {
+        if case .failed = phase { return true }
+        return false
+    }
 }
 
-#Preview {
+#Preview("Вышла версия") {
     UpdateNoticeView(
-        release: PublishedRelease(
-            version: AppVersion(major: 0, minor: 2, patch: 0),
-            page: URL(string: "https://github.com/slimgo/ghostmeet/releases/tag/v0.2.0")!
-        ),
-        dismiss: {},
-        open: { _ in }
+        phase: .available(OfferedUpdate(version: "0.4.0", notes: nil)),
+        install: {},
+        dismiss: {}
+    )
+    .frame(width: 420)
+}
+
+#Preview("Загрузка") {
+    UpdateNoticeView(phase: .downloading(fraction: 0.42), install: {}, dismiss: {})
+        .frame(width: 420)
+}
+
+#Preview("Не вышло") {
+    UpdateNoticeView(
+        phase: .failed("Обновление отложено: идёт прослушивание"),
+        install: {},
+        dismiss: {}
     )
     .frame(width: 420)
 }

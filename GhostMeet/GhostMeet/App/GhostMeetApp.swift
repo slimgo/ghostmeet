@@ -63,19 +63,36 @@ final class GhostMeetAppDelegate: NSObject, NSApplicationDelegate {
 
     private lazy var settingsWindowController = SettingsWindowController(
         store: settings,
-        recognition: recognition
+        recognition: recognition,
+        // The switch alone means nothing until the next launch; the button
+        // beside it is what makes turning updates on take effect now.
+        checkForUpdates: { [weak self] in self?.updates.checkNow() }
     )
 
-    /// Whether a newer build has been published.
+    /// Whether a newer build has been published, and — since 0.4.0 — putting it
+    /// in place (ADR-0012).
     ///
-    /// Built here because the switch that permits it lives in the settings store
-    /// and the line that shows it lives in the overlay, and this is the only
-    /// place that holds both. The store is read at request time rather than
-    /// copied, so turning the check off takes effect from the next launch on
-    /// without anything having to be told.
-    private lazy var updates = UpdateCheck { [weak self] in
-        self?.settings.checksForUpdates ?? false
-    }
+    /// Built here because the three participants live in three different places
+    /// and this is the only one holding all of them: the switch that permits it
+    /// is in the settings store, the line that shows it is in the overlay, and
+    /// the reason an install may have to wait is in the session. The store is
+    /// read at request time rather than copied, so turning the check off takes
+    /// effect from the next launch on without anything having to be told.
+    ///
+    /// The installer is built by a closure rather than passed in, so that with
+    /// the switch off it is never built at all — off has to mean "no request",
+    /// not "a request whose answer is thrown away".
+    private lazy var updates = AppUpdater(
+        makeInstaller: { [weak self] status in
+            SparkleUpdateInstaller(status: status) { [weak self] in
+                // The one thing an update must never do is interrupt a call.
+                // Same rule as `SessionController.canQuit`, and the same reason:
+                // installing is a restart, only not asked for by a human.
+                InstallBlock.reason(isBusy: !(self?.session.canQuit ?? true))
+            }
+        },
+        isEnabled: { [weak self] in self?.settings.checksForUpdates ?? false }
+    )
 
     /// The global chords and what they do.
     ///
@@ -150,17 +167,17 @@ final class GhostMeetAppDelegate: NSObject, NSApplicationDelegate {
         // come up before the user has asked for anything, and the first thing
         // they see would be a permission dialog rather than the overlay.
 
-        // Ask whether a newer build exists — in the background, so a slow or
-        // unreachable network costs the launch nothing, and the window comes up
+        // Ask whether a newer build exists. Asynchronous inside, so a slow or
+        // unreachable network costs the launch nothing and the window comes up
         // the same either way.
         //
-        // Never under tests. The suite hosts itself inside the app, so every
-        // `xcodebuild test` would otherwise put a request to GitHub on the wire:
-        // noise on a developer's machine, and a rate limit waiting to happen on
-        // a CI runner where hundreds of jobs share one address.
-        if !AppDefaults.isRunningTests() {
-            Task { await updates.run() }
-        }
+        // The two refusals that used to be written here — not under tests, not
+        // with the switch off — now live inside `AppUpdater`, because with
+        // Sparkle they have to be refusals to *build* the mechanism rather than
+        // to call it: the framework's standard controller starts its updater in
+        // its own initialiser, and a condition on this line would arrive too
+        // late. Nothing here can put a request on the wire.
+        updates.startAtLaunch()
 
         // The settings window carries the same content protection as the overlay,
         // so it follows the same switch. Wired here because this is the only

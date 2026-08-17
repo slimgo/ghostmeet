@@ -50,9 +50,20 @@ final class SettingsWindowController: NSObject, NSWindowDelegate {
         window?.sharingType = type
     }
 
-    init(store: SettingsStore, recognition: SpeechModelStatus) {
+    /// - Parameter checkForUpdates: asks the feed now, for the button in the
+    ///   updates section. A closure rather than the updater, because this window
+    ///   only asks — the answer belongs on the overlay's one update line.
+    /// Asks the feed now — see the initialiser.
+    private let checkForUpdates: () -> Void
+
+    init(
+        store: SettingsStore,
+        recognition: SpeechModelStatus,
+        checkForUpdates: @escaping () -> Void = {}
+    ) {
         self.store = store
         self.recognition = recognition
+        self.checkForUpdates = checkForUpdates
         super.init()
     }
 
@@ -87,7 +98,12 @@ final class SettingsWindowController: NSObject, NSWindowDelegate {
     }
 
     private func makeWindow() -> NSWindow {
-        let content = SettingsView(store: store, recognition: recognition, navigation: navigation)
+        let content = SettingsView(
+            store: store,
+            recognition: recognition,
+            navigation: navigation,
+            checkForUpdates: checkForUpdates
+        )
         let window = NSWindow(contentViewController: NSHostingController(rootView: content))
         window.styleMask = [.titled, .closable, .miniaturizable, .resizable]
         window.title = "Настройки GhostMeet"

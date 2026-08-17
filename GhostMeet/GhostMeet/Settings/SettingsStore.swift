@@ -173,19 +173,27 @@ final class SettingsStore {
     // process on the machine 28–32 dB, the browser holding the call included. So
     // there is no backend, and no setting, under which it may come back on.
 
-    /// Whether the app asks GitHub at launch whether a newer build exists.
+    /// Whether the app asks for the update feed at launch — and, since 0.4.0, may
+    /// install what it finds (ADR-0012).
     ///
     /// **On by default, which is the one place this app reaches out without
     /// being asked.** The reason is how it is delivered: a disk image handed to a
-    /// colleague, with no store, no updater and no way of learning about a new
-    /// version other than being told. A check the user has to remember to run is
-    /// a check nobody runs, and the machine stays on the build it was given.
+    /// colleague, with no store and no way of learning about a new version other
+    /// than being told. A check the user has to remember to run is a check nobody
+    /// runs, and the machine stays on the build it was given.
     ///
     /// What the request carries is the whole of the argument for the default: an
-    /// IP address and the running version, in a `User-Agent`. No transcript, no
-    /// profile, no identifier of the machine or the user — and the answer is a
-    /// public page anybody can open. It is off with one switch, and off means
-    /// no request at all rather than a request whose answer is ignored.
+    /// IP address and the running version. No transcript, no profile, no
+    /// identifier of the machine or the user — the framework's optional system
+    /// profile is off from three sides — and the answer is a public file anybody
+    /// can open. It is off with one switch, and off means no request at all: with
+    /// this false the updater is not built, never mind asked.
+    ///
+    /// **One switch for both, deliberately.** Splitting «спрашивать» from
+    /// «ставить» would produce a state — knows about a version, may not install
+    /// it — whose only outcome is a line nagging about something the user has
+    /// already forbidden. What the switch permits is stated on the settings
+    /// screen in the words «Проверять и ставить обновления».
     ///
     /// Stored as a bare `Bool`, so the absent value has to be handled explicitly
     /// at load: `UserDefaults.bool(forKey:)` answers false for "never written",

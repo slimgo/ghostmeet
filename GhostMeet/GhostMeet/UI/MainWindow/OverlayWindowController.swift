@@ -48,7 +48,7 @@ final class OverlayWindowController: NSObject, ObservableObject, NSWindowDelegat
     /// Whether a newer build exists — passed through for the same reason and
     /// with the same `nil` case as the store above: the window tests have no
     /// user to be out of date.
-    private let updates: UpdateCheck?
+    private let updates: AppUpdater?
 
     /// Opening the settings window is somebody else's job — the overlay only
     /// has the button. In accessory mode there is no menu bar to put it in.
@@ -64,7 +64,7 @@ final class OverlayWindowController: NSObject, ObservableObject, NSWindowDelegat
         hotkeys: HotkeyCenter,
         openSettings: @escaping OpenSettings,
         settings: SettingsStore? = nil,
-        updates: UpdateCheck? = nil,
+        updates: AppUpdater? = nil,
         configuration: OverlayWindowConfiguration = .overlay,
         stateStore: WindowStateStore = WindowStateStore()
     ) {
