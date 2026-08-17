@@ -21,6 +21,7 @@ enum SettingsSection: String, CaseIterable, Sendable {
     case provider
     case providerKey
     case segmentation
+    case language
     case updates
 
     /// The page this section lives on. Total, and deliberately so: a section
@@ -32,7 +33,7 @@ enum SettingsSection: String, CaseIterable, Sendable {
         case .captureBackend, .sourceApplication, .segmentation: .sound
         case .recognition: .recognition
         case .provider, .providerKey: .model
-        case .updates: .about
+        case .language, .updates: .about
         }
     }
 }
@@ -56,11 +57,11 @@ enum SettingsTab: String, CaseIterable, Sendable, Identifiable {
 
     var title: String {
         switch self {
-        case .profile: "Профиль"
-        case .sound: "Звук"
-        case .recognition: "Распознавание"
-        case .model: "Модель"
-        case .about: "О программе"
+        case .profile: String(localized: "Профиль")
+        case .sound: String(localized: "Звук")
+        case .recognition: String(localized: "Распознавание")
+        case .model: String(localized: "Модель")
+        case .about: String(localized: "О программе")
         }
     }
 

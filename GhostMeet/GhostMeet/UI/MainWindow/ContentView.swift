@@ -156,8 +156,8 @@ struct ContentView: View {
         if !controller.isHiddenFromCapture {
             Label {
                 Text(session.isListening
-                     ? "Окно ВИДНО при шаринге и записи экрана. Прослушивание идёт — переключить уже нельзя."
-                     : "Окно видно при шаринге и записи экрана, и попадает в собственные скриншоты приложения.")
+                     ? String(localized: "Окно ВИДНО при шаринге и записи экрана. Прослушивание идёт — переключить уже нельзя.")
+                     : String(localized: "Окно видно при шаринге и записи экрана, и попадает в собственные скриншоты приложения."))
                     .fixedSize(horizontal: false, vertical: true)
             } icon: {
                 Image(systemName: "eye")
@@ -231,19 +231,19 @@ struct ContentView: View {
     }
 
     private var listenTitle: String {
-        if session.isStarting { return "Доступ…" }
-        if session.isListening { return "Стоп" }
+        if session.isStarting { return String(localized: "Доступ…") }
+        if session.isListening { return String(localized: "Стоп") }
         // The word on a disabled button has to say why it is disabled — the
         // reason below the header explains it, but the button is what the eye
         // goes to first.
-        return isModelReady ? "Слушать" : "Подготовка…"
+        return isModelReady ? String(localized: "Слушать") : String(localized: "Подготовка…")
     }
 
     private var listenHelp: String {
         if let reason = recognition.phase.listeningBlockedReason, !session.isListening {
             return reason
         }
-        return "Начать и остановить прослушивание микрофона — канал You. Кнопка ничего не отправляет в звонок."
+        return String(localized: "Начать и остановить прослушивание микрофона — канал You. Кнопка ничего не отправляет в звонок.")
     }
 
     private var settingsButton: some View {
@@ -253,7 +253,7 @@ struct ContentView: View {
                 .font(.system(size: 12))
         }
         .controlSize(.small)
-        .help("Настройки: профиль, ключ провайдера, пороги нарезки реплик.")
+        .help(String(localized: "Настройки: профиль, ключ провайдера, пороги нарезки реплик."))
     }
 
     // MARK: - Невидимость
@@ -280,8 +280,8 @@ struct ContentView: View {
         .disabled(session.isListening)
         .help(visibilityHelp)
         .accessibilityLabel(controller.isHiddenFromCapture
-            ? "Окно скрыто от захвата экрана"
-            : "Окно видно при захвате экрана")
+            ? String(localized: "Окно скрыто от захвата экрана")
+            : String(localized: "Окно видно при захвате экрана"))
     }
 
     /// Says what the button does *and* what it costs — the second part is the
@@ -291,12 +291,12 @@ struct ContentView: View {
     private var visibilityHelp: String {
         if session.isListening {
             return controller.isHiddenFromCapture
-                ? "Прослушивание идёт — переключатель заблокирован. Окно скрыто от захвата и останется скрытым до конца."
-                : "Прослушивание идёт — переключатель заблокирован. Окно ВИДНО при захвате и останется видимым до конца."
+                ? String(localized: "Прослушивание идёт — переключатель заблокирован. Окно скрыто от захвата и останется скрытым до конца.")
+                : String(localized: "Прослушивание идёт — переключатель заблокирован. Окно ВИДНО при захвате и останется видимым до конца.")
         }
         return controller.isHiddenFromCapture
-            ? "Окно скрыто от захвата экрана. Нажмите, чтобы сделать его видимым — для записи ролика или скриншота."
-            : "Окно видно при захвате экрана: попадёт в шаринг и в собственные скриншоты приложения. Нажмите, чтобы снова скрыть."
+            ? String(localized: "Окно скрыто от захвата экрана. Нажмите, чтобы сделать его видимым — для записи ролика или скриншота.")
+            : String(localized: "Окно видно при захвате экрана: попадёт в шаринг и в собственные скриншоты приложения. Нажмите, чтобы снова скрыть.")
     }
 
     // MARK: - Recognition readiness
@@ -345,7 +345,7 @@ struct ContentView: View {
             .padding(.vertical, 8)
             .background(recognitionBackground)
         } else if !session.isListening {
-            Label("Модель готова — можно слушать", systemImage: "checkmark.circle.fill")
+            Label(String(localized: "Модель готова — можно слушать"), systemImage: "checkmark.circle.fill")
                 .font(.system(size: 11))
                 .foregroundStyle(.green)
                 .frame(maxWidth: .infinity, alignment: .leading)
@@ -380,7 +380,7 @@ struct ContentView: View {
                 .font(.system(size: 11))
 
                 if failure.isPermissionDenied {
-                    Button("Открыть настройки приватности") { openMicrophonePrivacySettings() }
+                    Button(String(localized: "Открыть настройки приватности")) { openMicrophonePrivacySettings() }
                         .controlSize(.small)
                         .font(.system(size: 11))
                 }
@@ -512,7 +512,7 @@ struct ContentView: View {
                 .font(.system(size: 11))
 
                 if isThemBlockedByScreenRecording {
-                    Button("Открыть настройки записи экрана") { openScreenRecordingPrivacySettings() }
+                    Button(String(localized: "Открыть настройки записи экрана")) { openScreenRecordingPrivacySettings() }
                         .controlSize(.small)
                         .font(.system(size: 11))
                 }
@@ -593,14 +593,14 @@ struct ContentView: View {
             Button {
                 saveTranscript()
             } label: {
-                Label("Сохранить диалог", systemImage: "square.and.arrow.down")
+                Label(String(localized: "Сохранить диалог"), systemImage: "square.and.arrow.down")
                     .font(.system(size: 11))
             }
             .controlSize(.small)
             .disabled(session.transcript.isEmpty)
             .help(session.transcript.isEmpty
-                  ? "Пока нечего сохранять: в разговоре ни одной реплики."
-                  : "Сохранить весь разговор в файл: обе стороны, ответы модели, без реплик, признанных протечкой.")
+                  ? String(localized: "Пока нечего сохранять: в разговоре ни одной реплики.")
+                  : String(localized: "Сохранить весь разговор в файл: обе стороны, ответы модели, без реплик, признанных протечкой."))
 
             if let saveFailure {
                 Text(saveFailure)
@@ -682,7 +682,7 @@ struct ContentView: View {
 
             Spacer(minLength: 0)
         }
-        .help("Прозрачность окна. Размер меняется перетаскиванием краёв, положение — перетаскиванием окна; и то и другое запоминается между запусками.")
+        .help(String(localized: "Прозрачность окна. Размер меняется перетаскиванием краёв, положение — перетаскиванием окна; и то и другое запоминается между запусками."))
     }
 
     /// The scope of the invisibility guarantee, spelled out in the interface and
@@ -692,14 +692,14 @@ struct ContentView: View {
             Image(systemName: "eye.slash")
                 .font(.system(size: 9))
 
-            Text("Скрыто при шаринге окна или вкладки. При шаринге всего экрана невидимость не гарантируется.")
+            Text(String(localized: "Скрыто при шаринге окна или вкладки. При шаринге всего экрана невидимость не гарантируется."))
                 .fixedSize(horizontal: false, vertical: true)
 
             Spacer(minLength: 0)
         }
         .font(.system(size: 10))
         .foregroundStyle(.secondary)
-        .help("Окно исключено из захвата экрана, поэтому не попадает в шаринг отдельного окна или вкладки браузера. Шаринг всего экрана сознательно не поддерживается — выбирайте окно или вкладку.")
+        .help(String(localized: "Окно исключено из захвата экрана, поэтому не попадает в шаринг отдельного окна или вкладки браузера. Шаринг всего экрана сознательно не поддерживается — выбирайте окно или вкладку."))
     }
 }
 

@@ -199,7 +199,7 @@ final class OverlayUpdateDriver: NSObject, SPUUserDriver {
     /// to join may well have started.
     func showReadyToInstallAndRelaunch() async -> SPUUserUpdateChoice {
         if let reason = installBlock() {
-            status.failed("\(reason). Обновление не установлено")
+            status.failed(String(localized: "\(reason). Обновление не установлено"))
             return .dismiss
         }
         return .install

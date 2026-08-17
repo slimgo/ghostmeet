@@ -202,6 +202,16 @@ final class SettingsStore {
         didSet { defaults.set(checksForUpdates, forKey: DefaultsKey.checksForUpdates) }
     }
 
+    /// The language of the interface.
+    ///
+    /// **Not the language of a suggestion** — that follows the conversation and
+    /// is decided by the model, not here; see `AppLanguage`. Writing it takes
+    /// effect at the next launch, which is stated on the settings screen beside
+    /// the picker rather than left for the user to discover.
+    var appLanguage: AppLanguage {
+        didSet { appLanguage.apply(to: defaults) }
+    }
+
     /// Which chord runs which global action.
     ///
     /// User-scoped like everything else here: hotkeys are muscle memory, and
@@ -253,8 +263,8 @@ final class SettingsStore {
     /// that when picking, not when the answer turns out to be worse.
     var providerCapabilityNote: String {
         providerAcceptsImages
-            ? "Провайдер принимает изображения: режим «Решить с экрана» получает сам скриншот."
-            : "Провайдер только текстовый: скриншот не отправляется, и режим «Решить с экрана» работает слабее — по распознанному тексту с экрана."
+            ? String(localized: "Провайдер принимает изображения: режим «Решить с экрана» получает сам скриншот.")
+            : String(localized: "Провайдер только текстовый: скриншот не отправляется, и режим «Решить с экрана» работает слабее — по распознанному тексту с экрана.")
     }
 
     /// The reason the current selection cannot be turned into a provider, in
@@ -352,6 +362,9 @@ final class SettingsStore {
         self.checksForUpdates = defaults.object(forKey: DefaultsKey.checksForUpdates) == nil
             ? true
             : defaults.bool(forKey: DefaultsKey.checksForUpdates)
+        // Read back from `AppleLanguages` rather than from a key of our own: two
+        // places holding the same answer is two places that can disagree.
+        self.appLanguage = AppLanguage.stored(in: defaults)
         // A selection naming a provider that has since been removed falls back
         // to the default rather than leaving the app pointed at nothing.
         let stored = Self.decode(ProviderSelection.self, from: defaults, key: DefaultsKey.providerSelection)

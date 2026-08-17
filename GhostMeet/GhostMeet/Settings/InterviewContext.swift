@@ -108,14 +108,34 @@ nonisolated struct InterviewContext: Codable, Equatable, Sendable {
         case compensation
         case questions
 
-        /// Label the field is written under, in the prompt and on the screen.
-        /// One wording for both, so that the user knows what the model was told.
+        /// Подпись, под которой поле уходит **в промпт**.
+        ///
+        /// Не переводится, и это не недосмотр. Промпт целиком русский и сверяется
+        /// дословно с `docs/GhostMeet-Prompts.md`; английский интерфейс, который
+        /// начал бы слать модели английские подписи, тихо изменил бы промпт — а
+        /// расхождение кода с документом ловится тестом только на русской машине.
+        /// Языку интерфейса тут делать нечего: он про окно, а не про запрос.
         var label: String {
             switch self {
             case .stories: "Истории из практики"
             case .motivation: "Почему эта компания"
             case .compensation: "Ожидания по деньгам"
             case .questions: "Вопросы к работодателю"
+            }
+        }
+
+        /// Подпись **на экране**, на языке интерфейса.
+        ///
+        /// Отдельно от `label` по причине выше. Ценой этому — на английском окне
+        /// подпись поля и подпись в промпте перестают совпадать буквально; они
+        /// продолжают значить одно и то же, а обещание «пользователь видит, что
+        /// сказали модели» держится смыслом, а не побуквенно.
+        var screenLabel: String {
+            switch self {
+            case .stories: String(localized: "Истории из практики")
+            case .motivation: String(localized: "Почему эта компания")
+            case .compensation: String(localized: "Ожидания по деньгам")
+            case .questions: String(localized: "Вопросы к работодателю")
             }
         }
     }

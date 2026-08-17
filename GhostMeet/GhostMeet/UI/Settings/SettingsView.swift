@@ -79,6 +79,7 @@ struct SettingsView: View {
                 providerKeySection.id(SettingsSection.providerKey)
             }
             page(.about) {
+                languageSection.id(SettingsSection.language)
                 updatesSection.id(SettingsSection.updates)
             }
         }
@@ -565,6 +566,36 @@ struct SettingsView: View {
             Button("Вернуть значения по умолчанию") {
                 store.resetTurnSegmentationToDefaults()
             }
+        }
+    }
+
+    // MARK: - Язык
+
+    /// Which language the window speaks.
+    ///
+    /// **Only the window.** A suggestion is read aloud to the interviewer and is
+    /// therefore written in the language of the conversation, whatever is chosen
+    /// here — the recogniser detects it per turn and the prompts say so outright.
+    /// The note below says this, because the obvious reading of a «Язык» picker
+    /// in an app that produces text is the wrong one.
+    private var languageSection: some View {
+        Section("Язык") {
+            SettingsRow("Язык интерфейса") {
+                Picker("Язык интерфейса", selection: $store.appLanguage) {
+                    ForEach(AppLanguage.allCases) { language in
+                        Text(language.title).tag(language)
+                    }
+                }
+            }
+            Text("Применяется после перезапуска приложения.")
+                .font(.footnote)
+                .foregroundStyle(.secondary)
+            Text("""
+                Это язык окна и настроек. Язык подсказки от него не зависит: \
+                она пишется на языке разговора, потому что её читают вслух собеседнику.
+                """)
+                .font(.footnote)
+                .foregroundStyle(.secondary)
         }
     }
 

@@ -45,4 +45,4 @@
 
 **Blocked by:** 01, и перестройка настроек (`.scratch/settings-window/`).
 
-**Status:** ready-for-agent
+**Status:** done

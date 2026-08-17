@@ -55,7 +55,7 @@ nonisolated enum WhisperModel: String, Codable, CaseIterable, Sendable, Identifi
         case .tiny: return "Tiny"
         case .base: return "Base"
         case .small: return "Small"
-        case .largeV3Turbo: return "Large v3 Turbo (сжатая)"
+        case .largeV3Turbo: return String(localized: "Large v3 Turbo (сжатая)")
         case .largeV3TurboFull: return "Large v3 Turbo"
         }
     }
@@ -64,11 +64,11 @@ nonisolated enum WhisperModel: String, Codable, CaseIterable, Sendable, Identifi
     /// name because the download is the one thing that can take minutes.
     var approximateDownloadSize: String {
         switch self {
-        case .tiny: return "~75 МБ"
-        case .base: return "~145 МБ"
-        case .small: return "~480 МБ"
-        case .largeV3Turbo: return "~630 МБ"
-        case .largeV3TurboFull: return "~1,6 ГБ"
+        case .tiny: return String(localized: "~75 МБ")
+        case .base: return String(localized: "~145 МБ")
+        case .small: return String(localized: "~480 МБ")
+        case .largeV3Turbo: return String(localized: "~630 МБ")
+        case .largeV3TurboFull: return String(localized: "~1,6 ГБ")
         }
     }
 
@@ -76,15 +76,15 @@ nonisolated enum WhisperModel: String, Codable, CaseIterable, Sendable, Identifi
     var summary: String {
         switch self {
         case .tiny:
-            return "Самая быстрая и самая неточная. Русский разбирает плохо — для проверки, что пайплайн вообще жив."
+            return String(localized: "Самая быстрая и самая неточная. Русский разбирает плохо — для проверки, что пайплайн вообще жив.")
         case .base:
-            return "Быстрая, но на русском часто путает термины."
+            return String(localized: "Быстрая, но на русском часто путает термины.")
         case .small:
-            return "Компромисс для слабых машин: заметно точнее base и всё ещё небольшая."
+            return String(localized: "Компромисс для слабых машин: заметно точнее base и всё ещё небольшая.")
         case .largeV3Turbo:
-            return "Рекомендуемая: качество large-v3-turbo при вдвое меньшем размере."
+            return String(localized: "Рекомендуемая: качество large-v3-turbo при вдвое меньшем размере.")
         case .largeV3TurboFull:
-            return "Максимальное качество. Дольше качается и заметнее греет машину."
+            return String(localized: "Максимальное качество. Дольше качается и заметнее греет машину.")
         }
     }
 }

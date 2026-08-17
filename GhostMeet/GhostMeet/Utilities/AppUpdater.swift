@@ -55,7 +55,7 @@ enum InstallBlock {
         fileManager: FileManager = .default
     ) -> String? {
         if isBusy {
-            return "идёт прослушивание"
+            return String(localized: "идёт прослушивание")
         }
         // Sparkle would handle this by itself, and that is exactly the problem:
         // it escalates with a system authorisation dialog — «GhostMeet wants
@@ -66,7 +66,7 @@ enum InstallBlock {
         let container = bundle.deletingLastPathComponent()
         guard fileManager.isWritableFile(atPath: bundle.path),
               fileManager.isWritableFile(atPath: container.path) else {
-            return "нет прав на запись в \(container.path) — обновите вручную"
+            return String(localized: "нет прав на запись в \(container.path) — обновите вручную")
         }
         return nil
     }

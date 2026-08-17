@@ -50,15 +50,15 @@ nonisolated enum SpeechModelPhase: Equatable, Sendable {
     var listeningBlockedReason: String? {
         switch self {
         case .idle:
-            return "Модель распознавания ещё не готова — подготовка вот-вот начнётся."
+            return String(localized: "Модель распознавания ещё не готова — подготовка вот-вот начнётся.")
         case .downloading(let fraction):
-            return "Скачивание модели — \(Self.percent(fraction))%. Прослушивание включится, когда она будет готова."
+            return String(localized: "Скачивание модели — \(Self.percent(fraction))%. Прослушивание включится, когда она будет готова.")
         case .loading:
-            return "Модель загружается в память — несколько секунд."
+            return String(localized: "Модель загружается в память — несколько секунд.")
         case .ready:
             return nil
         case .failed(let reason):
-            return "Модель не загрузилась: \(reason). Прослушивание недоступно — загрузите модель заново в настройках."
+            return String(localized: "Модель не загрузилась: \(reason). Прослушивание недоступно — загрузите модель заново в настройках.")
         }
     }
 
@@ -66,15 +66,15 @@ nonisolated enum SpeechModelPhase: Equatable, Sendable {
     var summary: String {
         switch self {
         case .idle:
-            return "Модель ещё не загружена"
+            return String(localized: "Модель ещё не загружена")
         case .downloading(let fraction):
-            return "Скачивание модели — \(Self.percent(fraction))%"
+            return String(localized: "Скачивание модели — \(Self.percent(fraction))%")
         case .loading:
-            return "Подготовка модели"
+            return String(localized: "Подготовка модели")
         case .ready:
-            return "Модель готова"
+            return String(localized: "Модель готова")
         case .failed(let reason):
-            return "Модель не загрузилась: \(reason)"
+            return String(localized: "Модель не загрузилась: \(reason)")
         }
     }
 

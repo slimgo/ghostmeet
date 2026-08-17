@@ -89,7 +89,7 @@ struct PrecallReadiness: Equatable, Sendable {
                 id: "profile",
                 icon: "person.crop.circle.badge.exclamationmark",
                 value: name,
-                detail: "Профиль «\(name)» пуст: ни роли, ни опыта, ни стека. Подсказки будут говорить за человека вообще, а не за вас. Заполните его в настройках или загрузите резюме.",
+                detail: String(localized: "Профиль «\(name)» пуст: ни роли, ни опыта, ни стека. Подсказки будут говорить за человека вообще, а не за вас. Заполните его в настройках или загрузите резюме."),
                 target: .profile,
                 isMissing: true
             )
@@ -100,8 +100,8 @@ struct PrecallReadiness: Equatable, Sendable {
             icon: "person.crop.circle",
             value: name,
             detail: role.isEmpty
-                ? "Активный профиль: «\(name)». Подсказки идут от лица этого опыта. Нажмите, чтобы выбрать другой — сменится к следующей подсказке."
-                : "Активный профиль: «\(name)» — \(role). Подсказки идут от лица этого опыта. Нажмите, чтобы выбрать другой — сменится к следующей подсказке.",
+                ? String(localized: "Активный профиль: «\(name)». Подсказки идут от лица этого опыта. Нажмите, чтобы выбрать другой — сменится к следующей подсказке.")
+                : String(localized: "Активный профиль: «\(name)» — \(role). Подсказки идут от лица этого опыта. Нажмите, чтобы выбрать другой — сменится к следующей подсказке."),
             target: .profile,
             isMissing: false
         )
@@ -125,7 +125,7 @@ struct PrecallReadiness: Equatable, Sendable {
                 id: "provider",
                 icon: "exclamationmark.triangle",
                 value: value,
-                detail: "Провайдер настроен неверно: \(error) Отвечает пока предыдущий — или никто. Нажмите, чтобы поправить.",
+                detail: String(localized: "Провайдер настроен неверно: \(error) Отвечает пока предыдущий — или никто. Нажмите, чтобы поправить."),
                 target: .provider,
                 isMissing: true
             )
@@ -135,7 +135,7 @@ struct PrecallReadiness: Equatable, Sendable {
                 id: "provider",
                 icon: "key",
                 value: value,
-                detail: "Ключ для «\(preset.name)» не задан — первая же подсказка вернётся ошибкой. Нажмите, чтобы вписать ключ в настройках.",
+                detail: String(localized: "Ключ для «\(preset.name)» не задан — первая же подсказка вернётся ошибкой. Нажмите, чтобы вписать ключ в настройках."),
                 // The key and not the provider: the sentence above names the one
                 // field that has to be filled in, and a click that stops one
                 // section short of it makes a liar of it.
@@ -158,14 +158,14 @@ struct PrecallReadiness: Equatable, Sendable {
         switch preset.transport {
         case .cli:
             head = model.isEmpty
-                ? "Отвечает \(preset.name)."
-                : "Отвечает \(preset.name), команда «\(model)»."
+                ? String(localized: "Отвечает \(preset.name).")
+                : String(localized: "Отвечает \(preset.name), команда «\(model)».")
         case .anthropic, .openAICompatible, .gemini:
             head = model.isEmpty
-                ? "Отвечает \(preset.name)."
-                : "Отвечает \(preset.name), модель \(model)."
+                ? String(localized: "Отвечает \(preset.name).")
+                : String(localized: "Отвечает \(preset.name), модель \(model).")
         }
-        return head + " Нажмите, чтобы сменить провайдера или модель — новый ответит уже на следующую подсказку."
+        return head + String(localized: " Нажмите, чтобы сменить провайдера или модель — новый ответит уже на следующую подсказку.")
     }
 
     /// The model the next request will actually name: the user's override when
@@ -203,8 +203,8 @@ struct PrecallReadiness: Equatable, Sendable {
             return ReadinessItem(
                 id: "source",
                 icon: "speaker.slash",
-                value: "источник не выбран",
-                detail: "Приложение-источник не выбрано — канал Them будет молчать весь звонок, и собеседника модель не услышит. Нажмите, чтобы выбрать браузер со звонком.",
+                value: String(localized: "источник не выбран"),
+                detail: String(localized: "Приложение-источник не выбрано — канал Them будет молчать весь звонок, и собеседника модель не услышит. Нажмите, чтобы выбрать браузер со звонком."),
                 target: .sourceApplication,
                 isMissing: true
             )
@@ -214,7 +214,7 @@ struct PrecallReadiness: Equatable, Sendable {
             id: "source",
             icon: "speaker.wave.2",
             value: name,
-            detail: "Источник канала Them — «\(name)», через \(backend). Звук берётся с приложения целиком: всё, что играет в нём же, попадёт в Them. Нажмите, чтобы выбрать другое.",
+            detail: String(localized: "Источник канала Them — «\(name)», через \(backend). Звук берётся с приложения целиком: всё, что играет в нём же, попадёт в Them. Нажмите, чтобы выбрать другое."),
             target: .sourceApplication,
             isMissing: false
         )

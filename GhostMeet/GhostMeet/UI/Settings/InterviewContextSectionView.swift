@@ -25,7 +25,7 @@ struct InterviewContextSectionView: View {
             // Built from the model's own list of fields, so a field added there
             // cannot quietly end up with storage and no way to fill it in.
             ForEach(InterviewContext.Field.allCases, id: \.self) { field in
-                SettingsParagraphRow(field.label) {
+                SettingsParagraphRow(field.screenLabel) {
                     TextField(placeholder(for: field), text: binding(for: field), axis: .vertical)
                         .lineLimit(lineLimit(for: field))
                         .textFieldStyle(.roundedBorder)

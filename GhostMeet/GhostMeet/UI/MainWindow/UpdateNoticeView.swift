@@ -43,7 +43,7 @@ struct UpdateNoticeView: View {
             }
 
             if case .available = phase {
-                Button("обновить", action: install)
+                Button(String(localized: "обновить"), action: install)
                     .buttonStyle(.link)
                     .font(.system(size: 10))
             }
@@ -55,8 +55,8 @@ struct UpdateNoticeView: View {
                     Image(systemName: "xmark")
                 }
                 .buttonStyle(.plain)
-                .help("Скрыть до следующего запуска")
-                .accessibilityLabel("Скрыть сообщение об обновлении")
+                .help(String(localized: "Скрыть до следующего запуска"))
+                .accessibilityLabel(String(localized: "Скрыть сообщение об обновлении"))
             }
         }
         .font(.system(size: 10))
@@ -74,19 +74,19 @@ struct UpdateNoticeView: View {
         case .idle:
             ""
         case .checking:
-            "Проверяю, есть ли новая версия…"
+            String(localized: "Проверяю, есть ли новая версия…")
         case .available(let update):
-            "Вышла версия \(update.version)"
+            String(localized: "Вышла версия \(update.version)")
         case .downloading(let fraction):
-            fraction.map { "Загружаю обновление — \(Int($0 * 100))%" } ?? "Загружаю обновление…"
+            fraction.map { String(localized: "Загружаю обновление — \(Int($0 * 100))%") } ?? String(localized: "Загружаю обновление…")
         case .preparing:
-            "Готовлю обновление…"
+            String(localized: "Готовлю обновление…")
         case .installing:
-            "Ставлю обновление — приложение сейчас перезапустится"
+            String(localized: "Ставлю обновление — приложение сейчас перезапустится")
         case .upToDate:
-            "Установлена последняя версия"
+            String(localized: "Установлена последняя версия")
         case .failed(let reason):
-            "Обновиться не вышло: \(reason)"
+            String(localized: "Обновиться не вышло: \(reason)")
         }
     }
 
@@ -114,7 +114,7 @@ struct UpdateNoticeView: View {
     }
 }
 
-#Preview("Вышла версия") {
+#Preview(String(localized: "Вышла версия")) {
     UpdateNoticeView(
         phase: .available(OfferedUpdate(version: "0.4.0", notes: nil)),
         install: {},
@@ -123,14 +123,14 @@ struct UpdateNoticeView: View {
     .frame(width: 420)
 }
 
-#Preview("Загрузка") {
+#Preview(String(localized: "Загрузка")) {
     UpdateNoticeView(phase: .downloading(fraction: 0.42), install: {}, dismiss: {})
         .frame(width: 420)
 }
 
-#Preview("Не вышло") {
+#Preview(String(localized: "Не вышло")) {
     UpdateNoticeView(
-        phase: .failed("Обновление отложено: идёт прослушивание"),
+        phase: .failed(String(localized: "Обновление отложено: идёт прослушивание")),
         install: {},
         dismiss: {}
     )

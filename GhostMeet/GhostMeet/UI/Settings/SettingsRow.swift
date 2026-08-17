@@ -50,10 +50,14 @@ enum SettingsMetrics {
 /// layout is decided here instead, once.
 struct SettingsRow<Control: View>: View {
 
-    let title: String
+    /// `LocalizedStringKey`, а не `String`, и это важнее, чем выглядит:
+    /// `Text(строка)` не переводится вовсе, а `Text(ключ)` — переводится. С
+    /// `String` подписи полей молча остались бы русскими на английском окне, и
+    /// нашёл это тест, меряющий английские подписи в колонке.
+    let title: LocalizedStringKey
     @ViewBuilder let control: Control
 
-    init(_ title: String, @ViewBuilder control: () -> Control) {
+    init(_ title: LocalizedStringKey, @ViewBuilder control: () -> Control) {
         self.title = title
         self.control = control()
     }
@@ -96,6 +100,9 @@ struct SettingsRow<Control: View>: View {
 /// as misaligned no matter how wide the column is.
 struct SettingsParagraphRow<Control: View>: View {
 
+    /// Здесь `String`, а не ключ: часть подписей приходит готовой строкой уже на
+    /// языке интерфейса — `InterviewContext.Field.screenLabel`, — и второй раз
+    /// её переводить не по чему.
     let title: String
     @ViewBuilder let control: Control
 

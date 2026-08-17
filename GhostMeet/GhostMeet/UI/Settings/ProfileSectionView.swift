@@ -73,7 +73,7 @@ struct ProfileSectionView: View {
             TextField("Например: backend-разработчик", text: $store.profile.role)
                 .textFieldStyle(.roundedBorder)
         }
-        SettingsParagraphRow("Опыт") {
+        SettingsParagraphRow(String(localized: "Опыт")) {
             TextField(
                 "Например: 6 лет, финтех и высоконагруженные сервисы",
                 text: $store.profile.experience,
@@ -82,7 +82,7 @@ struct ProfileSectionView: View {
             .lineLimit(2...5)
             .textFieldStyle(.roundedBorder)
         }
-        SettingsParagraphRow("Стек") {
+        SettingsParagraphRow(String(localized: "Стек")) {
             TextField(
                 "Например: Go, PostgreSQL, Kubernetes",
                 text: $store.profile.stack,
@@ -218,12 +218,12 @@ private struct ResumeReviewSheet: View {
                     TextField("Роль", text: $importer.draft.role)
                         .textFieldStyle(.roundedBorder)
                 }
-                SettingsParagraphRow("Опыт") {
+                SettingsParagraphRow(String(localized: "Опыт")) {
                     TextField("Опыт", text: $importer.draft.experience, axis: .vertical)
                         .lineLimit(3...8)
                         .textFieldStyle(.roundedBorder)
                 }
-                SettingsParagraphRow("Стек") {
+                SettingsParagraphRow(String(localized: "Стек")) {
                     TextField("Стек", text: $importer.draft.stack, axis: .vertical)
                         .lineLimit(2...6)
                         .textFieldStyle(.roundedBorder)

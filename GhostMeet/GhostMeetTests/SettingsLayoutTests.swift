@@ -54,12 +54,36 @@ struct SettingsLayoutTests {
     }
 
     /// Колонка, подобранная впритык, перестанет работать на первой же правке
-    /// текста — а тексты этого окна ещё будут переписаны при переводе.
+    /// текста.
     @Test("У колонки остаётся запас, а не ноль")
     func theColumnHasHeadroom() throws {
         let longest = try #require(sideLabels.max(by: { width(of: $0) < width(of: $1) }))
         let slack = SettingsMetrics.labelColumn - width(of: longest)
         #expect(slack >= 12, "самая длинная подпись «\(longest)», запаса всего \(Int(slack)) pt")
+    }
+
+    /// **То же самое по-английски, и это не формальность.** Колонка одна на оба
+    /// языка, а слова разной длины: «Базовый адрес» — 95 pt, «Base address» —
+    /// другое число, и узнать, какое, можно только измерив. Перевод, не влезший
+    /// в колонку, даёт то же обрезанное многоточием слово, ради которого всё это
+    /// и затевалось.
+    @Test("Английские подписи тоже помещаются в колонку")
+    func everyEnglishLabelFitsTheColumn() throws {
+        let url = try #require(
+            Bundle.main.url(forResource: "Localizable", withExtension: "strings", subdirectory: "en.lproj")
+        )
+        let data = try Data(contentsOf: url)
+        let table = try #require(
+            try PropertyListSerialization.propertyList(from: data, format: nil) as? [String: String]
+        )
+        for label in sideLabels {
+            let english = try #require(table[label], "«\(label)» не переведена вовсе")
+            let needed = width(of: english)
+            #expect(
+                needed <= SettingsMetrics.labelColumn,
+                "«\(english)» просит \(Int(needed)) pt, а колонка \(Int(SettingsMetrics.labelColumn)) pt"
+            )
+        }
     }
 
     /// Длинные подписи существуют, и их место — не в колонке. Тест сторожит

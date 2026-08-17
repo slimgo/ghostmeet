@@ -195,11 +195,11 @@ nonisolated final class ScreenCaptureService: ScreenCapturer {
         case CaptureError.contentUnavailable:
             return Self.permissionHelp
         case CaptureError.noDisplay:
-            return "Система не сообщила ни одного дисплея — подсказка идёт без снимка экрана."
+            return String(localized: "Система не сообщила ни одного дисплея — подсказка идёт без снимка экрана.")
         case CaptureError.screenshotFailed(let underlying):
-            return "Не удалось снять экран: \(underlying.localizedDescription). Подсказка идёт без снимка."
+            return String(localized: "Не удалось снять экран: \(underlying.localizedDescription). Подсказка идёт без снимка.")
         default:
-            return "Не удалось снять экран: \(error.localizedDescription). Подсказка идёт без снимка."
+            return String(localized: "Не удалось снять экран: \(error.localizedDescription). Подсказка идёт без снимка.")
         }
     }
 

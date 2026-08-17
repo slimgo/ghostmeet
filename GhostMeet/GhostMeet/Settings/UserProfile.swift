@@ -71,7 +71,7 @@ nonisolated struct UserProfile: Codable, Equatable, Identifiable, Sendable {
     /// Label for the picker. Falls back to the role, and then to a placeholder,
     /// so an unnamed profile is still something the user can point at.
     var displayName: String {
-        name.trimmedOrNil ?? role.trimmedOrNil ?? "Без названия"
+        name.trimmedOrNil ?? role.trimmedOrNil ?? String(localized: "Без названия")
     }
 
     /// Equality is about what a profile *says*, not which entry it is: two

@@ -123,7 +123,7 @@ struct SessionIndicators: Equatable, Sendable {
                 id: "you",
                 name: "You",
                 state: .listening,
-                detail: "Микрофон слушает — ваша речь пишется в канал You."
+                detail: String(localized: "Микрофон слушает — ваша речь пишется в канал You.")
             )
         }
         if let blocked = recognition.listeningBlockedReason {
@@ -133,7 +133,7 @@ struct SessionIndicators: Equatable, Sendable {
             id: "you",
             name: "You",
             state: .idle,
-            detail: "Прослушивание выключено. Нажмите «Слушать» или используйте хоткей."
+            detail: String(localized: "Прослушивание выключено. Нажмите «Слушать» или используйте хоткей.")
         )
     }
 
@@ -156,7 +156,7 @@ struct SessionIndicators: Equatable, Sendable {
     /// Added here rather than in each capture backend on purpose: a failure is
     /// published from several places, and a consequence written out at each of
     /// them is a consequence that goes missing at one of them.
-    static let deafConsequence = "Собеседника сейчас не слышно — его слова пишутся как ваша речь."
+    static let deafConsequence = String(localized: "Собеседника сейчас не слышно — его слова пишутся как ваша речь.")
 
     private static func themIndicator(isListening: Bool, status: ThemCaptureStatus) -> Indicator {
         if case .failed = status {
@@ -172,7 +172,7 @@ struct SessionIndicators: Equatable, Sendable {
                 id: "them",
                 name: "Them",
                 state: .idle,
-                detail: "Прослушивание выключено — звук собеседника не пишется."
+                detail: String(localized: "Прослушивание выключено — звук собеседника не пишется.")
             )
         }
         switch status {
@@ -207,27 +207,27 @@ struct SessionIndicators: Equatable, Sendable {
         if isGenerating {
             return Indicator(
                 id: "model",
-                name: "Модель",
+                name: String(localized: "Модель"),
                 state: .thinking,
-                detail: "Модель пишет подсказку."
+                detail: String(localized: "Модель пишет подсказку.")
             )
         }
         if isPreparingAnswer {
             return Indicator(
                 id: "model",
-                name: "Модель",
+                name: String(localized: "Модель"),
                 state: .waiting,
-                detail: "Нажатие принято — дозакрываю вопрос и снимаю экран."
+                detail: String(localized: "Нажатие принято — дозакрываю вопрос и снимаю экран.")
             )
         }
         if let suggestionFailure {
-            return Indicator(id: "model", name: "Модель", state: .failed, detail: suggestionFailure)
+            return Indicator(id: "model", name: String(localized: "Модель"), state: .failed, detail: suggestionFailure)
         }
         return Indicator(
             id: "model",
-            name: "Модель",
+            name: String(localized: "Модель"),
             state: .idle,
-            detail: "Подсказка приходит по нажатию хоткея — сама она не запускается."
+            detail: String(localized: "Подсказка приходит по нажатию хоткея — сама она не запускается.")
         )
     }
 }

@@ -35,7 +35,7 @@ struct TranscriptView: View {
     }
 
     private var emptyState: some View {
-        Text("Пока тихо: ни одной реплики")
+        Text(String(localized: "Пока тихо: ни одной реплики"))
             .font(.callout)
             .foregroundStyle(.secondary)
     }
@@ -66,7 +66,7 @@ private struct TurnRow: View {
                 // model never sees would still read here as the user's own
                 // sentence — silent corruption of the transcript, which is the
                 // failure this whole layer exists to prevent.
-                Text("протечка")
+                Text(String(localized: "протечка"))
                     .font(.caption)
                     .foregroundStyle(.secondary)
             }
@@ -90,14 +90,14 @@ private struct TurnRow: View {
     }
 
     private var length: String {
-        String(format: "%.2f с", turn.duration)
+        String(format: String(localized: "%.2f с"), turn.duration)
     }
 }
 
 #Preview {
     TranscriptView(turns: [
         Turn(channel: .you, timestamp: 0, duration: 1.24),
-        Turn(channel: .them, text: "Расскажите, как вы решали эту задачу?", timestamp: 3.1, duration: 2.75),
+        Turn(channel: .them, text: String(localized: "Расскажите, как вы решали эту задачу?"), timestamp: 3.1, duration: 2.75),
         Turn(channel: .you, timestamp: 7.4, duration: 10),
     ])
     .frame(width: 420, height: 240)
