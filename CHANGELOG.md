@@ -3,8 +3,11 @@
 All notable changes to GhostMeet are recorded here.
 
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and the project
-follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html). While the major version is
-`0`, the minor number carries breaking changes and the patch number carries everything else.
+follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html). The minor number goes up when
+the app gains a capability it did not have before; the patch number carries fixes and refinements
+of what is already there. Breaking changes go in a minor too, and are named as such in the notes.
+The major number becomes `1` when the v1.0 list in [docs/GhostMeet.md](docs/GhostMeet.md) is
+closed — see [docs/releasing.md](docs/releasing.md) for the whole release order.
 
 Versions below `0.1.0` were reconstructed from the commit history after the fact: the project ran
 unversioned from its first commit until the MVP closed, and the milestones are recorded here
