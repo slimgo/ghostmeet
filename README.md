@@ -180,9 +180,15 @@ Both are spelled out in [CLAUDE.md](CLAUDE.md).
 The spec and the decision records are written in Russian; code identifiers and comments follow
 normal Swift conventions in English.
 
-**The app's interface is in Russian.** Worth knowing before you download it: the buttons say
-«Слушать» and «Настройки». What the model *answers* is not forced to any language — a suggestion
-follows the language of the call, so an English-language interview is answered in English today.
+**The interface speaks Russian and English.** It follows the system language and can be switched
+in settings; the change takes effect on the next launch.
+
+That is the *window's* language, and it is a separate thing from what the model answers. A
+suggestion follows the language of the call — it is read aloud to the interviewer, not to you — so
+an English interview is answered in English whatever the window says. One prompt rule follows the
+call rather than the window for the same reason: in a Russian call the model is told to put a
+Russian pronunciation after every Latin term, because Latin cannot be read aloud inside a Russian
+sentence, and in an English call that rule is not sent at all.
 
 ## Releasing
 
