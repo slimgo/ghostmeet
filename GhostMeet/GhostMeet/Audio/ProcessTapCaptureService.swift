@@ -29,6 +29,14 @@ nonisolated enum ThemCaptureStatus: Equatable, Sendable {
     case restarting(attempt: Int)
     /// Capture broke and will not recover by itself.
     case failed(reason: String)
+    /// The backend gave up and the channel is moving to the other one.
+    ///
+    /// A state of its own rather than a flavour of `restarting`, because what
+    /// the user has to know is different: not «сейчас вернётся», but «слушаю
+    /// другим способом». The two backends have different blind spots — one sees
+    /// only applications with windows, the other is quieter — so somebody
+    /// switched without being told would look for the cause in the wrong place.
+    case switchingBackend(from: ThemCaptureBackend, to: ThemCaptureBackend, reason: String)
 
     var message: String {
         switch self {
@@ -42,6 +50,8 @@ nonisolated enum ThemCaptureStatus: Equatable, Sendable {
             String(localized: "Звук собеседника оборвался — восстанавливаю канал Them (попытка \(attempt)).")
         case .failed(let reason):
             reason
+        case .switchingBackend(_, let next, let reason):
+            String(localized: "\(reason) Перехожу на \(next.displayName).")
         }
     }
 

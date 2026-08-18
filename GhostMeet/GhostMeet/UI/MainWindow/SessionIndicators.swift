@@ -178,9 +178,12 @@ struct SessionIndicators: Equatable, Sendable {
         switch status {
         case .capturing:
             return Indicator(id: "them", name: "Them", state: .listening, detail: status.message)
-        case .idle, .waitingForSource, .restarting:
+        case .idle, .waitingForSource, .restarting, .switchingBackend:
             // Восстановление — это ожидание, а не отказ: канал сейчас молчит, но
             // сам себя поднимает, и звать пользователя что-то делать не за чем.
+            // Переход на второй бэкенд — то же самое: приложение уже действует,
+            // а строка нужна, чтобы человек знал, каким способом его теперь
+            // слушают, — у бэкендов разные слепые зоны.
             return Indicator(id: "them", name: "Them", state: .waiting, detail: status.message)
         case .failed:
             return Indicator(id: "them", name: "Them", state: .failed, detail: status.message)

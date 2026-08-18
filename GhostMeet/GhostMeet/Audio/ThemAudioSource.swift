@@ -58,6 +58,15 @@ nonisolated enum ThemCaptureBackend: String, Codable, CaseIterable, Sendable {
         }
     }
 
+    /// The other one. There are two, and the fallback needs to name the one it
+    /// is not on — see `SwitchableThemSource`.
+    var other: ThemCaptureBackend {
+        switch self {
+        case .screenCaptureKit: .processTap
+        case .processTap: .screenCaptureKit
+        }
+    }
+
     /// What a machine without the Screen Recording grant has to be told.
     ///
     /// One text, used both by the capture status the window shows and by the
