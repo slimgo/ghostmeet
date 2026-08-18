@@ -1,0 +1,1231 @@
+{
+ "slug": "go-backend-en",
+ "language": "en",
+ "title": "Backend developer, Go",
+ "phases": [
+  "Getting acquainted",
+  "Go: the language",
+  "Go: concurrency",
+  "Go: performance",
+  "Databases",
+  "Queues and APIs",
+  "Operations",
+  "Process and quality",
+  "Behavioural",
+  "Terms",
+  "Candidate's questions",
+  "Wrapping up"
+ ],
+ "entries": [
+  {
+   "phase": "Getting acquainted",
+   "kind": "talk",
+   "chunks": [
+    {
+     "text": "Hello! Glad we could make this work.",
+     "gap": 500
+    },
+    {
+     "text": "Can you hear and see me all right?",
+     "gap": 0
+    }
+   ]
+  },
+  {
+   "phase": "Getting acquainted",
+   "kind": "talk",
+   "chunks": [
+    {
+     "text": "Let me tell you the format quickly.",
+     "gap": 550
+    },
+    {
+     "text": "About an hour. First a little about your background, then the technical part, and a colleague of mine joins us closer to the end",
+     "gap": 700
+    },
+    {
+     "text": "and at the end we'll leave time for your questions. Sound good?",
+     "gap": 0
+    }
+   ]
+  },
+  {
+   "phase": "Getting acquainted",
+   "kind": "q",
+   "hint": "context",
+   "chunks": [
+    {
+     "text": "Let's start with something easy, then.",
+     "gap": 600
+    },
+    {
+     "text": "Tell me about yourself. Not from the CV, in your own words: what you've been doing for the past couple of years",
+     "gap": 800
+    },
+    {
+     "text": "and which parts of it you actually enjoyed.",
+     "gap": 0
+    }
+   ]
+  },
+  {
+   "phase": "Getting acquainted",
+   "kind": "q",
+   "hint": "context",
+   "tail": true,
+   "chunks": [
+    {
+     "text": "Let's go deeper on the most recent project.",
+     "gap": 700
+    },
+    {
+     "text": "What sort of system is it, what load does it take, how many people on the team",
+     "gap": 600
+    },
+    {
+     "text": "and where were you in all that?",
+     "gap": 0
+    }
+   ]
+  },
+  {
+   "phase": "Getting acquainted",
+   "kind": "q",
+   "hint": "self",
+   "chunks": [
+    {
+     "text": "Which parts of that system did you write yourself,",
+     "gap": 550
+    },
+    {
+     "text": "and which were already there before you and you just took them as given?",
+     "gap": 0
+    }
+   ]
+  },
+  {
+   "phase": "Go: the language",
+   "kind": "talk",
+   "chunks": [
+    {
+     "text": "Good, that's a clear picture.",
+     "gap": 450
+    },
+    {
+     "text": "Let's talk about the language now.",
+     "gap": 0
+    }
+   ]
+  },
+  {
+   "phase": "Go: the language",
+   "kind": "q",
+   "hint": "brief",
+   "tail": true,
+   "chunks": [
+    {
+     "text": "A classic one.",
+     "gap": 500
+    },
+    {
+     "text": "A function returns an error, inside it there's a pointer to a concrete type, the pointer itself is nil,",
+     "gap": 850
+    },
+    {
+     "text": "and the check says the error is there.",
+     "gap": 600
+    },
+    {
+     "text": "Why does that happen?",
+     "gap": 0
+    }
+   ]
+  },
+  {
+   "phase": "Go: the language",
+   "kind": "q",
+   "hint": "self",
+   "chunks": [
+    {
+     "text": "How is error handling set up in your project?",
+     "gap": 700
+    },
+    {
+     "text": "Do you wrap them on the way up,",
+     "gap": 500
+    },
+    {
+     "text": "and how does the calling code tell your error from somebody else's?",
+     "gap": 0
+    }
+   ]
+  },
+  {
+   "phase": "Go: the language",
+   "kind": "q",
+   "hint": "self",
+   "tail": true,
+   "chunks": [
+    {
+     "text": "Where in your code is a panic acceptable,",
+     "gap": 600
+    },
+    {
+     "text": "and where would you definitely not let one through at review",
+     "gap": 450
+    },
+    {
+     "text": "and why?",
+     "gap": 0
+    }
+   ]
+  },
+  {
+   "phase": "Go: the language",
+   "kind": "q",
+   "hint": "brief",
+   "chunks": [
+    {
+     "text": "Generics.",
+     "gap": 400
+    },
+    {
+     "text": "Where did they genuinely help you,",
+     "gap": 600
+    },
+    {
+     "text": "and where did you look at them and deliberately go back to plain interfaces?",
+     "gap": 0
+    }
+   ]
+  },
+  {
+   "phase": "Go: the language",
+   "kind": "q",
+   "hint": "detail",
+   "chunks": [
+    {
+     "text": "Here's one to check understanding.",
+     "gap": 550
+    },
+    {
+     "text": "You pass a slice into a function, it appends elements and also changes an existing one.",
+     "gap": 850
+    },
+    {
+     "text": "From the outside the changes are sometimes visible and sometimes not.",
+     "gap": 650
+    },
+    {
+     "text": "Talk me through what's happening, and how you write so it doesn't bite you.",
+     "gap": 0
+    }
+   ]
+  },
+  {
+   "phase": "Go: concurrency",
+   "kind": "talk",
+   "chunks": [
+    {
+     "text": "Right.",
+     "gap": 400
+    },
+    {
+     "text": "Now goroutines and everything around them.",
+     "gap": 0
+    }
+   ]
+  },
+  {
+   "phase": "Go: concurrency",
+   "kind": "q",
+   "hint": "context",
+   "chunks": [
+    {
+     "text": "Tell me about a time goroutines leaked on you.",
+     "gap": 750
+    },
+    {
+     "text": "How did you notice, how did you find it,",
+     "gap": 500
+    },
+    {
+     "text": "and what did you change so it wouldn't come back?",
+     "gap": 0
+    }
+   ]
+  },
+  {
+   "phase": "Go: concurrency",
+   "kind": "q",
+   "hint": "brief",
+   "tail": true,
+   "chunks": [
+    {
+     "text": "Buffered channel or unbuffered.",
+     "gap": 700
+    },
+    {
+     "text": "When do you reach for which,",
+     "gap": 450
+    },
+    {
+     "text": "and what do you look at?",
+     "gap": 0
+    }
+   ]
+  },
+  {
+   "phase": "Go: concurrency",
+   "kind": "q",
+   "hint": "detail",
+   "chunks": [
+    {
+     "text": "Let's walk a context all the way through.",
+     "gap": 600
+    },
+    {
+     "text": "A request comes in, you go to the database and to a neighbouring service.",
+     "gap": 800
+    },
+    {
+     "text": "The client drops halfway.",
+     "gap": 600
+    },
+    {
+     "text": "What happens in your code next, honestly?",
+     "gap": 0
+    }
+   ]
+  },
+  {
+   "phase": "Go: concurrency",
+   "kind": "q",
+   "hint": "detail",
+   "chunks": [
+    {
+     "text": "The client gives you five seconds for an answer.",
+     "gap": 650
+    },
+    {
+     "text": "Inside, you make three calls in a row.",
+     "gap": 700
+    },
+    {
+     "text": "How do you split that time budget, and what do you return to the client when it runs out?",
+     "gap": 0
+    }
+   ]
+  },
+  {
+   "phase": "Go: concurrency",
+   "kind": "q",
+   "hint": "self",
+   "tail": true,
+   "chunks": [
+    {
+     "text": "Mutex or channel.",
+     "gap": 550
+    },
+    {
+     "text": "How do you choose,",
+     "gap": 400
+    },
+    {
+     "text": "and why?",
+     "gap": 0
+    }
+   ]
+  },
+  {
+   "phase": "Go: concurrency",
+   "kind": "q",
+   "hint": "self",
+   "chunks": [
+    {
+     "text": "You need to call five services in parallel, wait for all of them,",
+     "gap": 700
+    },
+    {
+     "text": "and not lose the first error.",
+     "gap": 550
+    },
+    {
+     "text": "What do you use for that, and what happens to the other requests when one fails?",
+     "gap": 0
+    }
+   ]
+  },
+  {
+   "phase": "Go: concurrency",
+   "kind": "q",
+   "hint": "detail",
+   "tail": true,
+   "chunks": [
+    {
+     "text": "A data race that fires once a day in production",
+     "gap": 750
+    },
+    {
+     "text": "and cannot be reproduced locally at all.",
+     "gap": 600
+    },
+    {
+     "text": "What do you do?",
+     "gap": 0
+    }
+   ]
+  },
+  {
+   "phase": "Go: performance",
+   "kind": "talk",
+   "chunks": [
+    {
+     "text": "Right, got it.",
+     "gap": 400
+    },
+    {
+     "text": "A bit about performance.",
+     "gap": 0
+    }
+   ]
+  },
+  {
+   "phase": "Go: performance",
+   "kind": "q",
+   "hint": "detail",
+   "chunks": [
+    {
+     "text": "Since yesterday's release the service eats twice as much memory.",
+     "gap": 800
+    },
+    {
+     "text": "It doesn't crash, it just grows.",
+     "gap": 550
+    },
+    {
+     "text": "Step by step: what do you do first, second, third?",
+     "gap": 0
+    }
+   ]
+  },
+  {
+   "phase": "Go: performance",
+   "kind": "q",
+   "hint": "brief",
+   "tail": true,
+   "chunks": [
+    {
+     "text": "What is a variable escaping to the heap,",
+     "gap": 650
+    },
+    {
+     "text": "and how do you usually work out that it has happened",
+     "gap": 500
+    },
+    {
+     "text": "in your code specifically?",
+     "gap": 0
+    }
+   ]
+  },
+  {
+   "phase": "Go: performance",
+   "kind": "q",
+   "hint": "brief",
+   "chunks": [
+    {
+     "text": "The garbage collector is taking a noticeable share of the CPU.",
+     "gap": 700
+    },
+    {
+     "text": "What will you turn, and in what order?",
+     "gap": 0
+    }
+   ]
+  },
+  {
+   "phase": "Go: performance",
+   "kind": "q",
+   "hint": "self",
+   "chunks": [
+    {
+     "text": "How do you convince yourself an optimisation actually helped,",
+     "gap": 700
+    },
+    {
+     "text": "rather than just looking like it did?",
+     "gap": 0
+    }
+   ]
+  },
+  {
+   "phase": "Databases",
+   "kind": "talk",
+   "chunks": [
+    {
+     "text": "Good.",
+     "gap": 400
+    },
+    {
+     "text": "Right, databases now.",
+     "gap": 0
+    }
+   ]
+  },
+  {
+   "phase": "Databases",
+   "kind": "q",
+   "hint": "detail",
+   "chunks": [
+    {
+     "text": "A query that ran in ten milliseconds yesterday",
+     "gap": 700
+    },
+    {
+     "text": "takes eight seconds today. Nothing was deployed.",
+     "gap": 800
+    },
+    {
+     "text": "How will you work it out?",
+     "gap": 0
+    }
+   ]
+  },
+  {
+   "phase": "Databases",
+   "kind": "q",
+   "hint": "brief",
+   "chunks": [
+    {
+     "text": "Which isolation levels have you actually touched by hand,",
+     "gap": 700
+    },
+    {
+     "text": "and was there a case where read committed wasn't enough?",
+     "gap": 0
+    }
+   ]
+  },
+  {
+   "phase": "Databases",
+   "kind": "q",
+   "hint": "brief",
+   "tail": true,
+   "chunks": [
+    {
+     "text": "Two services update the same rows in a different order.",
+     "gap": 800
+    },
+    {
+     "text": "How does that end,",
+     "gap": 450
+    },
+    {
+     "text": "and how do you fix it?",
+     "gap": 0
+    }
+   ]
+  },
+  {
+   "phase": "Databases",
+   "kind": "q",
+   "hint": "self",
+   "chunks": [
+    {
+     "text": "How do you choose the connection pool size for Postgres?",
+     "gap": 750
+    },
+    {
+     "text": "What do you start from, and what happens if you double it?",
+     "gap": 0
+    }
+   ]
+  },
+  {
+   "phase": "Databases",
+   "kind": "q",
+   "hint": "detail",
+   "chunks": [
+    {
+     "text": "You need to rename a column in a table three services read from,",
+     "gap": 800
+    },
+    {
+     "text": "and all of it with no downtime.",
+     "gap": 600
+    },
+    {
+     "text": "Describe the sequence of deployments.",
+     "gap": 0
+    }
+   ]
+  },
+  {
+   "phase": "Databases",
+   "kind": "q",
+   "hint": "brief",
+   "chunks": [
+    {
+     "text": "An endpoint returns a list of a hundred items",
+     "gap": 650
+    },
+    {
+     "text": "and goes to the database separately for each one.",
+     "gap": 700
+    },
+    {
+     "text": "How will you notice that, and how will you rewrite it?",
+     "gap": 0
+    }
+   ]
+  },
+  {
+   "phase": "Queues and APIs",
+   "kind": "talk",
+   "chunks": [
+    {
+     "text": "Understood.",
+     "gap": 400
+    },
+    {
+     "text": "Let's talk about queues and how services talk to each other.",
+     "gap": 0
+    }
+   ]
+  },
+  {
+   "phase": "Queues and APIs",
+   "kind": "q",
+   "hint": "brief",
+   "chunks": [
+    {
+     "text": "When do you take Kafka, when something like NATS,",
+     "gap": 700
+    },
+    {
+     "text": "and when is a table in Postgres honestly enough?",
+     "gap": 0
+    }
+   ]
+  },
+  {
+   "phase": "Queues and APIs",
+   "kind": "q",
+   "hint": "detail",
+   "tail": true,
+   "chunks": [
+    {
+     "text": "A consumer processed a message, wrote the result to the database",
+     "gap": 700
+    },
+    {
+     "text": "and died before committing the offset.",
+     "gap": 650
+    },
+    {
+     "text": "What happens next?",
+     "gap": 0
+    }
+   ]
+  },
+  {
+   "phase": "Queues and APIs",
+   "kind": "q",
+   "hint": "brief",
+   "tail": true,
+   "chunks": [
+    {
+     "text": "A payment endpoint the client can call twice.",
+     "gap": 750
+    },
+    {
+     "text": "How do you make it idempotent,",
+     "gap": 500
+    },
+    {
+     "text": "where do you start?",
+     "gap": 0
+    }
+   ]
+  },
+  {
+   "phase": "Queues and APIs",
+   "kind": "q",
+   "hint": "brief",
+   "chunks": [
+    {
+     "text": "You need to both write to the database and send an event to a queue",
+     "gap": 750
+    },
+    {
+     "text": "so that neither side drifts from the other.",
+     "gap": 600
+    },
+    {
+     "text": "How do you do that?",
+     "gap": 0
+    }
+   ]
+  },
+  {
+   "phase": "Queues and APIs",
+   "kind": "q",
+   "hint": "self",
+   "chunks": [
+    {
+     "text": "Between your own services — gRPC or REST?",
+     "gap": 700
+    },
+    {
+     "text": "How did you choose at your last place, and what did you regret afterwards?",
+     "gap": 0
+    }
+   ]
+  },
+  {
+   "phase": "Queues and APIs",
+   "kind": "q",
+   "hint": "detail",
+   "chunks": [
+    {
+     "text": "A neighbouring service now answers in three seconds instead of fifty milliseconds.",
+     "gap": 850
+    },
+    {
+     "text": "It isn't failing, it's just slow.",
+     "gap": 600
+    },
+    {
+     "text": "What does your service do, and what did you build in ahead of time?",
+     "gap": 0
+    }
+   ]
+  },
+  {
+   "phase": "Queues and APIs",
+   "kind": "q",
+   "hint": "brief",
+   "tail": true,
+   "chunks": [
+    {
+     "text": "A cache expired and ten thousand identical queries hit the database at once.",
+     "gap": 800
+    },
+    {
+     "text": "How do you prevent",
+     "gap": 450
+    },
+    {
+     "text": "that?",
+     "gap": 0
+    }
+   ]
+  },
+  {
+   "phase": "Operations",
+   "kind": "talk",
+   "who": 2,
+   "chunks": [
+    {
+     "text": "Hi, I've joined.",
+     "gap": 550
+    },
+    {
+     "text": "I'm from the neighbouring team, I'll be grilling you on operations.",
+     "gap": 0
+    }
+   ]
+  },
+  {
+   "phase": "Operations",
+   "kind": "q",
+   "hint": "brief",
+   "who": 2,
+   "chunks": [
+    {
+     "text": "I'll start with an easy one.",
+     "gap": 500
+    },
+    {
+     "text": "How do you configure liveness and readiness probes,",
+     "gap": 650
+    },
+    {
+     "text": "and what's wrong with making them identical?",
+     "gap": 0
+    }
+   ]
+  },
+  {
+   "phase": "Operations",
+   "kind": "q",
+   "hint": "self",
+   "tail": true,
+   "who": 2,
+   "chunks": [
+    {
+     "text": "A pod gets a termination signal.",
+     "gap": 700
+    },
+    {
+     "text": "What must your service manage to do,",
+     "gap": 500
+    },
+    {
+     "text": "in what order?",
+     "gap": 0
+    }
+   ]
+  },
+  {
+   "phase": "Operations",
+   "kind": "q",
+   "hint": "brief",
+   "who": 2,
+   "chunks": [
+    {
+     "text": "Every couple of days the service gets killed for memory.",
+     "gap": 750
+    },
+    {
+     "text": "You raised the limit, it helped for a week.",
+     "gap": 650
+    },
+    {
+     "text": "How will you look for the cause?",
+     "gap": 0
+    }
+   ]
+  },
+  {
+   "phase": "Operations",
+   "kind": "q",
+   "hint": "self",
+   "tail": true,
+   "who": 2,
+   "chunks": [
+    {
+     "text": "You've deployed a new service.",
+     "gap": 550
+    },
+    {
+     "text": "Which metrics do you put on it on day one,",
+     "gap": 600
+    },
+    {
+     "text": "and why those?",
+     "gap": 0
+    }
+   ]
+  },
+  {
+   "phase": "Operations",
+   "kind": "q",
+   "hint": "brief",
+   "who": 2,
+   "chunks": [
+    {
+     "text": "A client complains about an error, and all you have is a request id.",
+     "gap": 800
+    },
+    {
+     "text": "Walk me through your path: where do you look first?",
+     "gap": 0
+    }
+   ]
+  },
+  {
+   "phase": "Operations",
+   "kind": "q",
+   "hint": "brief",
+   "tail": true,
+   "who": 2,
+   "chunks": [
+    {
+     "text": "Which alert has the right to wake a person up at night?",
+     "gap": 700
+    },
+    {
+     "text": "And how do you deal with the ones that fire for nothing",
+     "gap": 550
+    },
+    {
+     "text": "every single night?",
+     "gap": 0
+    }
+   ]
+  },
+  {
+   "phase": "Operations",
+   "kind": "q",
+   "hint": "self",
+   "who": 2,
+   "chunks": [
+    {
+     "text": "How do you deploy,",
+     "gap": 500
+    },
+    {
+     "text": "and what tells you it's time to roll back rather than fix it live?",
+     "gap": 0
+    }
+   ]
+  },
+  {
+   "phase": "Process and quality",
+   "kind": "talk",
+   "chunks": [
+    {
+     "text": "Thanks.",
+     "gap": 400
+    },
+    {
+     "text": "I'll carry on then, briefly about process.",
+     "gap": 0
+    }
+   ]
+  },
+  {
+   "phase": "Process and quality",
+   "kind": "q",
+   "hint": "self",
+   "chunks": [
+    {
+     "text": "What do you always cover with tests in a Go service,",
+     "gap": 700
+    },
+    {
+     "text": "and what do you deliberately not cover and live with quite happily?",
+     "gap": 0
+    }
+   ]
+  },
+  {
+   "phase": "Process and quality",
+   "kind": "q",
+   "hint": "brief",
+   "chunks": [
+    {
+     "text": "How do you test code that talks to Postgres and to Kafka?",
+     "gap": 800
+    },
+    {
+     "text": "What do you bring up for real, and what do you replace with a stub?",
+     "gap": 0
+    }
+   ]
+  },
+  {
+   "phase": "Process and quality",
+   "kind": "q",
+   "hint": "self",
+   "chunks": [
+    {
+     "text": "What do you look at first when reviewing somebody else's code,",
+     "gap": 650
+    },
+    {
+     "text": "and what makes you refuse to let a change through at all?",
+     "gap": 0
+    }
+   ]
+  },
+  {
+   "phase": "Process and quality",
+   "kind": "q",
+   "hint": "context",
+   "chunks": [
+    {
+     "text": "Tell me about an incident your own code caused.",
+     "gap": 800
+    },
+    {
+     "text": "What happened, what did you do in the first hour,",
+     "gap": 650
+    },
+    {
+     "text": "and what changed afterwards?",
+     "gap": 0
+    }
+   ]
+  },
+  {
+   "phase": "Behavioural",
+   "kind": "talk",
+   "chunks": [
+    {
+     "text": "Good.",
+     "gap": 400
+    },
+    {
+     "text": "Now a couple of questions that aren't about technology.",
+     "gap": 0
+    }
+   ]
+  },
+  {
+   "phase": "Behavioural",
+   "kind": "q",
+   "hint": "context",
+   "chunks": [
+    {
+     "text": "Tell me about a disagreement with a colleague over a technical decision.",
+     "gap": 800
+    },
+    {
+     "text": "Preferably one where you turned out to be wrong.",
+     "gap": 600
+    },
+    {
+     "text": "How did you realise, and how did it end?",
+     "gap": 0
+    }
+   ]
+  },
+  {
+   "phase": "Behavioural",
+   "kind": "q",
+   "hint": "context",
+   "tail": true,
+   "chunks": [
+    {
+     "text": "The hardest task of the past couple of years.",
+     "gap": 700
+    },
+    {
+     "text": "What made it hard",
+     "gap": 500
+    },
+    {
+     "text": "for you specifically?",
+     "gap": 0
+    }
+   ]
+  },
+  {
+   "phase": "Behavioural",
+   "kind": "q",
+   "hint": "self",
+   "chunks": [
+    {
+     "text": "And what do you do when the requirements change in the middle of a sprint",
+     "gap": 700
+    },
+    {
+     "text": "and it's the third time this month?",
+     "gap": 0
+    }
+   ]
+  },
+  {
+   "phase": "Behavioural",
+   "kind": "q",
+   "hint": "self",
+   "tail": true,
+   "chunks": [
+    {
+     "text": "You've realised you won't make the deadline.",
+     "gap": 700
+    },
+    {
+     "text": "How soon and to whom will you say so,",
+     "gap": 550
+    },
+    {
+     "text": "and what will you propose?",
+     "gap": 0
+    }
+   ]
+  },
+  {
+   "phase": "Terms",
+   "kind": "talk",
+   "chunks": [
+    {
+     "text": "Understood.",
+     "gap": 450
+    },
+    {
+     "text": "Let's talk about terms and the formalities.",
+     "gap": 0
+    }
+   ]
+  },
+  {
+   "phase": "Terms",
+   "kind": "q",
+   "hint": "context",
+   "chunks": [
+    {
+     "text": "Why did you decide to change jobs now, of all times?",
+     "gap": 750
+    },
+    {
+     "text": "And what would have had to happen for you to stay?",
+     "gap": 0
+    }
+   ]
+  },
+  {
+   "phase": "Terms",
+   "kind": "q",
+   "hint": "context",
+   "tail": true,
+   "chunks": [
+    {
+     "text": "About money.",
+     "gap": 500
+    },
+    {
+     "text": "What are your expectations for the range,",
+     "gap": 550
+    },
+    {
+     "text": "take-home?",
+     "gap": 0
+    }
+   ]
+  },
+  {
+   "phase": "Terms",
+   "kind": "q",
+   "hint": "self",
+   "chunks": [
+    {
+     "text": "We have an on-call rotation, roughly a week every month and a half.",
+     "gap": 850
+    },
+    {
+     "text": "How do you feel about that, and have you done it before?",
+     "gap": 0
+    }
+   ]
+  },
+  {
+   "phase": "Terms",
+   "kind": "q",
+   "hint": "self",
+   "tail": true,
+   "chunks": [
+    {
+     "text": "When could you start,",
+     "gap": 550
+    },
+    {
+     "text": "and do you have other offers",
+     "gap": 500
+    },
+    {
+     "text": "in progress?",
+     "gap": 0
+    }
+   ]
+  },
+  {
+   "phase": "Candidate's questions",
+   "kind": "talk",
+   "chunks": [
+    {
+     "text": "Right, we're out of questions.",
+     "gap": 550
+    },
+    {
+     "text": "Your turn now.",
+     "gap": 0
+    }
+   ]
+  },
+  {
+   "phase": "Candidate's questions",
+   "kind": "q",
+   "hint": "context",
+   "chunks": [
+    {
+     "text": "What would you like to ask us?",
+     "gap": 700
+    },
+    {
+     "text": "Ask about anything: the team, the code, how things work here.",
+     "gap": 0
+    }
+   ]
+  },
+  {
+   "phase": "Candidate's questions",
+   "kind": "q",
+   "hint": "context",
+   "tail": true,
+   "who": 2,
+   "chunks": [
+    {
+     "text": "And is there anything that gave you pause",
+     "gap": 650
+    },
+    {
+     "text": "while we were talking",
+     "gap": 500
+    },
+    {
+     "text": "or in the job description?",
+     "gap": 0
+    }
+   ]
+  },
+  {
+   "phase": "Wrapping up",
+   "kind": "q",
+   "hint": "self",
+   "chunks": [
+    {
+     "text": "We'll come back to you within a week.",
+     "gap": 700
+    },
+    {
+     "text": "How would you prefer to get the feedback — by email or on a messenger?",
+     "gap": 0
+    }
+   ]
+  },
+  {
+   "phase": "Wrapping up",
+   "kind": "talk",
+   "chunks": [
+    {
+     "text": "Thank you for making the time.",
+     "gap": 550
+    },
+    {
+     "text": "It was a substantial conversation, I enjoyed it.",
+     "gap": 0
+    }
+   ]
+  },
+  {
+   "phase": "Wrapping up",
+   "kind": "talk",
+   "who": 2,
+   "chunks": [
+    {
+     "text": "Thank you from me too.",
+     "gap": 500
+    },
+    {
+     "text": "Good luck, talk soon!",
+     "gap": 0
+    }
+   ]
+  }
+ ],
+ "profile": {
+  "role": "Backend developer, Go",
+  "experience": "6 years in backend, 4 of them in Go: fintech and high-load services, payments and settlements, peak load around 12 thousand requests per second, a team of 7",
+  "stack": "Go, PostgreSQL, pgx, sqlc, Kafka, NATS, Redis, gRPC, protobuf, REST, Kubernetes, Docker, Prometheus, Grafana, OpenTelemetry, Jaeger, pprof, GitLab CI, Terraform, testcontainers"
+ },
+ "context": {
+  "stories": "A disagreement. The team lead wanted to pull limit calculation out into a separate microservice; I argued it should stay a module inside the payments service for now: the calculation had no load of its own, and a network call would add latency to every operation. We agreed not to argue in words but to measure: in two days I put together a prototype with a gRPC call and showed that the 99th percentile went from 40 to 95 milliseconds and deployment became a two-step affair. We kept it as a module but with a hard interface boundary — and a year later, when the load really did grow, we pulled it out in a week, because the boundary was already there.\n\nAn incident. On the peak day of a sale the cashback service started timing out, the Kafka lag was growing by about a hundred thousand messages an hour, and I was on call. I took a profile from a live pod and saw that almost all the CPU was going into the garbage collector: on the hot path we were building a thirty-thousand-entry lookup table for every message instead of keeping it in memory and refreshing it once a minute. We shipped a hotfix in forty minutes, memory use dropped roughly sixfold, and the lag cleared in two hours; after the post-mortem we added an alert on time spent in GC and a mandatory load run before every sale.\n\nThe hardest task. We moved the transaction-history endpoint from synchronous queries against the main database to a separate read-only store, and we could neither lose a single event nor show the user a stale balance. I built a transactional outbox with idempotency keys, deduplication by event id in the consumer, and for two weeks I kept both endpoints running side by side, reconciling differences with a nightly checker. We took the discrepancy from two per cent to zero, then switched the old path off, and load on the main database fell by about forty per cent.",
+  "motivation": "I'm looking for a team where backend makes decisions rather than only working through tickets: I want more systems design, and I want people around me who are stronger than I am in at least a couple of areas. I'm interested in a product with real load and a real cost of failure — after fintech it's dull to write things nobody puts under pressure. I'm leaving my current place without any drama: the product has stabilised, the last six months have been mostly support and small changes, and there's no growth in sight. I'm fine with being on call — I did a year in a rotation of six and I'm relaxed about it.",
+  "compensation": "Salary expectations: 380 to 430 thousand roubles take-home, open to discussion depending on level and the make-up of the package. Currently 340 take-home plus an annual bonus of about two months' salary. I can start two weeks after an offer; I have no outstanding commitments and no long holiday booked. There is one other process in its final stage, with an answer due next week, but I'll decide on the substance of the work rather than on the number alone.",
+  "questions": "How a task travels from idea to production, and how long that takes. Who decides when the team and the product disagree on priorities. How much of a sprint actually goes to technical debt, and whether there was a case in the last year where you were given time to fix it. How on-call works, how many times someone was woken at night last quarter, and what changed afterwards. Whether there are integration tests in CI, and how long the pipeline runs from commit to production. What the person whose place you're filling worked on, and why the place became free. What will count as success for me in three months, and in a year."
+ }
+}
