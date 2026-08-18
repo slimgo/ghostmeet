@@ -18,6 +18,10 @@ Design decisions referenced below live in [docs/adr/](docs/adr/); the product sp
 
 ## [Unreleased]
 
+Nothing yet.
+
+## [0.5.1] — 2026-08-18
+
 ### Fixed
 
 - **Half the interface stayed Russian on an English window.** The turn-segmentation
