@@ -94,18 +94,4 @@ extension AppLanguage {
     static func stored(in defaults: UserDefaults) -> AppLanguage {
         defaults.string(forKey: choiceKey).flatMap(AppLanguage.init(rawValue:)) ?? .system
     }
-
-    /// Which language the bundle will actually be drawn in.
-    ///
-    /// Not the same question as `stored(in:)`: under «как в системе» the choice is
-    /// `.system` and the answer here is whatever macOS is set to. Separate because
-    /// mixing them is precisely the mistake this pair exists to prevent.
-    static func effective(in defaults: UserDefaults) -> AppLanguage? {
-        guard let languages = defaults.array(forKey: appleLanguagesKey) as? [String],
-              let first = languages.first else { return nil }
-        // A stored value is a full identifier — «en», «ru», sometimes «ru-CY» —
-        // and only its language part decides.
-        let code = String(first.prefix(2))
-        return allCases.first { $0.localeIdentifier == code }
-    }
 }

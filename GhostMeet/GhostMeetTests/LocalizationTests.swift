@@ -100,13 +100,16 @@ struct AppLanguageTests {
         defer { defaults.removePersistentDomain(forName: name) }
 
         AppLanguage.english.apply(to: defaults)
-        #expect(defaults.array(forKey: AppLanguage.appleLanguagesKey) as? [String] == ["en"])
+        // Читается **записанное**, а не то, что вернёт `UserDefaults`: под
+        // тестами хост запущен с `-AppleLanguages (ru)`, а домен аргументов
+        // перебивает все остальные. Приложению это не мешает — оно спрашивает
+        // систему при запуске, — но проверять надо то, что мы положили.
+        #expect(defaults.persistentDomain(forName: name)?[AppLanguage.appleLanguagesKey] as? [String] == ["en"])
         #expect(AppLanguage.stored(in: defaults) == .english)
-        #expect(AppLanguage.effective(in: defaults) == .english)
 
         AppLanguage.russian.apply(to: defaults)
+        #expect(defaults.persistentDomain(forName: name)?[AppLanguage.appleLanguagesKey] as? [String] == ["ru"])
         #expect(AppLanguage.stored(in: defaults) == .russian)
-        #expect(AppLanguage.effective(in: defaults) == .russian)
     }
 
     /// «Как в системе» значит «продолжай следовать системе», в том числе когда
@@ -132,16 +135,6 @@ struct AppLanguageTests {
         #expect(defaults.persistentDomain(forName: name)?[AppLanguage.appleLanguagesKey] == nil)
     }
 
-    @Test("Полный идентификатор вроде en-GB читается как английский")
-    func readsARegionalIdentifier() {
-        let name = "GhostMeetLanguageTest-\(UUID().uuidString)"
-        let defaults = UserDefaults(suiteName: name)!
-        defer { defaults.removePersistentDomain(forName: name) }
-
-        defaults.set(["en-GB"], forKey: AppLanguage.appleLanguagesKey)
-        #expect(AppLanguage.effective(in: defaults) == .english)
-    }
-
     /// Ради этого разделения написан отдельный тикет: подсказку читают вслух
     /// собеседнику, и на английском собеседовании она обязана быть английской
     /// независимо от того, на каком языке пользователь держит окно.
@@ -153,5 +146,31 @@ struct AppLanguageTests {
         // `AppleLanguages`, и промпт этого ключа не видит.
         #expect(SolvePrompt.system.isEmpty == false)
         #expect(SolvePrompt.system.contains(AppLanguage.appleLanguagesKey) == false)
+    }
+}
+
+@Suite("Прогон не зависит от языка машины")
+struct TestHostLanguageTests {
+
+    /// **Найдено CI, а не рассуждением.** Раннер GitHub англоязычный, и на нём
+    /// `String(localized:)` честно отдавал английский — после чего 28 проверок,
+    /// сверяющихся с русскими литералами, разом покраснели, хотя локально всё
+    /// было зелёным. Тикет требовал «прогон не зависит от языка машины», и я
+    /// проверил это чтением кода вместо прогона; вот чего это стоило.
+    ///
+    /// Язык прибит в схеме — `-AppleLanguages (ru)` в аргументах Test-действия,
+    /// — и схема лежит в репозитории. Тест сторожит именно её: сама по себе она
+    /// молчалива, а потеряв аргумент, прогон снова начнёт зависеть от того, чья
+    /// машина его запустила.
+    @Test("Тестовый хост говорит по-русски, какой бы ни была машина")
+    func theHostRunsInRussian() throws {
+        let language = try #require(Bundle.main.preferredLocalizations.first)
+        #expect(
+            language.hasPrefix("ru"),
+            "хост запущен на «\(language)» — в схеме потерялся аргумент -AppleLanguages (ru)"
+        )
+        // И то же самое по существу: строка, у которой перевод есть, приходит
+        // русской — то есть ключом, а не английским значением.
+        #expect(String(localized: "Слушать") == "Слушать")
     }
 }
