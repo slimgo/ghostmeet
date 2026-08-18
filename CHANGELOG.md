@@ -18,6 +18,10 @@ Design decisions referenced below live in [docs/adr/](docs/adr/); the product sp
 
 ## [Unreleased]
 
+Nothing yet.
+
+## [0.5.0] — 2026-08-18
+
 ### Added
 
 - **The interface speaks English as well as Russian.** It follows the system language and can be
