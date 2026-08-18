@@ -31,6 +31,16 @@
         }
       }
     },
+    "%.0f с": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%.0f s"
+          }
+        }
+      }
+    },
     "%.2f с": {
       "localizations": {
         "en": {
@@ -57,12 +67,32 @@
         }
       }
     },
+    "%@ · звучит": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ · playing"
+          }
+        }
+      }
+    },
     "%@ Проверьте последние поля — они могли не дописаться.": {
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
             "value": "%@ Check the last fields — they may be incomplete."
+          }
+        }
+      }
+    },
+    "%@ не подойдёт: GhostMeet читает резюме в форматах .txt, .md и .pdf. Сохраните резюме в одном из них — или заполните поля профиля руками.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ will not do: GhostMeet reads résumés in .txt, .md and .pdf. Save the résumé in one of those — or fill the profile fields in by hand."
           }
         }
       }
@@ -109,12 +139,32 @@
         }
       }
     },
+    "%lld мс": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld ms"
+          }
+        }
+      }
+    },
     "%lld%%": {
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
             "value": "%lld%%"
+          }
+        }
+      }
+    },
+    "(пусто)": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "(empty)"
           }
         }
       }
@@ -139,12 +189,42 @@
         }
       }
     },
+    "Gemini отклонил запрос: %@.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gemini rejected the request: %@."
+          }
+        }
+      }
+    },
+    "Gemini прервал ответ: %@.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gemini cut the answer short: %@."
+          }
+        }
+      }
+    },
     "Keychain отказал: %@": {
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
             "value": "Keychain refused: %@"
+          }
+        }
+      }
+    },
+    "LM Studio (локально)": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "LM Studio (local)"
           }
         }
       }
@@ -159,12 +239,32 @@
         }
       }
     },
+    "Ollama (локально)": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ollama (local)"
+          }
+        }
+      }
+    },
     "PDF защищён паролем": {
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
             "value": "the PDF is password-protected"
+          }
+        }
+      }
+    },
+    "ScreenCaptureKit сейчас не показывает это приложение — захват включится сам, когда оно откроет окно.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ScreenCaptureKit is not showing this application right now — capture starts by itself once it opens a window."
           }
         }
       }
@@ -219,6 +319,16 @@
         }
       }
     },
+    "llama.cpp server (локально)": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "llama.cpp server (local)"
+          }
+        }
+      }
+    },
     "~1,6 ГБ": {
       "localizations": {
         "en": {
@@ -269,6 +379,32 @@
         }
       }
     },
+    "«%@» завершился с кодом %@.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "“%@” exited with code %@."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "new",
+            "value": "«%1$@» завершился с кодом %2$@."
+          }
+        }
+      }
+    },
+    "«%@» сейчас не выдаёт звук. Захват включится сам, как только приложение вернётся.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "“%@” is not making any sound right now. Capture starts by itself as soon as the application is back."
+          }
+        }
+      }
+    },
     "·": {
       "localizations": {
         "en": {
@@ -285,6 +421,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "×%lld"
+          }
+        }
+      }
+    },
+    "Адрес API «%@» не похож на адрес — проверьте настройки.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The API address “%@” does not look like an address — check the settings."
           }
         }
       }
@@ -345,6 +491,16 @@
         }
       }
     },
+    "Более короткие отрезки не попадают в распознавание.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Shorter stretches never reach recognition."
+          }
+        }
+      }
+    },
     "Быстрая, но на русском часто путает термины.": {
       "localizations": {
         "en": {
@@ -365,12 +521,32 @@
         }
       }
     },
+    "В реплике не оказалось звука": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The turn contained no audio"
+          }
+        }
+      }
+    },
     "В файле нет текста — собирать профиль не из чего.": {
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
             "value": "The file has no text — there is nothing to build a profile from."
+          }
+        }
+      }
+    },
+    "В этом PDF нет текстового слоя: резюме сохранено картинкой — скан или снимок страницы. Извлекать из него нечего, поэтому профиль остался бы пустым. Сохраните резюме в PDF с текстом (экспорт из Word, Pages, Google Docs), в .txt или .md — или заполните поля руками.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "This PDF has no text layer: the résumé was saved as an image — a scan or a photo of the page. There is nothing to extract from it, so the profile would come out empty. Save the résumé as a PDF with text (export from Word, Pages, Google Docs), as .txt or .md — or fill the fields in by hand."
           }
         }
       }
@@ -505,12 +681,52 @@
         }
       }
     },
+    "Действию «%@» не досталось комбинации — выберите её в списке, иначе оно не сработает.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "“%@” has no chord — pick one in the list, or it will never fire."
+          }
+        }
+      }
+    },
     "Длительность %@": {
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
             "value": "Duration %@"
+          }
+        }
+      }
+    },
+    "Для «%@» не задана команда запуска.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No launch command is set for “%@”."
+          }
+        }
+      }
+    },
+    "Для провайдера «%@» не задан адрес API.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No API address is set for the provider “%@”."
+          }
+        }
+      }
+    },
+    "Для провайдера «%@» не задана модель.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No model is set for the provider “%@”."
           }
         }
       }
@@ -645,6 +861,76 @@
         }
       }
     },
+    "Звук идёт в «%@», а слушает встроенный микрофон: голос собеседника попадает в канал You и пишется как ваша речь. Наушники убирают это полностью — часть приложение отфильтрует само, но не всю.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sound goes to “%@” while the built-in microphone is listening: the interviewer's voice lands in the You channel and is recorded as your speech. Headphones remove this completely — the app filters out some of it by itself, but not all."
+          }
+        }
+      }
+    },
+    "Звук идёт в динамики, а микрофон — %@, и опознать его не удалось. Если он стоит рядом с ноутбуком, голос собеседника попадёт в канал You. В наушниках этого не бывает вовсе.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sound goes to the speakers, and the microphone is %@, which could not be identified. If it sits next to the laptop, the interviewer's voice will land in the You channel. With headphones this never happens at all."
+          }
+        }
+      }
+    },
+    "Звук собеседника оборвался и не вернулся. Выключите и включите «Слушать» или выберите источник заново.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The interviewer's sound broke off and did not come back. Turn Listen off and on, or choose the source again."
+          }
+        }
+      }
+    },
+    "Звук собеседника оборвался — восстанавливаю канал Them (попытка %lld).": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The interviewer's sound broke off — restoring the Them channel (attempt %lld)."
+          }
+        }
+      }
+    },
+    "Звук тише этого уровня считается тишиной.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sound quieter than this counts as silence."
+          }
+        }
+      }
+    },
+    "Звуковое устройство сменилось — восстанавливаю микрофон (попытка %lld).": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The audio device changed — restoring the microphone (attempt %lld)."
+          }
+        }
+      }
+    },
+    "Из ответа модели профиль не собрался: в нём нет ни роли, ни опыта, ни стека. Попробуйте ещё раз, выберите другого провайдера — или заполните поля руками.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No profile could be built from the model's answer: it holds no role, no experience and no stack. Try again, choose another provider — or fill the fields in by hand."
+          }
+        }
+      }
+    },
     "Истории из практики": {
       "localizations": {
         "en": {
@@ -691,6 +977,16 @@
         }
       }
     },
+    "Канал Them молчит, пока источник не выбран.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The Them channel stays silent until a source is chosen."
+          }
+        }
+      }
+    },
     "Ключ · %@": {
       "localizations": {
         "en": {
@@ -717,6 +1013,26 @@
           "stringUnit": {
             "state": "translated",
             "value": "No key set"
+          }
+        }
+      }
+    },
+    "Ключ не нужен: инструмент отвечает по той подписке, под которой он уже залогинен.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No key needed: the tool answers on the subscription it is already signed in with."
+          }
+        }
+      }
+    },
+    "Ключ не нужен: локальный сервер работает без авторизации.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No key needed: a local server runs without authorisation."
           }
         }
       }
@@ -751,6 +1067,36 @@
         }
       }
     },
+    "Комбинацию %@ уже занимает другое приложение — выберите другую.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ is already taken by another application — pick a different one."
+          }
+        }
+      }
+    },
+    "Комбинация %@ не годится для глобального хоткея: нужен хотя бы один из ⌘, ⌥, ⌃.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ will not work as a global chord: at least one of ⌘, ⌥, ⌃ is required."
+          }
+        }
+      }
+    },
+    "Комбинация для «%@» снята — действие не сработает, пока вы не выберете новую.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The chord for “%@” has been cleared — the action will not fire until you pick a new one."
+          }
+        }
+      }
+    },
     "Компромисс для слабых машин: заметно точнее base и всё ещё небольшая.": {
       "localizations": {
         "en": {
@@ -781,12 +1127,82 @@
         }
       }
     },
+    "Маршрут звука определить не удалось: вывод — «%@». Если это наушники, всё хорошо; если динамики — голос собеседника попадёт в канал You.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The audio route could not be determined: output is “%@”. If those are headphones, all is well; if they are speakers, the interviewer's voice will land in the You channel."
+          }
+        }
+      }
+    },
+    "Микрофон замолчал после того, как звуковое устройство сменилось, и не вернулся. Обычно это делает другое приложение, включившее у себя обработку голоса. Выключите и включите «Слушать» — или проверьте устройство ввода в «Системных настройках» → «Звук».": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The microphone went quiet after the audio device changed, and did not come back. Usually this is another application turning on voice processing of its own. Turn Listen off and on — or check the input device in System Settings → Sound."
+          }
+        }
+      }
+    },
+    "Микрофон не слушает.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The microphone is not listening."
+          }
+        }
+      }
+    },
+    "Микрофон не сообщил формат записи — устройство ещё переключается": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The microphone did not report a recording format — the device is still switching"
+          }
+        }
+      }
+    },
+    "Микрофон отдаёт формат, который не удалось принять (%@)": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The microphone offers a format that could not be accepted (%@)"
+          }
+        }
+      }
+    },
     "Микрофон слушает — ваша речь пишется в канал You.": {
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
             "value": "The microphone is listening — your speech goes into the You channel."
+          }
+        }
+      }
+    },
+    "Микрофон сменился, и запись под него не поднялась (%@). Выключите и включите прослушивание ещё раз; если наушники только что подключились, дайте им пару секунд": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The microphone changed and recording did not come back up for it (%@). Turn listening off and on again; if headphones have just connected, give them a couple of seconds"
+          }
+        }
+      }
+    },
+    "Минимальная длина реплики": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Minimum turn length"
           }
         }
       }
@@ -871,6 +1287,16 @@
         }
       }
     },
+    "Модель отказалась продолжать.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The model refused to continue."
+          }
+        }
+      }
+    },
     "Модель пишет подсказку.": {
       "localizations": {
         "en": {
@@ -897,6 +1323,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "The recognition model is not ready yet — preparation is about to start."
+          }
+        }
+      }
+    },
+    "Монолог без пауз всё равно попадёт в транскрипт по этому таймеру.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A monologue with no pauses still reaches the transcript on this timer."
           }
         }
       }
@@ -951,6 +1387,16 @@
         }
       }
     },
+    "Например: 350–400 тысяч на руки, готов обсуждать при сильном опционе": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "For example: 350–400k net, open to discussion with a strong equity package"
+          }
+        }
+      }
+    },
     "Например: 6 лет, финтех и высоконагруженные сервисы": {
       "localizations": {
         "en": {
@@ -981,6 +1427,26 @@
         }
       }
     },
+    "Например: как устроен онбординг; кто принимает решение по архитектуре; почему открыта вакансия": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "For example: how onboarding works; who decides on architecture; why the role is open"
+          }
+        }
+      }
+    },
+    "Например: продукт про платежи, знаком по прошлой работе; команда 12 человек; интересна миграция на Go": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "For example: a payments product, familiar from a previous job; a team of 12; the migration to Go is interesting"
+          }
+        }
+      }
+    },
     "Например: тимлид": {
       "localizations": {
         "en": {
@@ -997,6 +1463,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Turn segmentation"
+          }
+        }
+      }
+    },
+    "Настройки GhostMeet": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "GhostMeet Settings"
           }
         }
       }
@@ -1071,6 +1547,104 @@
         }
       }
     },
+    "Не найден исполняемый файл «%@» для «%@». ": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Could not find the executable “%@” for “%@”. "
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "new",
+            "value": "Не найден исполняемый файл «%1$@» для «%2$@». "
+          }
+        }
+      }
+    },
+    "Не удалось запустить «%@»: %@": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Could not launch “%@”: %@"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "new",
+            "value": "Не удалось запустить «%1$@»: %2$@"
+          }
+        }
+      }
+    },
+    "Не удалось запустить запись микрофона (%@)": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Could not start microphone recording (%@)"
+          }
+        }
+      }
+    },
+    "Не удалось запустить захват звука приложения-источника (код %@)": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Could not start capturing the source application's sound (code %@)"
+          }
+        }
+      }
+    },
+    "Не удалось запустить захват через ScreenCaptureKit: %@": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Could not start capture through ScreenCaptureKit: %@"
+          }
+        }
+      }
+    },
+    "Не удалось подготовить преобразование звука микрофона": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Could not prepare the microphone's audio conversion"
+          }
+        }
+      }
+    },
+    "Не удалось подключиться к %@: %@": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Could not connect to %@: %@"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "new",
+            "value": "Не удалось подключиться к %1$@: %2$@"
+          }
+        }
+      }
+    },
+    "Не удалось подключиться к потоку захвата (код %@)": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Could not attach to the capture stream (code %@)"
+          }
+        }
+      }
+    },
     "Не удалось снять экран: %@. Подсказка идёт без снимка.": {
       "localizations": {
         "en": {
@@ -1081,12 +1655,88 @@
         }
       }
     },
+    "Не удалось собрать агрегатное устройство для захвата (код %@)": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Could not assemble the aggregate device for capture (code %@)"
+          }
+        }
+      }
+    },
+    "Не удалось создать тап на приложение-источник (код %@)": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Could not create a tap on the source application (code %@)"
+          }
+        }
+      }
+    },
     "Не удалось сохранить: %@": {
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
             "value": "Could not save: %@"
+          }
+        }
+      }
+    },
+    "Неизвестный провайдер «%@».": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Unknown provider “%@”."
+          }
+        }
+      }
+    },
+    "Некорректный адрес Gemini: «%@», модель «%@».": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Malformed Gemini address: “%@”, model “%@”."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "new",
+            "value": "Некорректный адрес Gemini: «%1$@», модель «%2$@»."
+          }
+        }
+      }
+    },
+    "Нет доступа к микрофону. Разрешите его в «Системных настройках» → «Конфиденциальность и безопасность» → «Микрофон», затем нажмите «Слушать» ещё раз.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No access to the microphone. Grant it in System Settings → Privacy & Security → Microphone, then press Listen again."
+          }
+        }
+      }
+    },
+    "Нет разрешения на запись экрана — подсказка идёт без снимка. Откройте «Системные настройки» → «Конфиденциальность и безопасность» → «Запись экрана и звука системы», включите GhostMeet и перезапустите приложение.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No screen-recording permission — the suggestion goes without a screenshot. Open System Settings → Privacy & Security → Screen & System Audio Recording, enable GhostMeet and restart the app."
+          }
+        }
+      }
+    },
+    "Нет разрешения на запись экрана: ScreenCaptureKit не увидит ни одного приложения, и канал Them будет молчать. Откройте «Системные настройки» → «Конфиденциальность и безопасность» → «Запись экрана и звука системы», включите GhostMeet и перезапустите приложение — либо переключитесь на Core Audio Process Tap, ему это разрешение не нужно.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No screen-recording permission: ScreenCaptureKit will see no applications at all and the Them channel will stay silent. Open System Settings → Privacy & Security → Screen & System Audio Recording, enable GhostMeet and restart the app — or switch to Core Audio Process Tap, which does not need that permission."
           }
         }
       }
@@ -1439,6 +2089,36 @@
         }
       }
     },
+    "Перезапустить": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Restart"
+          }
+        }
+      }
+    },
+    "Перезапустить нельзя: %@.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cannot restart: %@."
+          }
+        }
+      }
+    },
+    "По одной истории на абзац: ситуация — задача — что сделал — результат в цифрах. Например: платежи падали по ночам → нашёл дедлок в очереди → переписал на идемпотентные ретраи → отказы с 3% до 0.1%": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "One story per paragraph: situation — task — what you did — the result in numbers. For example: payments failed at night → found a deadlock in the queue → rewrote it with idempotent retries → failures from 3% to 0.1%"
+          }
+        }
+      }
+    },
     "Подготовка модели": {
       "localizations": {
         "en": {
@@ -1549,12 +2229,72 @@
         }
       }
     },
+    "Порог RMS-гейта": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "RMS gate threshold"
+          }
+        }
+      }
+    },
+    "Порог паузы": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pause threshold"
+          }
+        }
+      }
+    },
+    "Последние слова ещё распознавались — ответ собран без них. Нажмите ещё раз, если он не про то.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The last words were still being recognised — the answer was built without them. Press again if it is off the mark."
+          }
+        }
+      }
+    },
     "Почему эта компания": {
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
             "value": "Why this company"
+          }
+        }
+      }
+    },
+    "Приложение запущено, но пока молчит.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The application is running but silent so far."
+          }
+        }
+      }
+    },
+    "Приложение не запущено — захват включится сам, когда оно вернётся.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The application is not running — capture starts by itself when it is back."
+          }
+        }
+      }
+    },
+    "Приложение сейчас выдаёт звук.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The application is making sound right now."
           }
         }
       }
@@ -1589,6 +2329,36 @@
         }
       }
     },
+    "Приложение-источник не выбрано — канал Them молчит.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No source application is selected — the Them channel is silent."
+          }
+        }
+      }
+    },
+    "Приложение-источник не выдаёт звук — его нечего слушать": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The source application is making no sound — there is nothing to listen to"
+          }
+        }
+      }
+    },
+    "Приложение-источник не показывается в списке ScreenCaptureKit": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The source application does not appear in ScreenCaptureKit's list"
+          }
+        }
+      }
+    },
     "Применить": {
       "localizations": {
         "en": {
@@ -1615,6 +2385,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Provider"
+          }
+        }
+      }
+    },
+    "Провайдер вернул ошибку (HTTP %@).": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The provider returned an error (HTTP %@)."
           }
         }
       }
@@ -1655,6 +2435,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "The provider rejected the key."
+          }
+        }
+      }
+    },
+    "Провайдер отфильтровал ответ.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The provider filtered the answer out."
           }
         }
       }
@@ -1735,6 +2525,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Listening is off — the interviewer's sound is not recorded."
+          }
+        }
+      }
+    },
+    "Прослушивание выключено — отвечаю только по экрану.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Listening is off — answering from the screen alone."
           }
         }
       }
@@ -1889,6 +2689,22 @@
         }
       }
     },
+    "Резюме длинное: модель прочитала первые %@ символов из %lld. Проверьте, не потерялось ли что-то важное.": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "new",
+            "value": "Резюме длинное: модель прочитала первые %1$@ символов из %2$lld. Проверьте, не потерялось ли что-то важное."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The résumé is long: the model read the first %@ characters of %lld. Check that nothing important was lost."
+          }
+        }
+      }
+    },
     "Рекомендуемая: качество large-v3-turbo при вдвое меньшем размере.": {
       "localizations": {
         "en": {
@@ -1979,12 +2795,32 @@
         }
       }
     },
+    "Система не сообщила ни одного дисплея для захвата": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The system reported no display to capture"
+          }
+        }
+      }
+    },
     "Система не сообщила ни одного дисплея — подсказка идёт без снимка экрана.": {
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
             "value": "The system reported no displays — the suggestion goes without a screenshot."
+          }
+        }
+      }
+    },
+    "Система не сообщила устройство вывода звука": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The system reported no audio output device"
           }
         }
       }
@@ -2035,6 +2871,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Hide the update message"
+          }
+        }
+      }
+    },
+    "Слушаем «%@».": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Listening to “%@”."
           }
         }
       }
@@ -2109,6 +2955,36 @@
         }
       }
     },
+    "Список показывает то, что видит Core Audio: любой процесс, открывший звуковое устройство, даже без окна.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The list shows what Core Audio sees: any process that opened an audio device, even without a window."
+          }
+        }
+      }
+    },
+    "Список показывает то, что видит ScreenCaptureKit: приложения с окнами. Процесса без окна — плеера из терминала, например — здесь не будет; для него переключитесь на Core Audio Process Tap.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The list shows what ScreenCaptureKit sees: applications with windows. A process without one — a player started from a terminal, say — will not be here; switch to Core Audio Process Tap for that."
+          }
+        }
+      }
+    },
+    "Список пуст — см. предупреждение выше.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The list is empty — see the warning above."
+          }
+        }
+      }
+    },
     "Спрашиваю модель…": {
       "localizations": {
         "en": {
@@ -2179,6 +3055,66 @@
         }
       }
     },
+    "Страховочный флаш": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Safety flush"
+          }
+        }
+      }
+    },
+    "Тап не сообщил формат звука": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The tap did not report an audio format"
+          }
+        }
+      }
+    },
+    "Текст резюме уйдёт инструменту командной строки «%@»: дальше он отправит его туда, куда ходит сам. Для облачных инструментов (Claude CLI, Codex CLI) это серверы их разработчика, и данные покинут машину.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The résumé's text goes to the command-line tool “%@”, which then sends it wherever it goes itself. For cloud tools (Claude CLI, Codex CLI) that means their vendor's servers, and the data leaves this machine."
+          }
+        }
+      }
+    },
+    "Текст резюме уйдёт локальному провайдеру «%@» по адресу на этой машине — за её пределы он не выйдет.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The résumé's text goes to the local provider “%@” at an address on this machine — it never leaves it."
+          }
+        }
+      }
+    },
+    "Текст резюме уйдёт облачному провайдеру «%@»: имя, места работы и контакты покинут эту машину. Если это нежелательно — выберите локального провайдера или заполните поля руками.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The résumé's text goes to the cloud provider “%@”: your name, places of work and contacts will leave this machine. If that is not what you want, choose a local provider or fill the fields in by hand."
+          }
+        }
+      }
+    },
+    "Тишина такой длины закрывает реплику. На скорость подсказки не влияет: запрос уходит по нажатию, а нажатие дозакрывает реплику само.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Silence this long closes a turn. It does not affect how fast a suggestion arrives: the request goes on a press, and the press closes the turn itself."
+          }
+        }
+      }
+    },
     "То же, но развёрнутым разбором — когда тема незнакома целиком.": {
       "localizations": {
         "en": {
@@ -2195,6 +3131,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Delete"
+          }
+        }
+      }
+    },
+    "Установите инструмент или укажите в настройках полный путь к нему.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Install the tool, or write its full path in the settings."
           }
         }
       }
@@ -2219,8 +3165,17 @@
         }
       }
     },
+    "Устройство ввода не найдено (%@): проверьте микрофон в «Системных настройках»": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Input device not found (%@): check the microphone in System Settings"
+          }
+        }
+      }
+    },
     "Устройство вывода не определяется. Если звук идёт в динамики, голос собеседника будет попадать в канал You — наушники это чинят.": {
-      "extractionState": "stale",
       "localizations": {
         "en": {
           "stringUnit": {
@@ -2246,6 +3201,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "A file with no extension"
+          }
+        }
+      }
+    },
+    "Файл не выбран: %@.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No file chosen: %@."
           }
         }
       }
@@ -2340,17 +3305,6 @@
         }
       }
     },
-    "безопасный — вывод «%@»": {
-      "extractionState": "stale",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "safe — output “%@”"
-          }
-        }
-      }
-    },
     "в PDF нет страниц": {
       "localizations": {
         "en": {
@@ -2407,12 +3361,12 @@
         }
       }
     },
-    "код %d": {
+    "код %@": {
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "code %d"
+            "value": "code %@"
           }
         }
       }
@@ -2467,6 +3421,16 @@
         }
       }
     },
+    "не запущено": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "not running"
+          }
+        }
+      }
+    },
     "не получилось": {
       "localizations": {
         "en": {
@@ -2487,8 +3451,7 @@
         }
       }
     },
-    "неизвестный": {
-      "extractionState": "stale",
+    "неизвестна": {
       "localizations": {
         "en": {
           "stringUnit": {
@@ -2498,19 +3461,22 @@
         }
       }
     },
-    "неизвестный — вывод «%@», вход «%@»": {
-      "extractionState": "stale",
+    "неизвестный": {
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "unknown — output “%@”, input “%@”"
+            "value": "unknown"
           }
-        },
-        "ru": {
+        }
+      }
+    },
+    "нет в списке ScreenCaptureKit": {
+      "localizations": {
+        "en": {
           "stringUnit": {
-            "state": "new",
-            "value": "неизвестный — вывод «%1$@», вход «%2$@»"
+            "state": "translated",
+            "value": "not in ScreenCaptureKit's list"
           }
         }
       }
@@ -2541,23 +3507,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "cut short"
-          }
-        }
-      }
-    },
-    "опасный — вывод «%@», вход «%@»": {
-      "extractionState": "stale",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "leaky — output “%@”, input “%@”"
-          }
-        },
-        "ru": {
-          "stringUnit": {
-            "state": "new",
-            "value": "опасный — вывод «%1$@», вход «%2$@»"
           }
         }
       }

@@ -254,10 +254,10 @@ nonisolated final class SCKCaptureService: ThemAudioSource, @unchecked Sendable 
     /// added by `SessionIndicators` for every dead `Them` during a call, whatever
     /// killed it, so that it is stated once and cannot be forgotten in one of the
     /// places a failure is published.
-    static let lostMessage = """
+    static let lostMessage = String(localized: """
         Звук собеседника оборвался и не вернулся. \
         Выключите и включите «Слушать» или выберите источник заново.
-        """
+        """)
 
     /// Takes one broken stream and tries to get the channel back.
     ///

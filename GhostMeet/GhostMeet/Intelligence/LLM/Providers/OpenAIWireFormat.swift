@@ -93,7 +93,7 @@ nonisolated enum OpenAIWireFormat {
         case "content_filter":
             // Отказ, а не обрыв — но только пока на экране пусто. Если текст уже
             // читают вслух, цикл чтения превратит это в обрыв и текст оставит.
-            events.append(.failure(.provider("Провайдер отфильтровал ответ.")))
+            events.append(.failure(.provider(String(localized: "Провайдер отфильтровал ответ."))))
         // Нормальный конец засчитывается здесь, а не только по `[DONE]`: часть
         // каталога — чужие шлюзы и локальные серверы, и не все шлют sentinel.
         case "stop", "end_turn", "stop_sequence":
@@ -125,7 +125,7 @@ nonisolated enum OpenAIWireFormat {
         case 429, 503, 529:
             return .throttled
         default:
-            return .provider(reported.message ?? "Провайдер вернул ошибку (HTTP \(status)).")
+            return .provider(reported.message ?? String(localized: "Провайдер вернул ошибку (HTTP \(String(status)))."))
         }
     }
 
@@ -137,7 +137,7 @@ nonisolated enum OpenAIWireFormat {
     static func failure(transport error: URLError, endpoint: URL) -> LLMFailure {
         var host = endpoint.host ?? endpoint.absoluteString
         if let port = endpoint.port { host += ":\(port)" }
-        return .provider("Не удалось подключиться к \(host): \(error.localizedDescription)")
+        return .provider(String(localized: "Не удалось подключиться к \(host): \(error.localizedDescription)"))
     }
 
     // MARK: - Parsing helpers

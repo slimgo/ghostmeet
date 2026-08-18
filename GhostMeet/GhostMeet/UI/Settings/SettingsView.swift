@@ -29,6 +29,18 @@ struct SettingsView: View {
     /// where it was without a word.
     let navigation: SettingsNavigation
 
+    /// Why the app may not restart itself right now, or nil.
+    ///
+    /// A closure rather than the session: this screen has no business knowing
+    /// what a session is, and the only thing it needs is the one sentence to put
+    /// on screen. Defaulted to nil so the preview and the screen tests need no
+    /// session at all.
+    var relaunchBlocked: () -> String? = { nil }
+
+    /// Restarts the application. Injected for the same reason — a test must be
+    /// able to press the button without the process going away underneath it.
+    var relaunchNow: () -> Void = { AppRelaunch.now() }
+
     /// Asks the feed now, because somebody pressed the button below.
     ///
     /// A closure and not the updater itself: this screen has no business showing
@@ -215,7 +227,7 @@ struct SettingsView: View {
                 Picker("Слушать", selection: sourceSelection) {
                     Text("Не выбрано").tag(String?.none)
                     ForEach(catalog.applications) { application in
-                        Text(application.isPlayingAudio ? "\(application.name) · звучит" : application.name)
+                        Text(application.isPlayingAudio ? String(localized: "\(application.name) · звучит") : application.name)
                             .tag(String?.some(application.id))
                     }
                     // A source picked earlier keeps its place in the list even
@@ -258,9 +270,9 @@ struct SettingsView: View {
     private var listSourceNote: String {
         switch store.themCaptureBackend {
         case .screenCaptureKit:
-            "Список показывает то, что видит ScreenCaptureKit: приложения с окнами. Процесса без окна — плеера из терминала, например — здесь не будет; для него переключитесь на Core Audio Process Tap."
+            String(localized: "Список показывает то, что видит ScreenCaptureKit: приложения с окнами. Процесса без окна — плеера из терминала, например — здесь не будет; для него переключитесь на Core Audio Process Tap.")
         case .processTap:
-            "Список показывает то, что видит Core Audio: любой процесс, открывший звуковое устройство, даже без окна."
+            String(localized: "Список показывает то, что видит Core Audio: любой процесс, открывший звуковое устройство, даже без окна.")
         }
     }
 
@@ -268,8 +280,8 @@ struct SettingsView: View {
     /// ScreenCaptureKit that is one reason more than «не запущено».
     private var missingSelectionNote: String {
         store.themCaptureBackend == .screenCaptureKit
-            ? "нет в списке ScreenCaptureKit"
-            : "не запущено"
+            ? String(localized: "нет в списке ScreenCaptureKit")
+            : String(localized: "не запущено")
     }
 
     private var sourceSelection: Binding<String?> {
@@ -290,19 +302,19 @@ struct SettingsView: View {
         // A missing permission outranks everything else this line could say: the
         // list is empty for a reason that has nothing to do with the choice.
         if catalog.unavailableReason != nil {
-            return "Список пуст — см. предупреждение выше."
+            return String(localized: "Список пуст — см. предупреждение выше.")
         }
         guard let id = store.themSourceApplicationID else {
-            return "Канал Them молчит, пока источник не выбран."
+            return String(localized: "Канал Them молчит, пока источник не выбран.")
         }
         guard let application = catalog.application(withID: id) else {
             return store.themCaptureBackend == .screenCaptureKit
-                ? "ScreenCaptureKit сейчас не показывает это приложение — захват включится сам, когда оно откроет окно."
-                : "Приложение не запущено — захват включится сам, когда оно вернётся."
+                ? String(localized: "ScreenCaptureKit сейчас не показывает это приложение — захват включится сам, когда оно откроет окно.")
+                : String(localized: "Приложение не запущено — захват включится сам, когда оно вернётся.")
         }
         return application.isPlayingAudio
-            ? "Приложение сейчас выдаёт звук."
-            : "Приложение запущено, но пока молчит."
+            ? String(localized: "Приложение сейчас выдаёт звук.")
+            : String(localized: "Приложение запущено, но пока молчит.")
     }
 
     // MARK: - Recognition
@@ -348,7 +360,7 @@ struct SettingsView: View {
             HStack {
                 phaseLabel
                 Spacer()
-                Button(recognition.phase.isBusy ? "Загружается…" : "Загрузить модель") {
+                Button(recognition.phase.isBusy ? String(localized: "Загружается…") : String(localized: "Загрузить модель")) {
                     recognition.prepare()
                 }
                 .disabled(recognition.phase.isBusy || recognition.phase.isReady)
@@ -488,7 +500,7 @@ struct SettingsView: View {
                     }
                     .disabled(!store.hasProviderKey)
                     Spacer()
-                    Text(store.hasProviderKey ? "Ключ сохранён в Keychain" : "Ключ не задан")
+                    Text(store.hasProviderKey ? String(localized: "Ключ сохранён в Keychain") : String(localized: "Ключ не задан"))
                         .font(.callout)
                         .foregroundStyle(.secondary)
                 }
@@ -514,8 +526,8 @@ struct SettingsView: View {
 
     private var keylessNote: String {
         store.providerPreset.transport == .cli
-            ? "Ключ не нужен: инструмент отвечает по той подписке, под которой он уже залогинен."
-            : "Ключ не нужен: локальный сервер работает без авторизации."
+            ? String(localized: "Ключ не нужен: инструмент отвечает по той подписке, под которой он уже залогинен.")
+            : String(localized: "Ключ не нужен: локальный сервер работает без авторизации.")
     }
 
     private func saveProviderKey() {
@@ -528,31 +540,31 @@ struct SettingsView: View {
     private var segmentationSection: some View {
         Section("Нарезка реплик") {
             threshold(
-                title: "Порог паузы",
+                title: String(localized: "Порог паузы"),
                 value: $store.turnSegmentation.pauseThreshold,
                 range: TurnSegmentationConfig.pauseThresholdRange,
                 step: 0.05,
-                format: { "\(Int(($0 * 1000).rounded())) мс" },
-                hint: "Тишина такой длины закрывает реплику. На скорость подсказки не влияет: запрос уходит по нажатию, а нажатие дозакрывает реплику само."
+                format: { String(localized: "\(Int(($0 * 1000).rounded())) мс") },
+                hint: String(localized: "Тишина такой длины закрывает реплику. На скорость подсказки не влияет: запрос уходит по нажатию, а нажатие дозакрывает реплику само.")
             )
             threshold(
-                title: "Минимальная длина реплики",
+                title: String(localized: "Минимальная длина реплики"),
                 value: $store.turnSegmentation.minimumTurnDuration,
                 range: TurnSegmentationConfig.minimumTurnDurationRange,
                 step: 0.05,
-                format: { String(format: "%.2f с", $0) },
-                hint: "Более короткие отрезки не попадают в распознавание."
+                format: { String(format: String(localized: "%.2f с"), $0) },
+                hint: String(localized: "Более короткие отрезки не попадают в распознавание.")
             )
             threshold(
-                title: "Страховочный флаш",
+                title: String(localized: "Страховочный флаш"),
                 value: $store.turnSegmentation.safetyFlushInterval,
                 range: TurnSegmentationConfig.safetyFlushIntervalRange,
                 step: 1,
-                format: { String(format: "%.0f с", $0) },
-                hint: "Монолог без пауз всё равно попадёт в транскрипт по этому таймеру."
+                format: { String(format: String(localized: "%.0f с"), $0) },
+                hint: String(localized: "Монолог без пауз всё равно попадёт в транскрипт по этому таймеру.")
             )
             threshold(
-                title: "Порог RMS-гейта",
+                title: String(localized: "Порог RMS-гейта"),
                 value: Binding(
                     get: { TimeInterval(store.turnSegmentation.silenceGateRMS) },
                     set: { store.turnSegmentation.silenceGateRMS = Float($0) }
@@ -560,7 +572,7 @@ struct SettingsView: View {
                 range: Self.rmsGateRange,
                 step: 0.001,
                 format: { String(format: "%.3f", $0) },
-                hint: "Звук тише этого уровня считается тишиной."
+                hint: String(localized: "Звук тише этого уровня считается тишиной.")
             )
 
             Button("Вернуть значения по умолчанию") {
@@ -587,9 +599,19 @@ struct SettingsView: View {
                     }
                 }
             }
-            Text("Применяется после перезапуска приложения.")
-                .font(.footnote)
-                .foregroundStyle(.secondary)
+            HStack {
+                Text("Применяется после перезапуска приложения.")
+                    .font(.footnote)
+                    .foregroundStyle(.secondary)
+                Spacer(minLength: 8)
+                Button("Перезапустить", action: relaunch)
+                    .disabled(relaunchBlock != nil)
+            }
+            if let relaunchBlock {
+                Text("Перезапустить нельзя: \(relaunchBlock).")
+                    .font(.footnote)
+                    .foregroundStyle(.orange)
+            }
             Text("""
                 Это язык окна и настроек. Язык подсказки от него не зависит: \
                 она пишется на языке разговора, потому что её читают вслух собеседнику.
@@ -597,6 +619,13 @@ struct SettingsView: View {
                 .font(.footnote)
                 .foregroundStyle(.secondary)
         }
+    }
+
+    private var relaunchBlock: String? { relaunchBlocked() }
+
+    private func relaunch() {
+        guard relaunchBlocked() == nil else { return }
+        relaunchNow()
     }
 
     // MARK: - Обновления
@@ -649,7 +678,7 @@ struct SettingsView: View {
     /// names the *new* version, and «новее чего» is a fair question to be able
     /// to answer without opening the bundle.
     private var installedVersion: String {
-        AppVersion.running().map(String.init(describing:)) ?? "неизвестна"
+        AppVersion.running().map(String.init(describing:)) ?? String(localized: "неизвестна")
     }
 
     /// The RMS gate is a `Float` in the model but a `TimeInterval` in the

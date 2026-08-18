@@ -622,12 +622,12 @@ final class SessionEngine {
     /// застанет слова в транскрипте — распознавание не отменяется никогда.
     private func notice(for ask: SuggestionAsk, heardEverything: Bool) -> String? {
         guard ask.readsTranscript else { return nil }
-        if !isListening { return "Прослушивание выключено — отвечаю только по экрану." }
+        if !isListening { return String(localized: "Прослушивание выключено — отвечаю только по экрану.") }
         if !heardEverything {
-            return """
+            return String(localized: """
             Последние слова ещё распознавались — ответ собран без них. \
             Нажмите ещё раз, если он не про то.
-            """
+            """)
         }
         return nil
     }

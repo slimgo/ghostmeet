@@ -312,7 +312,7 @@ final class SessionController {
         engine.isLeakyRoute = { [weak monitor] in monitor?.mayLeak ?? true }
         monitor.onChange { [weak self] route in
             Logger(subsystem: "Mixxy.GhostMeet", category: "capture")
-                .info("МАРШРУТ ЗВУКА: \(route.summary, privacy: .public)")
+                .info("МАРШРУТ ЗВУКА: \(route.summary, privacy: .public)")  // не переводится: журнал
             // Core Audio posts from its own queue; the overlay reads this on the
             // main actor. The same hop the two capture channels make.
             DispatchQueue.main.async {
@@ -471,7 +471,7 @@ extension SessionController {
         var message: String {
             switch self {
             case .microphoneDenied:
-                "Нет доступа к микрофону. Разрешите его в «Системных настройках» → «Конфиденциальность и безопасность» → «Микрофон», затем нажмите «Слушать» ещё раз."
+                String(localized: "Нет доступа к микрофону. Разрешите его в «Системных настройках» → «Конфиденциальность и безопасность» → «Микрофон», затем нажмите «Слушать» ещё раз.")
             case .captureFailed(let reason):
                 reason
             }
@@ -567,7 +567,7 @@ extension SessionController {
         // ordinary behaviour, and it has to be visible.
         mic.onStatusChange = { [weak controller] status in
             Logger(subsystem: "Mixxy.GhostMeet", category: "capture")
-                .info("КАНАЛ YOU: \(status.message, privacy: .public)")
+                .info("КАНАЛ YOU: \(status.message, privacy: .public)")  // не переводится: журнал
             DispatchQueue.main.async {
                 MainActor.assumeIsolated { controller?.apply(micStatus: status) }
             }
@@ -582,7 +582,7 @@ extension SessionController {
         them.onStatusChange = { [weak them, weak controller] status in
             let backend = them?.backend.displayName ?? "—"
             Logger(subsystem: "Mixxy.GhostMeet", category: "capture")
-                .info("КАНАЛ THEM (\(backend, privacy: .public)): \(status.message, privacy: .public)")
+                .info("КАНАЛ THEM (\(backend, privacy: .public)): \(status.message, privacy: .public)")  // не переводится: журнал
             // Statuses arrive from capture threads; the overlay reads this on the
             // main actor. The same hop `SessionEngine` makes for audio frames.
             DispatchQueue.main.async {

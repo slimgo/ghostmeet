@@ -220,11 +220,11 @@ nonisolated enum AudioRoute: Equatable, Sendable {
             // to repeat something that is already true.
             nil
         case .leaky(_, let output):
-            """
+            String(localized: """
             Звук идёт в «\(output.name)», а слушает встроенный микрофон: \
             голос собеседника попадает в канал You и пишется как ваша речь. \
             Наушники убирают это полностью — часть приложение отфильтрует само, но не всю.
-            """
+            """)
         case .unknown(let input, let output):
             Self.unknownNotice(input: input, output: output)
         }
@@ -239,20 +239,20 @@ nonisolated enum AudioRoute: Equatable, Sendable {
     /// themselves in a second.
     private static func unknownNotice(input: AudioEndpoint?, output: AudioEndpoint?) -> String {
         guard let output else {
-            return "Устройство вывода не определяется. Если звук идёт в динамики, голос собеседника будет попадать в канал You — наушники это чинят."
+            return String(localized: "Устройство вывода не определяется. Если звук идёт в динамики, голос собеседника будет попадать в канал You — наушники это чинят.")
         }
         if output.isBuiltInSpeakers {
-            let microphone = input.map { "«\($0.name)»" } ?? "неизвестный"
-            return """
+            let microphone = input.map { "«\($0.name)»" } ?? String(localized: "неизвестный")
+            return String(localized: """
                 Звук идёт в динамики, а микрофон — \(microphone), и опознать его не удалось. \
                 Если он стоит рядом с ноутбуком, голос собеседника попадёт в канал You. \
                 В наушниках этого не бывает вовсе.
-                """
+                """)
         }
-        return """
+        return String(localized: """
             Маршрут звука определить не удалось: вывод — «\(output.name)». \
             Если это наушники, всё хорошо; если динамики — голос собеседника попадёт в канал You.
-            """
+            """)
     }
 
     /// One short line for the lifecycle log.
@@ -264,11 +264,11 @@ nonisolated enum AudioRoute: Equatable, Sendable {
     var summary: String {
         switch self {
         case .safe(let output):
-            "безопасный — вывод «\(output.name)»"
+            "безопасный — вывод «\(output.name)»"  // не переводится: журнал
         case .leaky(let input, let output):
-            "опасный — вывод «\(output.name)», вход «\(input.name)»"
+            "опасный — вывод «\(output.name)», вход «\(input.name)»"  // не переводится: журнал
         case .unknown(let input, let output):
-            "неизвестный — вывод «\(output?.name ?? "—")», вход «\(input?.name ?? "—")»"
+            "неизвестный — вывод «\(output?.name ?? "—")», вход «\(input?.name ?? "—")»"  // не переводится: журнал
         }
     }
 

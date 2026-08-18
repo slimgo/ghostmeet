@@ -55,7 +55,7 @@ nonisolated final class ScreenCaptureService: ScreenCapturer {
             frame = try await grab()
         } catch {
             let reason = Self.reason(for: error)
-            Self.log.error("СНИМОК ЭКРАНА НЕ СДЕЛАН причина=\(reason, privacy: .public)")
+            Self.log.error("СНИМОК ЭКРАНА НЕ СДЕЛАН причина=\(reason, privacy: .public)")  // не переводится: журнал
             return .failed(reason)
         }
 
@@ -68,7 +68,7 @@ nonisolated final class ScreenCaptureService: ScreenCapturer {
         // not a failure the user has anything to do about.
         guard !Task.isCancelled else {
             Self.log.info(
-                "СНИМОК ЭКРАНА ОТМЕНЁН снимок_мс=\(Self.milliseconds(startedAt, captured), privacy: .public)"
+                "СНИМОК ЭКРАНА ОТМЕНЁН снимок_мс=\(Self.milliseconds(startedAt, captured), privacy: .public)"  // не переводится: журнал
             )
             return .none
         }
@@ -206,11 +206,11 @@ nonisolated final class ScreenCaptureService: ScreenCapturer {
     /// Same situation as the `Them` channel's, different consequence: there the
     /// channel goes silent, here the suggestion merely goes blind. Worth its own
     /// sentence so the user is not sent hunting for a setting that is already on.
-    static let permissionHelp = """
+    static let permissionHelp = String(localized: """
         Нет разрешения на запись экрана — подсказка идёт без снимка. \
         Откройте «Системные настройки» → «Конфиденциальность и безопасность» → «Запись экрана и звука системы», \
         включите GhostMeet и перезапустите приложение.
-        """
+        """)
 
     private static func milliseconds(_ from: ContinuousClock.Instant, _ to: ContinuousClock.Instant) -> Int {
         let components = (to - from).components

@@ -66,7 +66,12 @@ final class GhostMeetAppDelegate: NSObject, NSApplicationDelegate {
         recognition: recognition,
         // The switch alone means nothing until the next launch; the button
         // beside it is what makes turning updates on take effect now.
-        checkForUpdates: { [weak self] in self?.updates.checkNow() }
+        checkForUpdates: { [weak self] in self?.updates.checkNow() },
+        // Перезапуск ради языка — тот же перезапуск, что ради обновления, и
+        // правило у них одно: во время звонка не происходит ничего.
+        relaunchBlocked: { [weak self] in
+            AppRelaunch.reason(isBusy: !(self?.session.canQuit ?? true))
+        }
     )
 
     /// Whether a newer build has been published, and — since 0.4.0 — putting it

@@ -94,7 +94,7 @@ nonisolated struct CLIProvider: LLMProvider {
         guard let executableName = configuration.command.first,
               !executableName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
         else {
-            throw LLMFailure.provider("Для «\(name)» не задана команда запуска.")
+            throw LLMFailure.provider(String(localized: "Для «\(name)» не задана команда запуска."))
         }
 
         guard let executable = CLIExecutable.locate(
@@ -102,8 +102,8 @@ nonisolated struct CLIProvider: LLMProvider {
             in: configuration.searchPaths
         ) else {
             throw LLMFailure.provider(
-                "Не найден исполняемый файл «\(executableName)» для «\(name)». "
-                + "Установите инструмент или укажите в настройках полный путь к нему."
+                String(localized: "Не найден исполняемый файл «\(executableName)» для «\(name)». ")
+                + String(localized: "Установите инструмент или укажите в настройках полный путь к нему.")
             )
         }
 
@@ -118,7 +118,7 @@ nonisolated struct CLIProvider: LLMProvider {
             stdout = try process.start(prompt: Self.prompt(for: request))
         } catch {
             throw LLMFailure.provider(
-                "Не удалось запустить «\(executableName)»: \(error.localizedDescription)"
+                String(localized: "Не удалось запустить «\(executableName)»: \(error.localizedDescription)")
             )
         }
 
@@ -171,7 +171,7 @@ nonisolated struct CLIProvider: LLMProvider {
     private func failureMessage(status: Int32, from process: CLIProcess) -> String {
         let reported = process.standardErrorText
         guard !reported.isEmpty else {
-            return "«\(name)» завершился с кодом \(status)."
+            return String(localized: "«\(name)» завершился с кодом \(String(status)).")
         }
         // The overlay is a small window over a video call, and some tools print
         // a stack trace: keep the head of it and drop the rest.
@@ -206,6 +206,6 @@ nonisolated struct CLIProvider: LLMProvider {
         case (true, false): user
         case (true, true): ""
         }
-        return joined.isEmpty ? "(пусто)" : joined
+        return joined.isEmpty ? String(localized: "(пусто)") : joined
     }
 }

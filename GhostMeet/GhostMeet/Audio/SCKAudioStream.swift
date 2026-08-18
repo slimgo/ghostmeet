@@ -146,11 +146,11 @@ nonisolated final class SCKAudioStream: NSObject, ThemAudioStream, SCStreamOutpu
                 // one wording, and it names both ways out of it.
                 return ThemCaptureBackend.screenRecordingHelp
             case .noDisplay:
-                return "Система не сообщила ни одного дисплея для захвата"
+                return String(localized: "Система не сообщила ни одного дисплея для захвата")
             case .noMatchingApplication:
-                return "Приложение-источник не показывается в списке ScreenCaptureKit"
+                return String(localized: "Приложение-источник не показывается в списке ScreenCaptureKit")
             case .startFailed(let error):
-                return "Не удалось запустить захват через ScreenCaptureKit: \(error.localizedDescription)"
+                return String(localized: "Не удалось запустить захват через ScreenCaptureKit: \(error.localizedDescription)")
             }
         }
     }

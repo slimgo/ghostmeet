@@ -59,10 +59,10 @@ nonisolated struct GeminiProvider: LLMProvider {
             let model = override(selection.model) ?? preset.defaultModel
 
             guard override(base) != nil else {
-                throw LLMFailure.provider("Для провайдера «\(preset.name)» не задан адрес API.")
+                throw LLMFailure.provider(String(localized: "Для провайдера «\(preset.name)» не задан адрес API."))
             }
             guard override(model) != nil else {
-                throw LLMFailure.provider("Для провайдера «\(preset.name)» не задана модель.")
+                throw LLMFailure.provider(String(localized: "Для провайдера «\(preset.name)» не задана модель."))
             }
             return Configuration(model: model, baseURL: base)
         }

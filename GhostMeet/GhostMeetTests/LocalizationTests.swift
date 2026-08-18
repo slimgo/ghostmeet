@@ -174,3 +174,40 @@ struct TestHostLanguageTests {
         #expect(String(localized: "Слушать") == "Слушать")
     }
 }
+
+@Suite("Локализация не портит то, что в неё попадает")
+struct LocalizedInterpolationTests {
+
+    /// **Найдено тестом сразу после того, как строки обернули.** `String(localized:)`
+    /// форматирует интерполированное число по локали, и код ошибки OSStatus
+    /// `-12345` выходил как «-12.345»: разряды в нём сгруппированы, будто это
+    /// количество. Пользователь такой код не найдёт ни поиском, ни в документации.
+    ///
+    /// Лечится тем, что число интерполируется уже строкой — к строке
+    /// форматирование не применяется.
+    @Test("Код ошибки печатается как есть, без разделителей разрядов")
+    func errorCodesAreNotGrouped() {
+        let code = -12345
+        let formatted = String(localized: "Не удалось запустить запись микрофона (\(String(code)))")
+        #expect(formatted.contains("-12345"))
+        #expect(formatted.contains("-12.345") == false)
+        #expect(formatted.contains("-12,345") == false)
+    }
+}
+
+@Suite("Перезапуск ради языка подчиняется правилу звонка")
+struct AppRelaunchTests {
+
+    /// Перезапуск ради языка — тот же перезапуск, что ради обновления, и разницы
+    /// для пользователя нет никакой: звонок обрывается одинаково.
+    @Test("Во время прослушивания перезапустить нельзя")
+    func refusesDuringACall() throws {
+        let reason = try #require(AppRelaunch.reason(isBusy: true))
+        #expect(reason.contains("прослушивание"))
+    }
+
+    @Test("Вне звонка ничто не мешает")
+    func allowsWhenIdle() {
+        #expect(AppRelaunch.reason(isBusy: false) == nil)
+    }
+}

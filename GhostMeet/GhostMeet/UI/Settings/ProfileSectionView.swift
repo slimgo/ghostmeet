@@ -53,7 +53,7 @@ struct ProfileSectionView: View {
         }
 
         HStack {
-            Button("Новый профиль") { store.addProfile(named: "Новый профиль") }
+            Button("Новый профиль") { store.addProfile(named: String(localized: "Новый профиль")) }
             Button("Удалить", role: .destructive) { store.removeProfile(store.selectedProfileID) }
                 .disabled(store.profiles.count < 2)
             Spacer()
@@ -75,7 +75,7 @@ struct ProfileSectionView: View {
         }
         SettingsParagraphRow(String(localized: "Опыт")) {
             TextField(
-                "Например: 6 лет, финтех и высоконагруженные сервисы",
+                String(localized: "Например: 6 лет, финтех и высоконагруженные сервисы"),
                 text: $store.profile.experience,
                 axis: .vertical
             )
@@ -84,7 +84,7 @@ struct ProfileSectionView: View {
         }
         SettingsParagraphRow(String(localized: "Стек")) {
             TextField(
-                "Например: Go, PostgreSQL, Kubernetes",
+                String(localized: "Например: Go, PostgreSQL, Kubernetes"),
                 text: $store.profile.stack,
                 axis: .vertical
             )
@@ -125,11 +125,11 @@ struct ProfileSectionView: View {
             // fix costs a minute and removes the exposure entirely. The profile
             // needs the experience, never the name.
             Label(
-                """
+                String(localized: """
                 Перед загрузкой уберите из резюме личные данные: имя, телефон, почту, ссылки на профили, \
                 названия компаний, если они под NDA. Для профиля важен опыт, а не то, как вас зовут, — \
                 обезличенное резюме даст ровно тот же результат.
-                """,
+                """),
                 systemImage: "person.crop.circle.badge.xmark"
             )
             .font(.footnote)
@@ -157,7 +157,7 @@ struct ProfileSectionView: View {
         ) { result in
             switch result {
             case .success(let url): resumeImport.start(url: url, in: store)
-            case .failure(let error): resumeImport.report("Файл не выбран: \(error.localizedDescription).")
+            case .failure(let error): resumeImport.report(String(localized: "Файл не выбран: \(error.localizedDescription)."))
             }
         }
     }

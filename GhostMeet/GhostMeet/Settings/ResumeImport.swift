@@ -134,10 +134,10 @@ final class ResumeImport {
             // Оборвался и не собрался — тогда причина обрыва и есть объяснение,
             // и она куда полезнее общего «профиль не собрался». Без этой ветки
             // пользователь получал английскую системную строку об ошибке Swift.
-            fail(cutoff?.message ?? """
+            fail(cutoff?.message ?? String(localized: """
             Из ответа модели профиль не собрался: в нём нет ни роли, ни опыта, ни стека. \
             Попробуйте ещё раз, выберите другого провайдера — или заполните поля руками.
-            """)
+            """))
             return
         }
 
@@ -158,10 +158,10 @@ final class ResumeImport {
         // показать его с оговоркой.
         var notices: [String] = []
         if resume.isTruncated {
-            notices.append("""
-            Резюме длинное: модель прочитала первые \(ResumeDocument.maxCharacters) символов \
+            notices.append(String(localized: """
+            Резюме длинное: модель прочитала первые \(String(ResumeDocument.maxCharacters)) символов \
             из \(resume.originalCharacterCount). Проверьте, не потерялось ли что-то важное.
-            """)
+            """))
         }
         if let cutoff {
             notices.append(String(localized: "\(cutoff.message) Проверьте последние поля — они могли не дописаться."))

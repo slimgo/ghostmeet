@@ -56,14 +56,20 @@ final class SettingsWindowController: NSObject, NSWindowDelegate {
     /// Asks the feed now — see the initialiser.
     private let checkForUpdates: () -> Void
 
+    /// Why the app may not restart itself right now, or nil. Same rule as an
+    /// update: a restart during a call ends the call.
+    private let relaunchBlocked: () -> String?
+
     init(
         store: SettingsStore,
         recognition: SpeechModelStatus,
-        checkForUpdates: @escaping () -> Void = {}
+        checkForUpdates: @escaping () -> Void = {},
+        relaunchBlocked: @escaping () -> String? = { nil }
     ) {
         self.store = store
         self.recognition = recognition
         self.checkForUpdates = checkForUpdates
+        self.relaunchBlocked = relaunchBlocked
         super.init()
     }
 
@@ -102,11 +108,12 @@ final class SettingsWindowController: NSObject, NSWindowDelegate {
             store: store,
             recognition: recognition,
             navigation: navigation,
+            relaunchBlocked: relaunchBlocked,
             checkForUpdates: checkForUpdates
         )
         let window = NSWindow(contentViewController: NSHostingController(rootView: content))
         window.styleMask = [.titled, .closable, .miniaturizable, .resizable]
-        window.title = "Настройки GhostMeet"
+        window.title = String(localized: "Настройки GhostMeet")
 
         // Same content protection as the overlay, and it follows the same switch:
         // otherwise the settings screen stays unrecordable while the overlay is

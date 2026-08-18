@@ -47,7 +47,9 @@ Both spec documents are written in Russian, and so is everything else in `docs/`
 - **`Text("Русский текст")` localises itself; `Text(строка)` does not.** A `String` built by a model — a phase, a summary, the wording of a failure — has to say `String(localized:)` at the point it is written, and a row helper that takes a `String` will silently skip translation (that is why `SettingsRow` takes a `LocalizedStringKey`).
 - **Logs, prompts and stored values are deliberately not translated.** `ЗАХВАТ СТАРТОВАЛ` stays as it is, or searching the journal for the sentence somebody reported stops working. Prompt text stays Russian because the prompt is verified word for word against [docs/GhostMeet-Prompts.md](docs/GhostMeet-Prompts.md) — `InterviewContext.Field` has `label` for the prompt and `screenLabel` for the screen precisely because of this, and mixing them up changes the prompt on an English machine only.
 
-`make-dmg.sh` refuses a build whose English table did not reach the bundle, and a test refuses any English value that still contains Cyrillic. Both exist because a forgotten string does not fail — it just comes out Russian.
+Three things enforce this, and none of them is a person reading the screen — 0.5.0 shipped with fifty Russian strings on an English window precisely because that was the only check. `scripts/find-untranslated.sh` reads the **sources** and refuses a literal that reaches a `String` without `String(localized:)`; it runs in CI before the tests and inside `make-dmg.sh`. `make-dmg.sh` also refuses a build whose English table did not reach the bundle, and a test refuses any English value that still contains Cyrillic.
+
+Two traps found the hard way and worth knowing before writing a string. **A multi-line literal hides from the eye and hid from the first version of the guard** — the résumé warning lived in `"""…"""` and survived the whole translation. And **a number interpolated into `String(localized:)` is formatted for the locale**: an OSStatus of `-12345` comes out as «-12.345», which nobody can search for. Interpolate it as `\(String(code))` — a string carries no formatting.
 
 ## Build and run
 

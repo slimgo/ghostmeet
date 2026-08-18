@@ -36,7 +36,7 @@ actor WhisperSpeechRecognizer: SpeechRecognizer {
         var errorDescription: String? {
             switch self {
             case .modelNotReady(let phase): return phase.summary
-            case .emptyAudio: return "В реплике не оказалось звука"
+            case .emptyAudio: return String(localized: "В реплике не оказалось звука")
             }
         }
     }

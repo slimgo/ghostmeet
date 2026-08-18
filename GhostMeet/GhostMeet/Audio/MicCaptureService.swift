@@ -37,9 +37,9 @@ nonisolated final class MicCaptureService: AudioSource, @unchecked Sendable {
         var errorDescription: String? {
             switch self {
             case .inputFormatUnavailable:
-                return "Микрофон не сообщил формат записи — устройство ещё переключается"
+                return String(localized: "Микрофон не сообщил формат записи — устройство ещё переключается")
             case .converterUnavailable:
-                return "Не удалось подготовить преобразование звука микрофона"
+                return String(localized: "Не удалось подготовить преобразование звука микрофона")
             case .engineRefused(let code):
                 return Self.engineExplanation(code)
             }
@@ -51,15 +51,15 @@ nonisolated final class MicCaptureService: AudioSource, @unchecked Sendable {
             case -10868:
                 // kAudioUnitErr_FormatNotSupported. Seen live when a headset was
                 // plugged in mid-session: the engine had outlived its device.
-                return "Микрофон сменился, и запись под него не поднялась (\(code)). Выключите и включите прослушивание ещё раз; если наушники только что подключились, дайте им пару секунд"
+                return String(localized: "Микрофон сменился, и запись под него не поднялась (\(String(code))). Выключите и включите прослушивание ещё раз; если наушники только что подключились, дайте им пару секунд")
             case -10851:
                 // kAudioUnitErr_InvalidPropertyValue.
-                return "Микрофон отдаёт формат, который не удалось принять (\(code))"
+                return String(localized: "Микрофон отдаёт формат, который не удалось принять (\(String(code)))")
             case -10877:
                 // No input device at all.
-                return "Устройство ввода не найдено (\(code)): проверьте микрофон в «Системных настройках»"
+                return String(localized: "Устройство ввода не найдено (\(String(code))): проверьте микрофон в «Системных настройках»")
             default:
-                return "Не удалось запустить запись микрофона (\(code))"
+                return String(localized: "Не удалось запустить запись микрофона (\(String(code)))")
             }
         }
     }

@@ -25,11 +25,11 @@ nonisolated enum MicCaptureStatus: Equatable, Sendable {
     var message: String {
         switch self {
         case .idle:
-            "Микрофон не слушает."
+            String(localized: "Микрофон не слушает.")
         case .capturing:
-            "Микрофон слушает — ваша речь пишется в канал You."
+            String(localized: "Микрофон слушает — ваша речь пишется в канал You.")
         case .restarting(let attempt):
-            "Звуковое устройство сменилось — восстанавливаю микрофон (попытка \(attempt))."
+            String(localized: "Звуковое устройство сменилось — восстанавливаю микрофон (попытка \(attempt)).")
         case .lost(let reason):
             reason
         }
@@ -89,11 +89,11 @@ nonisolated final class CaptureRecovery: @unchecked Sendable {
     /// is not readable from any error code — a device mid-switch and a device
     /// unplugged fail identically. So it is decided by behaviour instead: what
     /// survives the whole retry budget is a switch, what does not is a loss.
-    static let lostMessage = """
+    static let lostMessage = String(localized: """
         Микрофон замолчал после того, как звуковое устройство сменилось, и не вернулся. \
         Обычно это делает другое приложение, включившее у себя обработку голоса. \
         Выключите и включите «Слушать» — или проверьте устройство ввода в «Системных настройках» → «Звук».
-        """
+        """)
 
     private let delays: [TimeInterval]
     private let schedule: Scheduler

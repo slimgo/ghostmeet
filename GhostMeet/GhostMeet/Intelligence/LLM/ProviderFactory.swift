@@ -94,7 +94,7 @@ nonisolated enum ProviderFactory {
         ),
         ProviderPreset(
             id: "ollama",
-            name: "Ollama (локально)",
+            name: String(localized: "Ollama (локально)"),
             transport: .openAICompatible,
             defaultBaseURL: "http://localhost:11434/v1",
             defaultModel: "qwen3:8b",
@@ -106,7 +106,7 @@ nonisolated enum ProviderFactory {
         ),
         ProviderPreset(
             id: "lmstudio",
-            name: "LM Studio (локально)",
+            name: String(localized: "LM Studio (локально)"),
             transport: .openAICompatible,
             defaultBaseURL: "http://localhost:1234/v1",
             defaultModel: "local-model",
@@ -115,7 +115,7 @@ nonisolated enum ProviderFactory {
         ),
         ProviderPreset(
             id: "llamacpp",
-            name: "llama.cpp server (локально)",
+            name: String(localized: "llama.cpp server (локально)"),
             transport: .openAICompatible,
             defaultBaseURL: "http://localhost:8080/v1",
             defaultModel: "local-model",
@@ -171,7 +171,7 @@ nonisolated enum ProviderFactory {
         key: @escaping @Sendable () async -> String?
     ) throws -> any LLMProvider {
         guard let preset = preset(id: selection.presetID) else {
-            throw LLMFailure.provider("Неизвестный провайдер «\(selection.presetID)».")
+            throw LLMFailure.provider(String(localized: "Неизвестный провайдер «\(selection.presetID)»."))
         }
 
         switch preset.transport {
