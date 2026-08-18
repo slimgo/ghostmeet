@@ -18,7 +18,25 @@ Design decisions referenced below live in [docs/adr/](docs/adr/); the product sp
 
 ## [Unreleased]
 
-Nothing yet.
+### Added
+
+- **A dead `Them` channel now moves to the other backend by itself.** When capture
+  fails, the app switches ScreenCaptureKit ⇄ Process Tap and says so in one line
+  instead of leaving the channel silent. The fallback happens once per run — a
+  second failure is the machine's answer, not something to keep retrying — and it
+  never undoes a backend the user picked by hand.
+
+### Fixed
+
+- **Pronunciation brackets are tidied up in the suggestion card.** The prompt asks
+  for `nginx (энджин-икс)` and mostly delivers it; the leftovers were a bracket
+  repeating the Russian word it followed («кластер (кластер)») and an inverted pair
+  («(кубернетис) Kubernetes»), both of which are read aloud and both of which make
+  the reader say a word twice. They are now fixed where the card is built, and
+  deliberately not by an eleventh rewording of the rule — see
+  [docs/GhostMeet-Prompts.md](docs/GhostMeet-Prompts.md) §6 for why. Formulas like
+  `O(n log n)`, brackets inside code blocks and ordinary Russian asides are left
+  exactly as they were, and the saved call keeps the model's raw answer.
 
 ## [0.5.1] — 2026-08-18
 

@@ -83,7 +83,10 @@ nonisolated enum SuggestionMarkup {
             // nothing but the delimiter the model is halfway through typing
             // becomes empty here, and an empty paragraph would be a blank line
             // opening and closing in the middle of the card.
-            let text = balanced(paragraph.joined(separator: "\n"))
+            // Скобки с произношением правятся здесь — там же, где абзац, и
+            // только здесь: в блок кода этот путь не заходит, а внутри кода
+            // скобка часть синтаксиса, и любая правка ломает пример.
+            let text = PronunciationBrackets.fixed(balanced(paragraph.joined(separator: "\n")))
                 .trimmingCharacters(in: .whitespacesAndNewlines)
             guard !text.isEmpty else { return }
             blocks.append(SuggestionBlock(id: blocks.count, kind: .paragraph, text: text))
@@ -144,7 +147,7 @@ nonisolated enum SuggestionMarkup {
                     SuggestionBlock(
                         id: blocks.count,
                         kind: .heading(level: heading.level),
-                        text: balanced(heading.text)
+                        text: PronunciationBrackets.fixed(balanced(heading.text))
                     )
                 )
                 continue
@@ -156,7 +159,7 @@ nonisolated enum SuggestionMarkup {
                     SuggestionBlock(
                         id: blocks.count,
                         kind: .listItem(marker: item.marker, indent: item.indent),
-                        text: balanced(item.text)
+                        text: PronunciationBrackets.fixed(balanced(item.text))
                     )
                 )
                 continue

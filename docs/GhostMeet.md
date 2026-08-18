@@ -323,6 +323,7 @@ GhostMeet/GhostMeet/          ← синхронизированная груп�
 │   ├── MainWindow/                   # оверлей, лента подсказок, транскрипт
 │   │                                 # PrecallReadiness/PrecallStripView — строка готовности
 │   │                                 # SuggestionMarkup/SuggestionMarkupView — разметка в карточке
+│   │                                 # PronunciationBrackets — скобки произношения в карточке
 │   │                                 # SuggestionFeedEntry — свёртка повторяющихся отказов
 │   │                                 # UpdateNoticeView — строка обновления, до звонка
 │   │                                 # TranscriptSaving — панель сохранения и запись файла
