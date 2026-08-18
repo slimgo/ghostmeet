@@ -77,6 +77,12 @@ jobs:
           key: spm-${{ runner.os }}-${{ hashFiles('**/Package.resolved') }}
           restore-keys: spm-${{ runner.os }}-
 
+      - name: Перевод на месте
+        # Раньше тестов, потому что дешевле: строка, которую забыли обернуть в
+        # String(localized:), не падает и не пустеет — она просто выходит
+        # по-русски на английском экране. Один релиз так и уехал.
+        run: ./scripts/find-untranslated.sh
+
       - name: Тесты
         run: |
           set -o pipefail

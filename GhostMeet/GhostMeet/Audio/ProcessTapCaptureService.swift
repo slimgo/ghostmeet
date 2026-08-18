@@ -33,13 +33,13 @@ nonisolated enum ThemCaptureStatus: Equatable, Sendable {
     var message: String {
         switch self {
         case .idle:
-            "Приложение-источник не выбрано — канал Them молчит."
+            String(localized: "Приложение-источник не выбрано — канал Them молчит.")
         case .capturing(let application):
-            "Слушаем «\(application)»."
+            String(localized: "Слушаем «\(application)».")
         case .waitingForSource(let application):
-            "«\(application)» сейчас не выдаёт звук. Захват включится сам, как только приложение вернётся."
+            String(localized: "«\(application)» сейчас не выдаёт звук. Захват включится сам, как только приложение вернётся.")
         case .restarting(let attempt):
-            "Звук собеседника оборвался — восстанавливаю канал Them (попытка \(attempt))."
+            String(localized: "Звук собеседника оборвался — восстанавливаю канал Them (попытка \(attempt)).")
         case .failed(let reason):
             reason
         }

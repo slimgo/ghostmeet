@@ -52,18 +52,18 @@ nonisolated enum ResumeDocument {
             switch self {
             case .unsupportedFormat(let ext):
                 let named = ext.isEmpty ? String(localized: "Файл без расширения") : String(localized: "Файл «.\(ext)»")
-                return """
+                return String(localized: """
                 \(named) не подойдёт: GhostMeet читает резюме в форматах .txt, .md и .pdf. \
                 Сохраните резюме в одном из них — или заполните поля профиля руками.
-                """
+                """)
             case .unreadable(let reason):
                 return String(localized: "Файл не удалось прочитать: \(reason).")
             case .imageOnlyPDF:
-                return """
+                return String(localized: """
                 В этом PDF нет текстового слоя: резюме сохранено картинкой — скан или снимок страницы. \
                 Извлекать из него нечего, поэтому профиль остался бы пустым. Сохраните резюме в PDF \
                 с текстом (экспорт из Word, Pages, Google Docs), в .txt или .md — или заполните поля руками.
-                """
+                """)
             case .empty:
                 return String(localized: "В файле нет текста — собирать профиль не из чего.")
             }

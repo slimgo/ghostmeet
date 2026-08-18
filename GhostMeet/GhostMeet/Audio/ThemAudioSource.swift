@@ -64,11 +64,11 @@ nonisolated enum ThemCaptureBackend: String, Codable, CaseIterable, Sendable {
     /// settings screen, because it is one situation: the default backend cannot
     /// run at all, and there are exactly two ways out of it. Never a system
     /// notification — a banner would be drawn over the shared screen (ADR-0004).
-    static let screenRecordingHelp = """
+    static let screenRecordingHelp = String(localized: """
         Нет разрешения на запись экрана: ScreenCaptureKit не увидит ни одного приложения, и канал Them будет молчать. \
         Откройте «Системные настройки» → «Конфиденциальность и безопасность» → «Запись экрана и звука системы», \
         включите GhostMeet и перезапустите приложение — либо переключитесь на Core Audio Process Tap, ему это разрешение не нужно.
-        """
+        """)
 }
 
 /// The `Them` channel as everything above capture sees it, whichever backend is

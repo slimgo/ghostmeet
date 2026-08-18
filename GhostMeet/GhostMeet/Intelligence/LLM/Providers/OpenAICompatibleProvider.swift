@@ -68,10 +68,10 @@ nonisolated struct OpenAICompatibleProvider: LLMProvider {
             let model = override(selection.model) ?? preset.defaultModel
 
             guard !base.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
-                throw LLMFailure.provider("Для провайдера «\(preset.name)» не задан адрес API.")
+                throw LLMFailure.provider(String(localized: "Для провайдера «\(preset.name)» не задан адрес API."))
             }
             guard !model.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
-                throw LLMFailure.provider("Для провайдера «\(preset.name)» не задана модель.")
+                throw LLMFailure.provider(String(localized: "Для провайдера «\(preset.name)» не задана модель."))
             }
 
             let endpoint = try endpoint(base: base)
@@ -100,7 +100,7 @@ nonisolated struct OpenAICompatibleProvider: LLMProvider {
 
             let full = trimmed.hasSuffix(path) ? trimmed : trimmed + path
             guard let url = URL(string: full), url.scheme != nil, url.host != nil else {
-                throw LLMFailure.provider("Адрес API «\(base)» не похож на адрес — проверьте настройки.")
+                throw LLMFailure.provider(String(localized: "Адрес API «\(base)» не похож на адрес — проверьте настройки."))
             }
             return url
         }

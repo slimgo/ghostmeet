@@ -91,7 +91,7 @@ nonisolated enum ClaudeWireFormat {
                 // Классификатор остановил генерацию и вернул уже написанное.
                 // Пока текста нет — это отказ; появился текст — цикл чтения
                 // сделает из этого обрыв и текст сохранит.
-                return [.failure(.provider("Модель отказалась продолжать."))]
+                return [.failure(.provider(String(localized: "Модель отказалась продолжать.")))]
             // Всё остальное — нормальный конец. Умолчание намеренно доброе:
             // список причин у Anthropic растёт, и объявлять незнакомую обрывом
             // значило бы поднимать тревогу на каждом новом слове в протоколе.
@@ -128,7 +128,7 @@ nonisolated enum ClaudeWireFormat {
         case 429, 529:
             return .throttled
         default:
-            return .provider(reported.message ?? "Провайдер вернул ошибку (HTTP \(status)).")
+            return .provider(reported.message ?? String(localized: "Провайдер вернул ошибку (HTTP \(String(status)))."))
         }
     }
 

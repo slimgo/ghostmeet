@@ -32,19 +32,19 @@ nonisolated final class ProcessTap: @unchecked Sendable {
         var errorDescription: String? {
             switch self {
             case .noProcesses:
-                return "Приложение-источник не выдаёт звук — его нечего слушать"
+                return String(localized: "Приложение-источник не выдаёт звук — его нечего слушать")
             case .tapCreationFailed(let status):
-                return "Не удалось создать тап на приложение-источник (код \(status))"
+                return String(localized: "Не удалось создать тап на приложение-источник (код \(String(status)))")
             case .formatUnavailable:
-                return "Тап не сообщил формат звука"
+                return String(localized: "Тап не сообщил формат звука")
             case .noOutputDevice:
-                return "Система не сообщила устройство вывода звука"
+                return String(localized: "Система не сообщила устройство вывода звука")
             case .aggregateDeviceFailed(let status):
-                return "Не удалось собрать агрегатное устройство для захвата (код \(status))"
+                return String(localized: "Не удалось собрать агрегатное устройство для захвата (код \(String(status)))")
             case .ioProcFailed(let status):
-                return "Не удалось подключиться к потоку захвата (код \(status))"
+                return String(localized: "Не удалось подключиться к потоку захвата (код \(String(status)))")
             case .deviceStartFailed(let status):
-                return "Не удалось запустить захват звука приложения-источника (код \(status))"
+                return String(localized: "Не удалось запустить захват звука приложения-источника (код \(String(status)))")
             }
         }
     }

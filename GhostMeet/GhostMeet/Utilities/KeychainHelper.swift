@@ -36,7 +36,7 @@ extension SecretStoreError: LocalizedError {
     var errorDescription: String? {
         switch self {
         case .unexpectedStatus(let status):
-            let detail = SecCopyErrorMessageString(status, nil) as String? ?? String(localized: "код \(status)")
+            let detail = SecCopyErrorMessageString(status, nil) as String? ?? String(localized: "код \(String(status))")
             return String(localized: "Keychain отказал: \(detail)")
         case .malformedData:
             return String(localized: "Запись в Keychain повреждена.")

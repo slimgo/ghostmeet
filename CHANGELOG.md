@@ -18,7 +18,32 @@ Design decisions referenced below live in [docs/adr/](docs/adr/); the product sp
 
 ## [Unreleased]
 
-Nothing yet.
+### Fixed
+
+- **Half the interface stayed Russian on an English window.** The turn-segmentation
+  fields, the warning about where a résumé is sent, the line about the audio route,
+  every capture and provider failure — around a hundred strings in all. The cause is
+  the one already written down in CLAUDE.md and stepped on anyway: `Text(строка)` is
+  not localized, only `Text(ключ)` is, and a literal that reaches a `String` needs
+  `String(localized:)`. Two shapes hid from the first pass — strings built inside
+  `String`-returning properties, and multi-line `"""…"""` literals.
+
+  Checking this by eye is what let 0.5.0 out, so it is not checked by eye any more:
+  `scripts/find-untranslated.sh` reads the sources and refuses a literal that reaches
+  a `String` unlocalized. It runs in CI before the tests and inside `make-dmg.sh`.
+
+- **A number inside a localized string was formatted for the locale.** An OSStatus of
+  `-12345` was shown as «-12.345» — grouped as though it were a quantity, and
+  unsearchable. Error codes are interpolated as strings now.
+
+### Added
+
+- **A «Перезапустить» button beside the language picker.** Changing the interface
+  language takes effect on the next launch — that is the price of doing it through
+  `AppleLanguages`, and it buys strings that a `SwiftUI`-only path would have left
+  in the old language. What was missing was a way to pay it: the screen said
+  «применяется после перезапуска» and left the user to close and reopen the app by
+  hand. During a call the button refuses, for the same reason an update does.
 
 ## [0.5.0] — 2026-08-18
 

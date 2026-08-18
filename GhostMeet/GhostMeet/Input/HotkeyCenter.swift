@@ -151,13 +151,13 @@ final class HotkeyCenter {
     func problem(with action: HotkeyAction) -> String? {
         guard let hotkey = bindings[action] else {
             return bindings.isCleared(action)
-                ? "Комбинация для «\(action.title)» снята — действие не сработает, пока вы не выберете новую."
-                : "Действию «\(action.title)» не досталось комбинации — выберите её в списке, иначе оно не сработает."
+                ? String(localized: "Комбинация для «\(action.title)» снята — действие не сработает, пока вы не выберете новую.")
+                : String(localized: "Действию «\(action.title)» не досталось комбинации — выберите её в списке, иначе оно не сработает.")
         }
         guard unavailable.contains(action) else { return nil }
         guard hotkey.isValid else {
-            return "Комбинация \(hotkey.displayString) не годится для глобального хоткея: нужен хотя бы один из ⌘, ⌥, ⌃."
+            return String(localized: "Комбинация \(hotkey.displayString) не годится для глобального хоткея: нужен хотя бы один из ⌘, ⌥, ⌃.")
         }
-        return "Комбинацию \(hotkey.displayString) уже занимает другое приложение — выберите другую."
+        return String(localized: "Комбинацию \(hotkey.displayString) уже занимает другое приложение — выберите другую.")
     }
 }

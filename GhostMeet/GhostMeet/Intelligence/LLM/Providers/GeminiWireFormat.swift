@@ -62,7 +62,7 @@ nonisolated enum GeminiWireFormat {
               let escaped = name.addingPercentEncoding(withAllowedCharacters: .urlPathAllowed),
               let url = URL(string: "\(base)/models/\(escaped):streamGenerateContent?alt=sse")
         else {
-            throw LLMFailure.provider("Некорректный адрес Gemini: «\(baseURL)», модель «\(model)».")
+            throw LLMFailure.provider(String(localized: "Некорректный адрес Gemini: «\(baseURL)», модель «\(model)»."))
         }
         return url
     }
@@ -122,7 +122,7 @@ nonisolated enum GeminiWireFormat {
         // The prompt itself was refused — no candidate will ever arrive.
         if let feedback = object["promptFeedback"] as? [String: Any],
            let reason = feedback["blockReason"] as? String {
-            return [.failure(.provider("Gemini отклонил запрос: \(reason)."))]
+            return [.failure(.provider(String(localized: "Gemini отклонил запрос: \(reason).")))]
         }
 
         let candidates = object["candidates"] as? [[String: Any]] ?? []
@@ -140,7 +140,7 @@ nonisolated enum GeminiWireFormat {
         case .some(let reason):
             // Отказ, а не обрыв — но только пока на экране пусто; текст, который
             // уже читают вслух, цикл чтения сохранит.
-            events.append(.failure(.provider("Gemini прервал ответ: \(reason).")))
+            events.append(.failure(.provider(String(localized: "Gemini прервал ответ: \(reason)."))))
         }
         return events
     }
@@ -174,7 +174,7 @@ nonisolated enum GeminiWireFormat {
         case 429, 503:
             return .throttled
         default:
-            return .provider(reported.message ?? "Провайдер вернул ошибку (HTTP \(status)).")
+            return .provider(reported.message ?? String(localized: "Провайдер вернул ошибку (HTTP \(String(status)))."))
         }
     }
 

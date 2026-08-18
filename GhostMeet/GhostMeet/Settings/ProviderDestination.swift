@@ -62,22 +62,22 @@ nonisolated enum ProviderDestination: Equatable, Sendable {
     func resumeNote(providerName: String) -> String {
         switch self {
         case .localMachine:
-            """
+            String(localized: """
             Текст резюме уйдёт локальному провайдеру «\(providerName)» по адресу на этой машине — \
             за её пределы он не выйдет.
-            """
+            """)
         case .commandLineTool:
-            """
+            String(localized: """
             Текст резюме уйдёт инструменту командной строки «\(providerName)»: дальше он отправит его туда, \
             куда ходит сам. Для облачных инструментов (Claude CLI, Codex CLI) это серверы их разработчика, \
             и данные покинут машину.
-            """
+            """)
         case .cloud:
-            """
+            String(localized: """
             Текст резюме уйдёт облачному провайдеру «\(providerName)»: имя, места работы и контакты \
             покинут эту машину. Если это нежелательно — выберите локального провайдера или заполните \
             поля руками.
-            """
+            """)
         }
     }
 }

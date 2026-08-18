@@ -91,7 +91,7 @@ final class CarbonHotkeyRegistry: HotkeyRegistry {
             if register(hotkey, for: action) == false {
                 refused.insert(action)
                 Self.log.error(
-                    "ХОТКЕЙ ЗАНЯТ действие=\(action.rawValue, privacy: .public) комбинация=\(hotkey.displayString, privacy: .public)"
+                    "ХОТКЕЙ ЗАНЯТ действие=\(action.rawValue, privacy: .public) комбинация=\(hotkey.displayString, privacy: .public)"  // не переводится: журнал
                 )
             }
         }
@@ -104,7 +104,7 @@ final class CarbonHotkeyRegistry: HotkeyRegistry {
             .map { "\($0.action.rawValue)=\(bindings[$0.action]?.displayString ?? "?")" }
             .sorted()
             .joined(separator: " ")
-        Self.log.info("ХОТКЕИ ЗАРЕГИСТРИРОВАНЫ: \(granted, privacy: .public)")
+        Self.log.info("ХОТКЕИ ЗАРЕГИСТРИРОВАНЫ: \(granted, privacy: .public)")  // не переводится: журнал
 
         return refused
     }
