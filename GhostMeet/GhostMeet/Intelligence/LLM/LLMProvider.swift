@@ -99,10 +99,10 @@ nonisolated enum SuggestionCutoff: Error, Equatable, Sendable {
 
     var message: String {
         switch self {
-        case .budget: "Ответ оборван: модель упёрлась в лимит токенов. Для длинного ответа нажмите ⌥⌘E."
-        case .connection: "Ответ оборван: соединение закрылось раньше, чем модель договорила."
-        case .empty: "Модель вернула пустой ответ — попробуйте ещё раз или смените модель в настройках."
-        case .stopped(let reason): "Ответ оборван. \(reason)"
+        case .budget: String(localized: "Ответ оборван: модель упёрлась в лимит токенов. Для длинного ответа нажмите ⌥⌘E.")
+        case .connection: String(localized: "Ответ оборван: соединение закрылось раньше, чем модель договорила.")
+        case .empty: String(localized: "Модель вернула пустой ответ — попробуйте ещё раз или смените модель в настройках.")
+        case .stopped(let reason): String(localized: "Ответ оборван. \(reason)")
         }
     }
 }
@@ -123,9 +123,9 @@ nonisolated enum LLMFailure: Error, Equatable, Sendable {
 
     var message: String {
         switch self {
-        case .missingKey: "Не задан ключ провайдера — откройте настройки."
-        case .unauthorized: "Провайдер отклонил ключ."
-        case .throttled: "Провайдер ограничил частоту запросов."
+        case .missingKey: String(localized: "Не задан ключ провайдера — откройте настройки.")
+        case .unauthorized: String(localized: "Провайдер отклонил ключ.")
+        case .throttled: String(localized: "Провайдер ограничил частоту запросов.")
         case .provider(let text): text
         }
     }

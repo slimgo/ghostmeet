@@ -45,11 +45,11 @@ struct AskBarView: View {
     /// when a field is clicked directly and gives it back afterwards, so the
     /// overlay still never activates GhostMeet on its own.
     private var field: some View {
-        TextField("Спросить модель…", text: $question)
+        TextField(String(localized: "Спросить модель…"), text: $question)
             .textFieldStyle(.roundedBorder)
             .font(.system(size: 11))
             .onSubmit(send)
-            .help("Вопрос про экран и разговор. Ответ появится в ленте подсказок; язык ответа — язык вопроса.")
+            .help(String(localized: "Вопрос про экран и разговор. Ответ появится в ленте подсказок; язык ответа — язык вопроса."))
     }
 
     private var sendButton: some View {
@@ -59,7 +59,7 @@ struct AskBarView: View {
         }
         .buttonStyle(.plain)
         .disabled(!canSend)
-        .help("Спросить (Return).")
+        .help(String(localized: "Спросить (Return)."))
     }
 
     private var canSend: Bool {
@@ -82,11 +82,11 @@ struct AskBarView: View {
 
     private var solveButton: some View {
         Button { session.solveOnScreen() } label: {
-            Label("Решить", systemImage: "wand.and.stars")
+            Label(String(localized: "Решить"), systemImage: "wand.and.stars")
                 .font(.system(size: 11, weight: .medium))
         }
         .controlSize(.small)
-        .help("Решить задачу, которая сейчас на экране: подход, готовый код и сложность. Разговор при этом не читается.")
+        .help(String(localized: "Решить задачу, которая сейчас на экране: подход, готовый код и сложность. Разговор при этом не читается."))
     }
 }
 

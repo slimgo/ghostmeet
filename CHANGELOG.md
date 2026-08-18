@@ -18,7 +18,27 @@ Design decisions referenced below live in [docs/adr/](docs/adr/); the product sp
 
 ## [Unreleased]
 
-Nothing yet.
+### Added
+
+- **The interface speaks English as well as Russian.** It follows the system language and can be
+  switched in settings; the change takes effect on the next launch.
+
+  This is the language of the *window*. What the model answers is a different question and has not
+  changed: a suggestion follows the language of the call, because it is read aloud to the
+  interviewer rather than to you. An English interview is answered in English whatever the window
+  says.
+
+- **The settings window is five pages instead of one scroll nine sections long** — profile, sound,
+  recognition, model, about. Fields no longer change width with what is in them, and labels are
+  aligned to the left rather than pushed against the middle of the window.
+
+### Changed
+
+- **One prompt rule now follows the call rather than being unconditional.** In a Russian call the
+  model is told to put a Russian pronunciation after every Latin term — `nginx (энджин-икс)` —
+  because Latin cannot be read aloud inside a Russian sentence. In an English call that rule is not
+  sent at all: the answer is English, all of it is Latin, and a Cyrillic gloss in the middle of a
+  spoken English sentence is not a nuance but an unreadable line.
 
 ## [0.4.0] — 2026-08-17
 

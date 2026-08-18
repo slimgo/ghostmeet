@@ -72,9 +72,9 @@ struct SuggestionFeedView: View {
 
     private var emptyState: some View {
         VStack(spacing: 4) {
-            Text("Подсказок пока нет")
+            Text(String(localized: "Подсказок пока нет"))
                 .font(.callout)
-            Text("Нажмите хоткей, когда понадобится: сама подсказка не приходит.")
+            Text(String(localized: "Нажмите хоткей, когда понадобится: сама подсказка не приходит."))
                 .font(.caption)
         }
         .foregroundStyle(.secondary)
@@ -140,23 +140,23 @@ private struct SuggestionCard: View {
     }
 
     private var repeatsHelp: String {
-        "Одна и та же ошибка подряд \(repeats) \(Self.times(repeats)). Показана один раз — пока причина не изменилась, повторять её нечем."
+        String(localized: "Одна и та же ошибка подряд \(repeats) \(Self.times(repeats)). Показана один раз — пока причина не изменилась, повторять её нечем.")
     }
 
     /// «2 раза», «5 раз»: a count in the window has to read as Russian, and the
     /// user is going to see this one on the day nothing works.
     private static func times(_ count: Int) -> String {
-        if (11...14).contains(count % 100) { return "раз" }
-        return (2...4).contains(count % 10) ? "раза" : "раз"
+        if (11...14).contains(count % 100) { return String(localized: "раз") }
+        return (2...4).contains(count % 10) ? String(localized: "раза") : String(localized: "раз")
     }
 
     private var statusTitle: String {
         switch suggestion.state {
-        case .streaming: "печатается"
-        case .complete: "подсказка"
-        case .superseded: "устарела"
-        case .cut: "оборвана"
-        case .failed: "не получилось"
+        case .streaming: String(localized: "печатается")
+        case .complete: String(localized: "подсказка")
+        case .superseded: String(localized: "устарела")
+        case .cut: String(localized: "оборвана")
+        case .failed: String(localized: "не получилось")
         }
     }
 
@@ -274,7 +274,7 @@ private struct SuggestionCard: View {
         Suggestion(state: .failed(LLMFailure.missingKey.message), startedAt: Date()),
         Suggestion(state: .failed(LLMFailure.missingKey.message), startedAt: Date()),
         Suggestion(state: .failed(LLMFailure.missingKey.message), startedAt: Date()),
-        Suggestion(text: "Начну с оценки сложности: сейчас это O(n²), потому что `contains` внутри", startedAt: Date()),
+        Suggestion(text: String(localized: "Начну с оценки сложности: сейчас это O(n²), потому что `contains` внутри"), startedAt: Date()),
     ])
     .frame(width: 420, height: 420)
 }

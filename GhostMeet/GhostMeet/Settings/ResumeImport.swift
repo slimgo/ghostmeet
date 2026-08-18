@@ -46,8 +46,8 @@ final class ResumeImport {
         var summary: String {
             switch self {
             case .idle, .review, .failed: ""
-            case .reading: "Читаю файл…"
-            case .asking: "Спрашиваю модель…"
+            case .reading: String(localized: "Читаю файл…")
+            case .asking: String(localized: "Спрашиваю модель…")
             }
         }
     }
@@ -99,7 +99,7 @@ final class ResumeImport {
             fail(failure.message)
             return
         } catch {
-            fail("Файл не удалось прочитать: \(error.localizedDescription).")
+            fail(String(localized: "Файл не удалось прочитать: \(error.localizedDescription)."))
             return
         }
         guard !Task.isCancelled else { return }
@@ -124,7 +124,7 @@ final class ResumeImport {
             reset()
             return
         } catch {
-            fail("Провайдер не ответил: \(error.localizedDescription).")
+            fail(String(localized: "Провайдер не ответил: \(error.localizedDescription)."))
             return
         }
         guard !Task.isCancelled else { return }
@@ -164,7 +164,7 @@ final class ResumeImport {
             """)
         }
         if let cutoff {
-            notices.append("\(cutoff.message) Проверьте последние поля — они могли не дописаться.")
+            notices.append(String(localized: "\(cutoff.message) Проверьте последние поля — они могли не дописаться."))
         }
         notice = notices.isEmpty ? nil : notices.joined(separator: "\n")
         phase = .review

@@ -40,7 +40,14 @@ GhostMeet/                      ← repo root
     └── GhostMeet/              ← file-system-synchronized source group
 ```
 
-Both spec documents are written in Russian. Keep docs and in-app user-facing strings consistent with that; code identifiers and comments follow normal Swift conventions in English.
+Both spec documents are written in Russian, and so is everything else in `docs/`, `CONTEXT.md` and `.scratch/` — that has not changed. Code identifiers and comments follow normal Swift conventions in English.
+
+**In-app strings are a different question since 0.5.0, and the line is worth knowing before adding one.** The interface speaks two languages: the Russian text in the source *is the key*, and `Localizable.xcstrings` carries the English beside it. So a new visible string is written in Russian as usual — and then it has to reach the catalogue, or it stays Russian on an English screen without anything failing. Two rules follow.
+
+- **`Text("Русский текст")` localises itself; `Text(строка)` does not.** A `String` built by a model — a phase, a summary, the wording of a failure — has to say `String(localized:)` at the point it is written, and a row helper that takes a `String` will silently skip translation (that is why `SettingsRow` takes a `LocalizedStringKey`).
+- **Logs, prompts and stored values are deliberately not translated.** `ЗАХВАТ СТАРТОВАЛ` stays as it is, or searching the journal for the sentence somebody reported stops working. Prompt text stays Russian because the prompt is verified word for word against [docs/GhostMeet-Prompts.md](docs/GhostMeet-Prompts.md) — `InterviewContext.Field` has `label` for the prompt and `screenLabel` for the screen precisely because of this, and mixing them up changes the prompt on an English machine only.
+
+`make-dmg.sh` refuses a build whose English table did not reach the bundle, and a test refuses any English value that still contains Cyrillic. Both exist because a forgotten string does not fail — it just comes out Russian.
 
 ## Build and run
 

@@ -147,10 +147,11 @@
 				};
 			};
 			buildConfigurationList = 95F66DA93020DD0C0083906F /* Build configuration list for PBXProject "GhostMeet" */;
-			developmentRegion = en;
+			developmentRegion = ru;
 			hasScannedForEncodings = 0;
 			knownRegions = (
 				en,
+				ru,
 				Base,
 			);
 			mainGroup = 95F66DA53020DD0C0083906F;

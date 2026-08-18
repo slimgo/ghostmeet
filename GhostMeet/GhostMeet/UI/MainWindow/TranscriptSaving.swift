@@ -42,7 +42,7 @@ enum TranscriptSaving {
         panel.nameFieldStringValue = name
         panel.allowedContentTypes = [.init(filenameExtension: "md") ?? .plainText]
         panel.canCreateDirectories = true
-        panel.title = "Сохранить диалог"
+        panel.title = String(localized: "Сохранить диалог")
 
         // The overlay is a non-activating panel, so without this the save sheet
         // can come up behind the call. Focus returns to the call window as soon
@@ -56,7 +56,7 @@ enum TranscriptSaving {
             try markdown.write(to: url, atomically: true, encoding: .utf8)
             return nil
         } catch {
-            return "Не удалось сохранить: \(error.localizedDescription)"
+            return String(localized: "Не удалось сохранить: \(error.localizedDescription)")
         }
     }
 }

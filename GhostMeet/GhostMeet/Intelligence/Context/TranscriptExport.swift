@@ -96,7 +96,7 @@ nonisolated enum TranscriptExport {
         let header = header(metadata: metadata, entries: entries, dropped: dropped)
 
         guard let first = entries.first else {
-            return header + "\n\n_Разговор пуст: сохранять нечего._\n"
+            return header + String(localized: "\n\n_Разговор пуст: сохранять нечего._\n")
         }
 
         let body = entries.map { entry in
@@ -120,7 +120,7 @@ nonisolated enum TranscriptExport {
             Entry(
                 at: anchor.date(forUptime: turn.timestamp),
                 title: turn.channel == .you ? "You" : "Them",
-                body: turn.text.isEmpty ? "_(не распознано)_" : turn.text
+                body: turn.text.isEmpty ? String(localized: "_(не распознано)_") : turn.text
             )
         }
 
@@ -146,18 +146,18 @@ nonisolated enum TranscriptExport {
     /// «Подсказка · коротко» about an answer nobody asked briefly for would be a
     /// worse file than one that stays quiet.
     private static func title(of suggestion: Suggestion) -> String {
-        guard let kind = suggestion.kind else { return "Подсказка" }
-        return "Подсказка · \(caption(of: kind))"
+        guard let kind = suggestion.kind else { return String(localized: "Подсказка") }
+        return String(localized: "Подсказка · \(caption(of: kind))")
     }
 
     /// The words of the glossary and not new ones: `коротко` and `подробно` are
     /// the two `жанры`, and the other two modes are named as `Нажатие` names them.
     private static func caption(of kind: Suggestion.Kind) -> String {
         switch kind {
-        case .brief: "коротко"
-        case .detailed: "подробно"
+        case .brief: String(localized: "коротко")
+        case .detailed: String(localized: "подробно")
         case .question(let text): "Ask: \(oneLine(text))"
-        case .screenTask: "задача с экрана"
+        case .screenTask: String(localized: "задача с экрана")
         }
     }
 
@@ -186,15 +186,15 @@ nonisolated enum TranscriptExport {
 
         switch suggestion.state {
         case .streaming, .complete:
-            lines.append(suggestion.text.isEmpty ? "_(пусто)_" : suggestion.text)
+            lines.append(suggestion.text.isEmpty ? String(localized: "_(пусто)_") : suggestion.text)
         case .superseded:
-            lines.append(suggestion.text.isEmpty ? "_(пусто)_" : suggestion.text)
-            lines.append("_Ответ перебит следующим нажатием._")
+            lines.append(suggestion.text.isEmpty ? String(localized: "_(пусто)_") : suggestion.text)
+            lines.append(String(localized: "_Ответ перебит следующим нажатием._"))
         case .cut(let reason):
-            lines.append(suggestion.text.isEmpty ? "_(пусто)_" : suggestion.text)
-            lines.append("_Ответ оборван: \(reason)_")
+            lines.append(suggestion.text.isEmpty ? String(localized: "_(пусто)_") : suggestion.text)
+            lines.append(String(localized: "_Ответ оборван: \(reason)_"))
         case .failed(let reason):
-            lines.append("_Ответа не было: \(reason)_")
+            lines.append(String(localized: "_Ответа не было: \(reason)_"))
         }
 
         return lines.joined(separator: "\n\n")
@@ -206,10 +206,10 @@ nonisolated enum TranscriptExport {
         var facts: [String] = []
 
         if let duration = duration(of: entries) {
-            facts.append("Длительность \(humanDuration(duration))")
+            facts.append(String(localized: "Длительность \(humanDuration(duration))"))
         }
         if let profile = metadata.profile, !profile.isEmpty {
-            facts.append("профиль «\(profile)»")
+            facts.append(String(localized: "профиль «\(profile)»"))
         }
         if let provider = metadata.provider, !provider.isEmpty {
             facts.append(provider)
@@ -217,10 +217,10 @@ nonisolated enum TranscriptExport {
 
         var tail: [String] = []
         if let source = metadata.source, !source.isEmpty {
-            tail.append("Источник: \(source)")
+            tail.append(String(localized: "Источник: \(source)"))
         }
         if dropped > 0 {
-            tail.append("выброшено как протечка: \(dropped) \(lines(dropped))")
+            tail.append(String(localized: "выброшено как протечка: \(dropped) \(lines(dropped))"))
         }
 
         var header = "# GhostMeet — \(started(metadata: metadata, entries: entries))"
@@ -253,27 +253,27 @@ nonisolated enum TranscriptExport {
 
     private static func humanDuration(_ interval: TimeInterval) -> String {
         let minutes = Int((interval / 60).rounded())
-        guard minutes > 0 else { return "меньше минуты" }
+        guard minutes > 0 else { return String(localized: "меньше минуты") }
         return "\(minutes) \(minutesWord(minutes))"
     }
 
     private static func minutesWord(_ count: Int) -> String {
         let tail = count % 100
-        if (11...14).contains(tail) { return "минут" }
+        if (11...14).contains(tail) { return String(localized: "минут") }
         switch count % 10 {
-        case 1: return "минута"
-        case 2, 3, 4: return "минуты"
-        default: return "минут"
+        case 1: return String(localized: "минута")
+        case 2, 3, 4: return String(localized: "минуты")
+        default: return String(localized: "минут")
         }
     }
 
     private static func lines(_ count: Int) -> String {
         let tail = count % 100
-        if (11...14).contains(tail) { return "строк" }
+        if (11...14).contains(tail) { return String(localized: "строк") }
         switch count % 10 {
-        case 1: return "строка"
-        case 2, 3, 4: return "строки"
-        default: return "строк"
+        case 1: return String(localized: "строка")
+        case 2, 3, 4: return String(localized: "строки")
+        default: return String(localized: "строк")
         }
     }
 }

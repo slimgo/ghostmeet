@@ -32,7 +32,7 @@ struct HotkeysSectionView: View {
                     row(for: action)
                 }
 
-                Button("Вернуть комбинации по умолчанию") { hotkeys.resetToDefaults() }
+                Button(String(localized: "Вернуть комбинации по умолчанию")) { hotkeys.resetToDefaults() }
                     .controlSize(.small)
                     .font(.system(size: 10))
             }
@@ -41,7 +41,7 @@ struct HotkeysSectionView: View {
             HStack(spacing: 6) {
                 Image(systemName: "command")
                     .font(.system(size: 9))
-                Text("Хоткеи")
+                Text(String(localized: "Хоткеи"))
                     .font(.system(size: 10, weight: .medium))
                 Spacer(minLength: 0)
                 if hasProblem {
@@ -71,7 +71,7 @@ struct HotkeysSectionView: View {
                 Spacer(minLength: 8)
 
                 Picker("", selection: binding(for: action)) {
-                    Text("Выключено").tag(Hotkey?.none)
+                    Text(String(localized: "Выключено")).tag(Hotkey?.none)
                     ForEach(options(for: action), id: \.self) { hotkey in
                         Text(hotkey.displayString).tag(Hotkey?.some(hotkey))
                     }

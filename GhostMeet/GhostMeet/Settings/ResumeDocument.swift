@@ -51,13 +51,13 @@ nonisolated enum ResumeDocument {
         var message: String {
             switch self {
             case .unsupportedFormat(let ext):
-                let named = ext.isEmpty ? "Файл без расширения" : "Файл «.\(ext)»"
+                let named = ext.isEmpty ? String(localized: "Файл без расширения") : String(localized: "Файл «.\(ext)»")
                 return """
                 \(named) не подойдёт: GhostMeet читает резюме в форматах .txt, .md и .pdf. \
                 Сохраните резюме в одном из них — или заполните поля профиля руками.
                 """
             case .unreadable(let reason):
-                return "Файл не удалось прочитать: \(reason)."
+                return String(localized: "Файл не удалось прочитать: \(reason).")
             case .imageOnlyPDF:
                 return """
                 В этом PDF нет текстового слоя: резюме сохранено картинкой — скан или снимок страницы. \
@@ -65,7 +65,7 @@ nonisolated enum ResumeDocument {
                 с текстом (экспорт из Word, Pages, Google Docs), в .txt или .md — или заполните поля руками.
                 """
             case .empty:
-                return "В файле нет текста — собирать профиль не из чего."
+                return String(localized: "В файле нет текста — собирать профиль не из чего.")
             }
         }
     }
@@ -107,18 +107,18 @@ nonisolated enum ResumeDocument {
         // non-UTF-8 case.
         if let text = String(data: data, encoding: .windowsCP1251) { return text }
         if let text = String(data: data, encoding: .isoLatin1) { return text }
-        throw Failure.unreadable("не удалось определить кодировку текста")
+        throw Failure.unreadable(String(localized: "не удалось определить кодировку текста"))
     }
 
     private static func pdfText(at url: URL) throws -> String {
         guard let document = PDFDocument(url: url) else {
-            throw Failure.unreadable("файл не открывается как PDF — возможно, он повреждён")
+            throw Failure.unreadable(String(localized: "файл не открывается как PDF — возможно, он повреждён"))
         }
         guard !document.isLocked else {
-            throw Failure.unreadable("PDF защищён паролем")
+            throw Failure.unreadable(String(localized: "PDF защищён паролем"))
         }
         guard document.pageCount > 0 else {
-            throw Failure.unreadable("в PDF нет страниц")
+            throw Failure.unreadable(String(localized: "в PDF нет страниц"))
         }
 
         let pages = (0..<document.pageCount).compactMap { document.page(at: $0)?.string }

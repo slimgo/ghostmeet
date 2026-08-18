@@ -69,11 +69,15 @@ nonisolated enum BriefPrompt {
         screenshot: Data? = nil
     ) -> SuggestionRequest {
         let started = TranscriptFormatter.hasStartedAnswering(transcript)
+        // Язык разговора читается здесь, а не приходит настройкой: он про этот
+        // звонок, и меняет он ровно одно правило промпта.
+        let language = ConversationLanguage.detected(in: transcript)
         return SuggestionRequest(
             systemPrompt: system(
                 profile: profile,
                 interviewContext: interviewContext,
-                hasStartedAnswering: started
+                hasStartedAnswering: started,
+                language: language
             ),
             userPrompt: user(
                 transcript: transcript,
@@ -91,13 +95,16 @@ nonisolated enum BriefPrompt {
     /// out loud in the first person, so experience the user does not have is worse
     /// than a slow answer — and the behavioural branch of the rules answers from
     /// the заготовки or from nothing.
+    /// - Parameter language: язык разговора. Влияет ровно на одно — правило
+    ///   скобок с произношением; см. `ConversationLanguage`.
     static func system(
         profile: UserProfile,
         interviewContext: InterviewContext = .empty,
-        hasStartedAnswering: Bool = true
+        hasStartedAnswering: Bool = true,
+        language: ConversationLanguage = .default
     ) -> String {
         PromptFragment.system(
-            systemRules(hasStartedAnswering: hasStartedAnswering),
+            systemRules(hasStartedAnswering: hasStartedAnswering, language: language),
             profile: profile,
             interviewContext: interviewContext
         )
@@ -197,7 +204,10 @@ nonisolated enum BriefPrompt {
     /// which was the original live complaint. The «не с начала» half therefore
     /// survives in both shapes — what changes is whether there is a sentence to
     /// continue.
-    private static func systemRules(hasStartedAnswering: Bool) -> String {
+    private static func systemRules(
+        hasStartedAnswering: Bool,
+        language: ConversationLanguage
+    ) -> String {
     """
     Ты — GhostMeet, скрытый real-time copilot поверх экрана пользователя во время звонка.
 
@@ -209,7 +219,7 @@ nonisolated enum BriefPrompt {
 
     \(PromptFragment.outOfStack)
 
-    \(PromptFragment.pronunciation)
+    \(PromptFragment.pronunciation(for: language))
 
     Говорит он коротко — он в середине собственной фразы:
     - Дай ровно то, чего не хватает: термин, цифру, различие, порядок из 2–4 шагов. Не пересказывай вопрос и не начинай ответ заново.

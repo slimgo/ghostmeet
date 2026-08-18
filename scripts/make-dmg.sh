@@ -92,6 +92,18 @@ for key in SUSendProfileInfo SUEnableSystemProfiling SUEnableAutomaticChecks; do
 done
 echo "  лента, открытый ключ и три запрета на месте"
 
+# Английская таблица строк — такой же молча пропадающий ресурс, как ключи выше:
+# каталог, не попавший в сборку, даёт приложение, которое просто целиком
+# по-русски, без единой ошибки. Заметит это англоязычный пользователь.
+echo "▸ Проверка перевода…"
+STRINGS="$APP/Contents/Resources/en.lproj/Localizable.strings"
+[ -f "$STRINGS" ] \
+  || { echo "✗ В бандле нет en.lproj/Localizable.strings — английского в приложении нет"; exit 1; }
+PHRASES="$(plutil -p "$STRINGS" 2>/dev/null | grep -c "=>" || echo 0)"
+[ "$PHRASES" -gt 200 ] \
+  || { echo "✗ В английской таблице всего $PHRASES строк — каталог доехал не целиком"; exit 1; }
+echo "  английских строк: $PHRASES"
+
 echo "▸ Сборка образа…"
 mkdir -p "$STAGE" "$DIST"
 cp -R "$APP" "$STAGE/"

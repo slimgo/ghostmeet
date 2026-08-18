@@ -48,13 +48,13 @@ nonisolated enum HotkeyAction: String, CaseIterable, Codable, Sendable, Identifi
 
     var title: String {
         switch self {
-        case .toggleVisibility: "Показать / скрыть окно"
-        case .startListening: "Начать прослушивание"
-        case .stopListening: "Остановить прослушивание"
-        case .suggestBriefly: "Подсказка коротко"
-        case .suggestInDetail: "Подсказка подробно"
-        case .solveOnScreen: "Решить задачу с экрана"
-        case .clearContext: "Очистить контекст разговора"
+        case .toggleVisibility: String(localized: "Показать / скрыть окно")
+        case .startListening: String(localized: "Начать прослушивание")
+        case .stopListening: String(localized: "Остановить прослушивание")
+        case .suggestBriefly: String(localized: "Подсказка коротко")
+        case .suggestInDetail: String(localized: "Подсказка подробно")
+        case .solveOnScreen: String(localized: "Решить задачу с экрана")
+        case .clearContext: String(localized: "Очистить контекст разговора")
         }
     }
 
@@ -64,19 +64,19 @@ nonisolated enum HotkeyAction: String, CaseIterable, Codable, Sendable, Identifi
     var summary: String {
         switch self {
         case .toggleVisibility:
-            "Прячет окно с глаз мгновенно. Захват при этом продолжается — реплики пишутся дальше."
+            String(localized: "Прячет окно с глаз мгновенно. Захват при этом продолжается — реплики пишутся дальше.")
         case .startListening:
-            "Если модель распознавания ещё готовится, прослушивание включится само, как только она будет готова."
+            String(localized: "Если модель распознавания ещё готовится, прослушивание включится само, как только она будет готова.")
         case .stopListening:
-            "Останавливает оба канала и закрывает начатую реплику."
+            String(localized: "Останавливает оба канала и закрывает начатую реплику.")
         case .suggestBriefly:
-            "Главный аккорд. Дозакрывает вопрос собеседника и вашу начатую фразу, а просит только недостающее — термин, цифру, пару пунктов. Нажимают, уже начав отвечать."
+            String(localized: "Главный аккорд. Дозакрывает вопрос собеседника и вашу начатую фразу, а просит только недостающее — термин, цифру, пару пунктов. Нажимают, уже начав отвечать.")
         case .suggestInDetail:
-            "То же, но развёрнутым разбором — когда тема незнакома целиком."
+            String(localized: "То же, но развёрнутым разбором — когда тема незнакома целиком.")
         case .solveOnScreen:
-            "Просит готовое решение задачи, которая сейчас на экране. Работает и без прослушивания."
+            String(localized: "Просит готовое решение задачи, которая сейчас на экране. Работает и без прослушивания.")
         case .clearContext:
-            "Стирает транскрипт и подсказки текущего звонка. Профиль и контекст собеседования остаются — они заполнены заранее."
+            String(localized: "Стирает транскрипт и подсказки текущего звонка. Профиль и контекст собеседования остаются — они заполнены заранее.")
         }
     }
 
