@@ -5,28 +5,30 @@
 
 import Foundation
 
-/// Приводит в порядок скобки с произношением — то, что промпт просит, но не
-/// всегда добивает.
+/// Tidies up pronunciation brackets — what the prompt asks for and does not
+/// always land.
 ///
-/// В русском разговоре модели велено ставить за латиницей скобку с произношением:
-/// `nginx (энджин-икс)`. Пользователь читает подсказку **вслух** и произносит
-/// содержимое скобки вместо латиницы, которую вслух не прочесть.
+/// In a Russian conversation the model is told to follow every Latin term with a
+/// pronunciation in brackets: `nginx (энджин-икс)`. The user reads the suggestion
+/// **aloud** and says the bracket's contents instead of the Latin, which cannot
+/// be read aloud inside a Russian sentence.
 ///
-/// **Почему остаток чинится кодом, а не ещё одной строкой промпта.** Промпт уже
-/// говорит это прямо и с примером; в проекте записано, что запреты обходятся по
-/// букве, а образцы исполняются, — десятая формулировка одного правила скорее
-/// расшатает остальные, чем добьёт это. А вопрос «слева от скобки латиница или
-/// нет» решается разбором строки и суждения не требует. То, что механическое,
-/// промптом решать незачем.
+/// **Why the remainder is fixed in code rather than by another line of prompt.**
+/// The prompt already says this outright and with an example; this project has
+/// recorded that prohibitions get obeyed to the letter while examples get
+/// executed, so a tenth wording of one rule would loosen its neighbours sooner
+/// than it would land this one. And whether the character to the left of a
+/// bracket is Latin needs no judgement — parsing answers it. What is mechanical
+/// has no business being decided by a prompt.
 enum PronunciationBrackets {
 
-    /// Чинит текст, который **может быть недописан**.
+    /// Fixes text that **may still be half-written**.
     ///
-    /// Подсказка приходит потоком, и разметка разбирается заново на каждом
-    /// фрагменте. Поэтому правило одно и жёсткое: трогается только то, что уже
-    /// дописано целиком. Незакрытая скобка, оборванное слово, скобка, которая
-    /// ещё набирается, — не трогаются вовсе. Испортить наполовину пришедший
-    /// текст хуже, чем не поправить его.
+    /// A suggestion arrives as a stream and the markup is parsed afresh on every
+    /// fragment, so the rule is single and strict: only what is already complete
+    /// gets touched. An unclosed bracket, a cut-off word, a bracket still being
+    /// typed — none of them are touched at all. Corrupting half-arrived text is
+    /// worse than leaving it unfixed.
     static func fixed(_ text: String) -> String {
         guard text.contains("(") else { return text }
         var result = ""
@@ -35,8 +37,8 @@ enum PronunciationBrackets {
         var rest = Substring(text)
         while let open = rest.firstIndex(of: "(") {
             guard let close = rest[rest.index(after: open)...].firstIndex(of: ")") else {
-                // Скобка ещё не закрыта: либо текст недописан, либо её и не
-                // закроют. В обоих случаях остаток отдаётся как есть.
+                // The bracket is not closed yet: either the text is unfinished
+                // or it never will be. Either way the rest is passed through.
                 result += rest
                 return result
             }
@@ -51,29 +53,32 @@ enum PronunciationBrackets {
 
             let after = rest[rest.index(after: close)...]
             if latinTerm(endingAt: before) != nil {
-                // Слева латиница — скобка ровно там, где ей положено.
+                // Latin on the left — the bracket is exactly where it belongs.
                 result += rest[..<rest.index(after: close)]
                 rest = after
             } else if let term = latinTerm(startingAfter: after) {
-                // «(кубернетис) Kubernetes» — вывернутая пара, и проверяется она
-                // **раньше** дубля: слева тут тоже кириллица («Берём»), и
-                // порядок проверок решает, переставим мы пару или съедим её.
+                // «(кубернетис) Kubernetes» — an inverted pair, and it is checked
+                // **before** the duplicate: this one has Cyrillic on its left too
+                // («Берём»), so the order of the checks decides whether the pair
+                // gets reordered or swallowed.
                 //
-                // Порядок важен и для читающего: содержимое скобки произносят
-                // **вместо** латиницы, а не перед ней, иначе термин звучит дважды.
+                // The order matters to the reader as well: the bracket's contents
+                // are said **instead of** the Latin, not before it, or the term is
+                // spoken twice.
                 result += before
                 result += term.text
                 result += " (\(inside))"
                 rest = term.rest
             } else if repeatsWord(endingAt: before, inside: inside) {
-                // «кластер (кластер)» — глосс к русскому слову, дублирующий его.
-                // Читать нечем: пользователь произнесёт слово дважды.
+                // «кластер (кластер)» — a gloss on a Russian word that repeats it.
+                // There is nothing to read: the user would say the word twice.
                 //
-                // **Только дубль, и это не осторожность, а необходимость.** По
-                // одному признаку «в скобках кириллица» неотличимы глосс и
-                // обычное пояснение — «Это важно (и вот почему)», — а пояснение
-                // выбрасывать нельзя: оно несёт смысл. Совпадение со словом
-                // слева и есть тот самый дефект, и ничего кроме него.
+                // **Duplicates only, and that is necessity rather than caution.**
+                // On the single signal "Cyrillic inside brackets" a gloss is
+                // indistinguishable from an ordinary aside — «Это важно (и вот
+                // почему)» — and an aside must not be thrown away: it carries
+                // meaning. Matching the word on the left *is* the defect, and
+                // nothing besides it.
                 result += trimmedTrailingSpace(before)
                 rest = after
             } else {
@@ -87,11 +92,11 @@ enum PronunciationBrackets {
 
     // MARK: -
 
-    /// Глосс — это скобка, внутри которой только кириллица, дефисы и пробелы.
+    /// A gloss is a bracket holding nothing but Cyrillic, hyphens and spaces.
     ///
-    /// Узко намеренно. `O(n log n)` — не глосс, `(и это важно)` после русской
-    /// фразы — тоже: первое сломается, второе потеряется. Трогается лишь то, что
-    /// заведомо является произношением.
+    /// Narrow on purpose. `O(n log n)` is not a gloss, and neither is «(и это
+    /// важно)» after a Russian phrase: the first would break, the second would be
+    /// lost. Only what is certainly a pronunciation gets touched.
     private static func isGloss(_ inside: Substring) -> Bool {
         guard !inside.isEmpty else { return false }
         return inside.allSatisfy { character in
@@ -99,10 +104,10 @@ enum PronunciationBrackets {
         }
     }
 
-    /// Повторяет ли скобка слово, стоящее перед ней.
+    /// Whether the bracket repeats the word standing in front of it.
     ///
-    /// Сравнение без регистра и без дефисов: «Кластер (кластер)» и «хеш-мапа
-    /// (хешмапа)» — один и тот же дефект.
+    /// Compared without case or hyphens: «Кластер (кластер)» and «хеш-мапа
+    /// (хешмапа)» are the same defect.
     private static func repeatsWord(endingAt before: Substring, inside: Substring) -> Bool {
         let word = before.reversed().drop(while: \.isWhitespace).prefix { $0.isCyrillic }
         guard !word.isEmpty else { return false }
@@ -119,13 +124,14 @@ enum PronunciationBrackets {
         return before
     }
 
-    /// Латинский термин в начале остатка — вместе с тем, что за ним осталось.
+    /// The Latin term at the start of the remainder, with what follows it.
     private static func latinTerm(startingAfter rest: Substring) -> (text: Substring, rest: Substring)? {
         let start = rest.drop(while: \.isWhitespace)
         guard let first = start.first, first.isLatinTerm else { return nil }
         let end = start.firstIndex { !$0.isLatinTerm } ?? start.endIndex
-        // Слово, дошедшее ровно до конца текста, могло не дописаться: в потоке
-        // «Kub» превратилось бы в термин, а через фрагмент это «Kubernetes».
+        // A word reaching exactly the end of the text may be unfinished: in a
+        // stream «Kub» would become a term, and a fragment later it is
+        // «Kubernetes».
         guard end != start.endIndex else { return nil }
         return (start[..<end], start[end...])
     }
@@ -146,8 +152,8 @@ private extension Character {
         unicodeScalars.allSatisfy { (0x0400...0x04FF).contains($0.value) }
     }
 
-    /// Что может входить в латинский термин: буквы, цифры и знаки, из которых
-    /// состоят имена из кода — `created_at`, `large-v3`, `Vue.js`.
+    /// What a Latin term may contain: letters, digits and the punctuation that
+    /// makes up names from code — `created_at`, `large-v3`, `Vue.js`.
     var isLatinTerm: Bool {
         isASCII && (isLetter || isNumber || self == "_" || self == "-" || self == ".")
     }

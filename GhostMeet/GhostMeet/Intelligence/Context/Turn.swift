@@ -50,19 +50,21 @@ nonisolated struct Turn: Identifiable, Hashable, Sendable {
     /// touches it.
     var isLeak: Bool
 
-    /// Нажатие произошло **после** этой реплики: всё, что до неё включительно,
-    /// уже уходило в модель.
+    /// A press happened **after** this turn: everything up to and including it
+    /// has already gone to the model.
     ///
-    /// Граница, а не свойство самой реплики, и заведена она из-за реального
-    /// отказа. Склейка соединяет подряд идущие реплики одного канала, потому что
-    /// человек задаёт вопрос с паузами — но отличить «один вопрос, разрезанный
-    /// паузой» от «два разных вопроса, между которыми никто не ответил» по звуку
-    /// нельзя: снаружи это одно и то же. Нажатие как раз и отличает: пользователь
-    /// нажал, значит предыдущий вопрос он уже обработал.
+    /// A boundary rather than a property of the turn itself, and it exists
+    /// because of a real failure. Merging joins consecutive turns of one channel
+    /// because people ask questions with pauses in them — but «один вопрос,
+    /// разрезанный паузой» cannot be told from «два разных вопроса, между
+    /// которыми никто не ответил» by sound: from the outside they are the same
+    /// thing. The press is what tells them apart: the user pressed, so they have
+    /// already dealt with the previous question.
     ///
-    /// Без этого два вопроса подряд приезжали моделью одной строкой — а промпт
-    /// говорит про строку `Them:`, что это «один человек и одна мысль», — и
-    /// модель отвечала на начало склейки, то есть на предыдущий вопрос.
+    /// Without this, two questions in a row reached the model as one line — while
+    /// the prompt says of a `Them:` line that it is one person and one thought —
+    /// and the model answered the start of the merge, that is, the previous
+    /// question.
     var isBeforePress: Bool = false
 
     init(

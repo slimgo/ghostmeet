@@ -74,7 +74,7 @@ struct PrecallReadiness: Equatable, Sendable {
         )
     }
 
-    // MARK: - Профиль
+    // MARK: - The profile
 
     /// The `Активный профиль` — the one, and only one, that reaches the prompt.
     ///
@@ -107,7 +107,7 @@ struct PrecallReadiness: Equatable, Sendable {
         )
     }
 
-    // MARK: - Провайдер
+    // MARK: - The provider
 
     /// Who answers, and on what. Both halves, because either one alone is a
     /// half-truth: «Anthropic» says nothing about which Claude, and a bare model
@@ -185,7 +185,7 @@ struct PrecallReadiness: Equatable, Sendable {
         }
     }
 
-    // MARK: - Приложение-источник
+    // MARK: - The source application
 
     /// Which application the `Them` channel is pointed at — and, when none has
     /// been picked, that fact stated before the call rather than during it.

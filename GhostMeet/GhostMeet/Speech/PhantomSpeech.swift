@@ -37,7 +37,7 @@ import Foundation
 /// transcript without words, which is already the ordinary state of one whose
 /// recognition failed.
 ///
-/// ## Признак по звуку: что искали и чего не нашлось
+/// ## A signal from the audio: what was looked for and what was not there
 ///
 /// A phrase list has to be topped up forever and is blind to whatever the next
 /// model invents. A measure computed from the audio — Whisper's own

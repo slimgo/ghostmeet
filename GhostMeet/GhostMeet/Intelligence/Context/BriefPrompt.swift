@@ -69,8 +69,9 @@ nonisolated enum BriefPrompt {
         screenshot: Data? = nil
     ) -> SuggestionRequest {
         let started = TranscriptFormatter.hasStartedAnswering(transcript)
-        // Язык разговора читается здесь, а не приходит настройкой: он про этот
-        // звонок, и меняет он ровно одно правило промпта.
+        // The language of the conversation is read here rather than arriving as
+        // a setting: it belongs to this call, and it changes exactly one rule of
+        // the prompt.
         let language = ConversationLanguage.detected(in: transcript)
         return SuggestionRequest(
             systemPrompt: system(
@@ -95,8 +96,8 @@ nonisolated enum BriefPrompt {
     /// out loud in the first person, so experience the user does not have is worse
     /// than a slow answer — and the behavioural branch of the rules answers from
     /// the заготовки or from nothing.
-    /// - Parameter language: язык разговора. Влияет ровно на одно — правило
-    ///   скобок с произношением; см. `ConversationLanguage`.
+    /// - Parameter language: the language of the conversation. Affects exactly
+    ///   one thing — the pronunciation bracket rule; see `ConversationLanguage`.
     static func system(
         profile: UserProfile,
         interviewContext: InterviewContext = .empty,

@@ -151,14 +151,14 @@ final class SessionController {
         return reason
     }
 
-    // MARK: - Что просит пользователь
+    // MARK: - What the user asks for
 
     /// Жанр «коротко» — the default press (ADR-0008).
     func suggestBriefly() {
         engine.suggestBriefly()
     }
 
-    /// Жанр «подробно».
+    /// The «подробно» genre.
     func suggestInDetail() {
         engine.suggestInDetail()
     }
@@ -293,7 +293,7 @@ final class SessionController {
         }
     }
 
-    // MARK: - Маршрут звука
+    // MARK: - Audio route
 
     /// Attaches a route classifier: the window starts saying which way the sound
     /// goes, and strict mode starts believing it.

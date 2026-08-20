@@ -61,7 +61,7 @@ struct PrecallStripView: View {
             .foregroundStyle(.tertiary)
     }
 
-    // MARK: - Профиль
+    // MARK: - The profile
 
     /// The one control in the strip: the `Активный профиль`, swapped in a click.
     ///
@@ -96,7 +96,7 @@ struct PrecallStripView: View {
         .accessibilityLabel(item.detail)
     }
 
-    // MARK: - Провайдер и источник
+    // MARK: - Provider and source
 
     /// A fact plus the way to change it. Both of these live in settings and
     /// nowhere else, so the strip states them and hands over — to the section

@@ -91,11 +91,13 @@ nonisolated enum OpenAIWireFormat {
         case "length":
             events.append(.cut(.budget))
         case "content_filter":
-            // Отказ, а не обрыв — но только пока на экране пусто. Если текст уже
-            // читают вслух, цикл чтения превратит это в обрыв и текст оставит.
+            // A failure rather than a cut-off — but only while the screen is
+            // empty. If the text is already being read aloud, the read loop turns
+            // this into a cut-off and keeps it.
             events.append(.failure(.provider(String(localized: "Провайдер отфильтровал ответ."))))
-        // Нормальный конец засчитывается здесь, а не только по `[DONE]`: часть
-        // каталога — чужие шлюзы и локальные серверы, и не все шлют sentinel.
+        // An ordinary end counts here and not only on `[DONE]`: part of the
+        // catalogue is third-party gateways and local servers, and not all of
+        // them send the sentinel.
         case "stop", "end_turn", "stop_sequence":
             events.append(.done)
         default:

@@ -83,9 +83,9 @@ nonisolated enum SuggestionMarkup {
             // nothing but the delimiter the model is halfway through typing
             // becomes empty here, and an empty paragraph would be a blank line
             // opening and closing in the middle of the card.
-            // Скобки с произношением правятся здесь — там же, где абзац, и
-            // только здесь: в блок кода этот путь не заходит, а внутри кода
-            // скобка часть синтаксиса, и любая правка ломает пример.
+            // Pronunciation brackets are fixed here — where the paragraph is
+            // built, and only here: this path never enters a code block, and
+            // inside code a bracket is syntax, so any edit breaks the example.
             let text = PronunciationBrackets.fixed(balanced(paragraph.joined(separator: "\n")))
                 .trimmingCharacters(in: .whitespacesAndNewlines)
             guard !text.isEmpty else { return }

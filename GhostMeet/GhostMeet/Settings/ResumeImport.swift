@@ -131,9 +131,10 @@ final class ResumeImport {
 
         var parsed = UserProfile.parsed(from: answer)
         guard !parsed.isEmpty else {
-            // Оборвался и не собрался — тогда причина обрыва и есть объяснение,
-            // и она куда полезнее общего «профиль не собрался». Без этой ветки
-            // пользователь получал английскую системную строку об ошибке Swift.
+            // Cut off and did not parse — then the reason for the cut-off *is*
+            // the explanation, and far more use than a generic «профиль не
+            // собрался». Without this branch the user got an English system
+            // string about a Swift error.
             fail(cutoff?.message ?? String(localized: """
             Из ответа модели профиль не собрался: в нём нет ни роли, ни опыта, ни стека. \
             Попробуйте ещё раз, выберите другого провайдера — или заполните поля руками.
@@ -152,10 +153,10 @@ final class ResumeImport {
         )
 
         draft = parsed
-        // Две разные правды, и обе стоит сказать: резюме не влезло целиком — и
-        // ответ модели кончился раньше времени. Профиль при этом собрался, и
-        // выбрасывать его из-за подрезанной последней строки было бы хуже, чем
-        // показать его с оговоркой.
+        // Two separate truths, both worth saying: the résumé did not fit whole,
+        // and the model's answer ended early. The profile did parse, and throwing
+        // it away over a clipped last line would be worse than showing it with a
+        // caveat.
         var notices: [String] = []
         if resume.isTruncated {
             notices.append(String(localized: """

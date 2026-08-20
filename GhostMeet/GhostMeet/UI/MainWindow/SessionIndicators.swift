@@ -160,8 +160,9 @@ struct SessionIndicators: Equatable, Sendable {
 
     private static func themIndicator(isListening: Bool, status: ThemCaptureStatus) -> Indicator {
         if case .failed = status {
-            // Пока звонок идёт, следствие важнее причины и потому стоит первым:
-            // канал молчит, а транскрипт продолжает выглядеть правдоподобно.
+            // While a call is running the consequence matters more than the
+            // cause and so comes first: the channel is silent while the
+            // transcript goes on looking plausible.
             let detail = isListening
                 ? "\(deafConsequence) \(status.message)"
                 : status.message
@@ -179,11 +180,12 @@ struct SessionIndicators: Equatable, Sendable {
         case .capturing:
             return Indicator(id: "them", name: "Them", state: .listening, detail: status.message)
         case .idle, .waitingForSource, .restarting, .switchingBackend:
-            // Восстановление — это ожидание, а не отказ: канал сейчас молчит, но
-            // сам себя поднимает, и звать пользователя что-то делать не за чем.
-            // Переход на второй бэкенд — то же самое: приложение уже действует,
-            // а строка нужна, чтобы человек знал, каким способом его теперь
-            // слушают, — у бэкендов разные слепые зоны.
+            // Recovery is waiting rather than failure: the channel is silent
+            // right now but is picking itself up, and there is nothing to call
+            // the user to do. Moving to the other backend is the same: the app is
+            // already acting, and the line exists so the person knows how they
+            // are being listened to now — the backends have different blind
+            // spots.
             return Indicator(id: "them", name: "Them", state: .waiting, detail: status.message)
         case .failed:
             return Indicator(id: "them", name: "Them", state: .failed, detail: status.message)

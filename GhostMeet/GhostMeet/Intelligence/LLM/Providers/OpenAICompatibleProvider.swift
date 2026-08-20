@@ -152,9 +152,10 @@ nonisolated struct OpenAICompatibleProvider: LLMProvider {
                 } catch let error as URLError where error.code == .cancelled {
                     continuation.finish(throwing: CancellationError())
                 } catch let cutoff as SuggestionCutoff {
-                    // Проходит насквозь, как и `LLMFailure`: сессия отличает
-                    // оборванный ответ от несостоявшегося по типу ошибки, и
-                    // заворачивать его в `.provider` значило бы стереть разницу.
+                    // Passes straight through, as `LLMFailure` does: the session
+                    // tells a cut-off answer from one that never happened by the
+                    // type of the error, and wrapping this in `.provider` would
+                    // erase the difference.
                     continuation.finish(throwing: cutoff)
                 } catch let failure as LLMFailure {
                     continuation.finish(throwing: failure)
@@ -209,10 +210,11 @@ nonisolated struct OpenAICompatibleProvider: LLMProvider {
                     delivered += fragment.count
                     continuation.yield(fragment)
                 case .failure(let failure):
-                    // Отказ стирает карточку — она рисует причину ВМЕСТО текста.
-                    // Пока экран пуст, это правильно; но если пользователь уже
-                    // читает ответ вслух, фраза не должна исчезать у него из-под
-                    // глаз, поэтому поздний отказ становится обрывом.
+                    // A failure wipes the card — it draws the reason INSTEAD of
+                    // the text. While the screen is empty that is right; but if
+                    // the user is already reading the answer aloud, the sentence
+                    // must not vanish from under their eyes, so a late failure
+                    // becomes a cut-off instead.
                     throw delivered == 0 ? failure : SuggestionCutoff.stopped(failure.message)
                 case .cut(let cutoff):
                     // The text stays: the consumer has already been handed every
@@ -220,9 +222,9 @@ nonisolated struct OpenAICompatibleProvider: LLMProvider {
                     // thrown, and it arrives after the words it explains.
                     throw cutoff
                 case .done:
-                    // Пустой, но честно закрытый поток — тоже случай, о котором
-                    // надо сказать: рассуждающая модель тратит бюджет на
-                    // невидимые токены и закрывает поток, не сказав ничего.
+                    // A stream that closes honestly but empty is also worth
+                    // saying out loud: a reasoning model can spend the budget on
+                    // invisible tokens and close the stream having said nothing.
                     if delivered == 0 { throw SuggestionCutoff.empty }
                     return
                 }

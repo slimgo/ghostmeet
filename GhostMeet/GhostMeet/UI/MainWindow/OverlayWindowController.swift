@@ -88,7 +88,7 @@ final class OverlayWindowController: NSObject, ObservableObject, NSWindowDelegat
 
     var isVisible: Bool { panel?.isVisible ?? false }
 
-    // MARK: - Невидимость для захвата экрана
+    // MARK: - Invisibility to screen capture
 
     /// Whether the app's windows are kept out of screen capture.
     ///
@@ -244,32 +244,32 @@ final class OverlayWindowController: NSObject, ObservableObject, NSWindowDelegat
         stateStore.frame = panel.frame
     }
 
-    /// Красная кнопка закрывает **приложение**, а не окно.
+    /// The red button closes the **application**, not the window.
     ///
-    /// У окна нет второго способа вернуться: значка в Dock нет, строки меню нет,
-    /// ⌘-Tab тоже пуст. Закрытое окно оставило бы работающую программу, которую
-    /// не видно и до которой не добраться иначе как аккордом, — то есть ровно ту
-    /// ловушку, из-за которой кнопка и появилась.
+    /// The window has no second way back: no Dock icon, no menu bar, nothing in
+    /// ⌘-Tab. A closed window would leave a running program that cannot be seen
+    /// and cannot be reached except by a chord — exactly the trap the button was
+    /// added to remove.
     ///
-    /// Отказ во время прослушивания живёт не здесь, а в самой кнопке: она гаснет
-    /// вместе с `.closable`, и по красной кнопке, которая ничего не делает,
-    /// щёлкать не приходится. Проверка всё равно повторена — окно закрывают не
-    /// только мышью.
+    /// Refusing while listening lives in the button rather than here: it dims
+    /// along with `.closable`, so nobody clicks a red button that does nothing.
+    /// The check is repeated all the same — a window is not closed by the mouse
+    /// alone.
     func windowShouldClose(_ sender: NSWindow) -> Bool {
         guard session.canQuit else { return false }
         NSApplication.shared.terminate(nil)
         return false
     }
 
-    /// Гасит и зажигает красную кнопку вслед за прослушиванием.
+    /// Dims and restores the red button as listening starts and stops.
     ///
-    /// Через `isEnabled` самой кнопки, а не через `styleMask` окна. Первая
-    /// версия снимала `.closable` — на вид то же самое, погашенный кружок macOS
-    /// рисует и так, и так, — но `styleMask` менялся из `onAppear`, то есть
-    /// посреди раскладки SwiftUI, и AppKit бросал на это исключение прямо в
-    /// цикле отрисовки. Приложение падало при запуске, а под тестами это
-    /// выглядело как «0 tests passed»: host-приложение умирало раньше первого
-    /// теста, и прогон рапортовал успех, не выполнив ничего.
+    /// Through the button's own `isEnabled` rather than the window's `styleMask`.
+    /// The first version dropped `.closable` — visually the same, macOS draws the
+    /// dimmed circle either way — but `styleMask` was changed from `onAppear`,
+    /// that is, in the middle of a SwiftUI layout pass, and AppKit threw for it
+    /// inside the draw loop. The app crashed at launch, and under tests that read
+    /// as «0 tests passed»: the host application died before the first test and
+    /// the run reported success having executed nothing.
 
     func setCloseEnabled(_ enabled: Bool) {
         panel?.standardWindowButton(.closeButton)?.isEnabled = enabled

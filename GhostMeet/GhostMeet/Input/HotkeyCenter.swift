@@ -26,7 +26,7 @@ struct HotkeyActions {
     var stopListening: () -> Void = {}
     /// Жанр «коротко» — the press the whole app is built around (ADR-0008).
     var suggestBriefly: () -> Void = {}
-    /// Жанр «подробно».
+    /// The «подробно» genre.
     var suggestInDetail: () -> Void = {}
     /// Mode `Solve on screen`. Needs no session — the screen is the whole input —
     /// so this fires whether or not capture is running.

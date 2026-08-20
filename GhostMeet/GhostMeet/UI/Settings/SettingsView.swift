@@ -327,9 +327,9 @@ struct SettingsView: View {
     /// downloading happens in the recogniser, and the form stays usable.
     private var recognitionSection: some View {
         Section("Распознавание речи") {
-            // Выбор движка появляется только там, где есть из чего выбирать: на
-            // macOS младше 26 системного распознавателя не существует, и ряд с
-            // одним пунктом — это вопрос без выбора.
+            // The engine picker appears only where there is something to pick:
+            // below macOS 26 the system recogniser does not exist, and a row with
+            // one option is a question without a choice.
             if SpeechEngine.available.count > 1 {
                 SettingsRow("Движок") {
                     Picker("Движок", selection: engineSelection) {
@@ -380,8 +380,9 @@ struct SettingsView: View {
         }
     }
 
-    /// У Whisper качается модель, у системного движка — языковые файлы. Слово
-    /// «модель» на кнопке системного движка обещало бы не то, что произойдёт.
+    /// Whisper downloads a model, the system engine downloads language files.
+    /// The word «модель» on the system engine's button would promise something
+    /// other than what happens.
     private var phaseButtonTitle: String {
         if recognition.phase.isBusy { return String(localized: "Загружается…") }
         return recognition.engine == .system
@@ -684,7 +685,7 @@ struct SettingsView: View {
         relaunchNow()
     }
 
-    // MARK: - Обновления
+    // MARK: - Updates
 
     /// The one switch that decides whether the app talks to anything but the
     /// provider the user chose.
@@ -720,8 +721,8 @@ struct SettingsView: View {
             Text("Установлена версия \(installedVersion)")
                 .font(.footnote)
                 .foregroundStyle(.secondary)
-            // Без этой кнопки только что включённый переключатель не значит
-            // ничего до следующего запуска, а выглядит так, будто значит.
+            // Without this button a switch just turned on means nothing until
+            // the next launch, while looking as though it means something.
             Button("Проверить сейчас", action: checkForUpdates)
                 .disabled(!store.checksForUpdates)
             Text("Ответ появится строкой в окне GhostMeet — оно поверх этого.")

@@ -5,13 +5,13 @@
 
 import Foundation
 
-/// Дедупликация по тексту: the second layer against `Протечка канала`, and the
+/// Deduplication by text: the second layer against `Протечка канала`, and the
 /// only one that works on words instead of on decibels.
 ///
 /// A `Реплика` of `You` whose recognised text is the neighbouring `Реплика` of
 /// `Them` said again is not the user speaking — it is the interlocutor coming
-/// back out of the speakers. This layer is here because the first one, строгий
-/// режим, has a floor it cannot cross: it refuses to break a `Реплика` that was
+/// back out of the speakers. This layer is here because the first one, strict
+/// mode, has a floor it cannot cross: it refuses to break a `Реплика` that was
 /// already open, so a leak that opened one before the first loud `Them` frame
 /// arrived lands in the transcript whole (see `.scratch/no-vpio/issues/03-strict-mode.md`).
 /// Judging the words afterwards costs microseconds, depends on neither loudness
@@ -137,7 +137,7 @@ nonisolated enum LeakDedup {
         return Double(commonSubsequenceLength(mine, words(heard))) / Double(mine.count)
     }
 
-    // MARK: - Слова
+    // MARK: - Words
 
     /// The text as words that can be compared.
     ///
