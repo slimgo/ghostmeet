@@ -18,6 +18,10 @@ Design decisions referenced below live in [docs/adr/](docs/adr/); the product sp
 
 ## [Unreleased]
 
+Nothing yet.
+
+## [0.6.0] — 2026-08-20
+
 ### Added
 
 - **A second recognition engine: the system's own `SpeechAnalyzer`, on macOS 26 and
