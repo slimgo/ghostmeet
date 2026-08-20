@@ -59,6 +59,8 @@ final class SettingsStore {
         /// before ADR-0008".
         static let turnSegmentationVersion = "settings.turnSegmentation.version"
         static let speechModel = "settings.speechModel"
+        static let speechEngine = "settings.speechEngine"
+        static let speechLanguage = "settings.speechLanguage"
         static let themSourceApplication = "settings.themSourceApplication"
         static let themCaptureBackend = "settings.themCaptureBackend"
         static let providerSelection = "settings.providerSelection"
@@ -130,6 +132,23 @@ final class SettingsStore {
     /// choice made before an interview must still be there at the next one.
     var speechModel: WhisperModel {
         didSet { persist(speechModel, forKey: DefaultsKey.speechModel) }
+    }
+
+    /// Which engine recognises speech at all (ADR-0013).
+    ///
+    /// Belongs to the user like the model does, and for the same reason: it is a
+    /// property of this machine and this person's calls, not of one session.
+    var speechEngine: SpeechEngine {
+        didSet { persist(speechEngine, forKey: DefaultsKey.speechEngine) }
+    }
+
+    /// Language handed to the system engine.
+    ///
+    /// Read only when that engine is selected: Whisper works the language out of
+    /// the audio, while the system engine has to be told before it hears
+    /// anything (ADR-0013).
+    var speechLanguage: SpeechLanguage {
+        didSet { persist(speechLanguage, forKey: DefaultsKey.speechLanguage) }
     }
 
     /// Stable id of the application whose sound becomes the `Them` channel, or
@@ -350,6 +369,13 @@ final class SettingsStore {
         // leaving the app with no model at all.
         self.speechModel = Self.decode(WhisperModel.self, from: defaults, key: DefaultsKey.speechModel)
             ?? .default
+        // A stored engine this machine cannot run — settings carried over from a
+        // newer system, or a hand-edited value — falls back to Whisper rather
+        // than leaving recognition pointing at something that does not exist.
+        let storedEngine = Self.decode(SpeechEngine.self, from: defaults, key: DefaultsKey.speechEngine)
+        self.speechEngine = (storedEngine?.isAvailable ?? false) ? storedEngine! : .whisper
+        self.speechLanguage = Self.decode(SpeechLanguage.self, from: defaults, key: DefaultsKey.speechLanguage)
+            ?? .russian
         self.themSourceApplicationID = defaults.string(forKey: DefaultsKey.themSourceApplication)
         self.themCaptureBackend = defaults.string(forKey: DefaultsKey.themCaptureBackend)
             .flatMap(ThemCaptureBackend.init(rawValue:)) ?? .default

@@ -183,3 +183,137 @@ struct NativeSpeechAudioFormatTests {
         #expect(buffer.floatChannelData?[0][0] == 0.25)
     }
 }
+
+@Suite("Выбор движка распознавания")
+struct SpeechEngineChoiceTests {
+
+    @Test("Whisper есть всегда, системный — только на macOS 26")
+    func availabilityFollowsTheSystem() {
+        #expect(SpeechEngine.whisper.isAvailable)
+        if #available(macOS 26, *) {
+            #expect(SpeechEngine.system.isAvailable)
+            #expect(SpeechEngine.available.count == 2)
+        } else {
+            #expect(SpeechEngine.system.isAvailable == false)
+            #expect(SpeechEngine.available == [.whisper])
+        }
+    }
+
+    /// Язык нужен только системному движку: Whisper определяет его сам, и
+    /// спрашивать про него — предлагать выбор, который ничего не меняет.
+    @Test("Язык звонка спрашивается только у системного движка")
+    func onlyTheSystemEngineNeedsALanguage() {
+        #expect(SpeechEngine.system.needsExplicitLanguage)
+        #expect(SpeechEngine.whisper.needsExplicitLanguage == false)
+    }
+
+    @Test("Цена выбора названа у обоих движков и не совпадает")
+    func bothEnginesStateTheirPrice() {
+        for engine in SpeechEngine.allCases {
+            #expect(engine.tradeOff.isEmpty == false)
+            #expect(engine.displayName.isEmpty == false)
+        }
+        #expect(SpeechEngine.whisper.tradeOff != SpeechEngine.system.tradeOff)
+    }
+
+    @Test("Локали языков — те, что понимает система")
+    func languagesMapToLocales() {
+        #expect(SpeechLanguage.russian.localeIdentifier == "ru-RU")
+        #expect(SpeechLanguage.english.localeIdentifier == "en-US")
+    }
+
+    /// Настройки могут приехать с новой системы — например, вместе с домашней
+    /// папкой. Движок, которого здесь нет, обязан откатиться, а не остаться
+    /// выбранным: распознавание указывало бы на то, чего не существует.
+    @Test("Недоступный движок из настроек откатывается к Whisper")
+    @MainActor
+    func anUnavailableStoredEngineFallsBack() {
+        withOwnDefaults { defaults in
+            defaults.set(try? JSONEncoder().encode(SpeechEngine.system), forKey: "settings.speechEngine")
+            let store = SettingsStore(defaults: defaults, secrets: InMemorySecretStore())
+
+            if #available(macOS 26, *) {
+                #expect(store.speechEngine == .system)
+            } else {
+                #expect(store.speechEngine == .whisper)
+            }
+        }
+    }
+
+    @Test("Выбор языка переживает перезапуск")
+    @MainActor
+    func theChoiceIsRemembered() {
+        withOwnDefaults { defaults in
+            let store = SettingsStore(defaults: defaults, secrets: InMemorySecretStore())
+            store.speechLanguage = .english
+            #expect(SettingsStore(defaults: defaults, secrets: InMemorySecretStore()).speechLanguage == .english)
+        }
+    }
+
+    /// Реплика, уже ушедшая в распознавание, остаётся на своём движке: речь в
+    /// этом приложении не отменяется, и слова принадлежат транскрипту.
+    @Test("Подмена движка не трогает уже начатую реплику")
+    func aTurnInFlightKeepsItsEngine() async throws {
+        let slow = SlowRecognizer(text: "первый движок")
+        let switchable = SwitchableSpeechRecognizer(engine: .whisper, recognizer: slow)
+        let audio = SpeechAudio(samples: [0.1, 0.2], sampleRate: 16_000)
+
+        async let inFlight = switchable.transcribe(audio)
+        await slow.waitUntilStarted()
+        await switchable.swap(to: .whisper, recognizer: SlowRecognizer(text: "второй движок", released: true))
+        await slow.release()
+
+        #expect(try await inFlight == "первый движок")
+        #expect(try await switchable.transcribe(audio) == "второй движок")
+    }
+}
+
+/// Распознаватель, который ждёт, пока его отпустят.
+private actor SlowRecognizer: SpeechRecognizer {
+    private let text: String
+    private var started: CheckedContinuation<Void, Never>?
+    private var gate: CheckedContinuation<Void, Never>?
+    private var hasStarted = false
+    private var isReleased = false
+
+    /// `released: true` — распознаватель, который не задерживается: второй в
+    /// тесте нужен только чтобы ответить, и ждущий отпускания повесил бы прогон.
+    init(text: String, released: Bool = false) {
+        self.text = text
+        self.isReleased = released
+    }
+
+    func transcribe(_ audio: SpeechAudio) async throws -> String {
+        hasStarted = true
+        started?.resume()
+        started = nil
+        if !isReleased {
+            await withCheckedContinuation { gate = $0 }
+        }
+        return text
+    }
+
+    func waitUntilStarted() async {
+        guard !hasStarted else { return }
+        await withCheckedContinuation { started = $0 }
+    }
+
+    func release() {
+        isReleased = true
+        gate?.resume()
+        gate = nil
+    }
+}
+
+
+/// Свой изолированный домен настроек: одноимённый помощник в соседнем файле
+/// объявлен `private`, а два теста, делящих домен, портят друг другу состояние.
+private func withOwnDefaults<T>(_ body: (UserDefaults) throws -> T) rethrows -> T {
+    let name = "GhostMeetSpeechEngineTests.\(UUID().uuidString)"
+    let defaults = UserDefaults(suiteName: name)!
+    defer {
+        defaults.removePersistentDomain(forName: name)
+        UserDefaults.standard.removeSuite(named: name)
+    }
+    return try body(defaults)
+}

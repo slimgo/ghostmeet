@@ -33,15 +33,54 @@ final class SpeechModelStatus {
         set {
             guard newValue != store.speechModel else { return }
             store.speechModel = newValue
-            let recognizer = recognizer
-            Task { await recognizer.use(newValue) }
+            let whisper = whisperRecognizer
+            Task { await whisper.use(newValue) }
         }
     }
 
-    /// The recogniser to hand to `SessionEngine`. Behind `SpeechRecognizer` from
-    /// the engine's point of view — the concrete type is visible here only
-    /// because this is the type that drives its model.
-    let recognizer: WhisperSpeechRecognizer
+    /// Selected engine. Writing it persists the choice and swaps what is behind
+    /// the protocol, without tearing the session down.
+    var engine: SpeechEngine {
+        get { store.speechEngine }
+        set {
+            guard newValue != store.speechEngine, newValue.isAvailable else { return }
+            store.speechEngine = newValue
+            activate(newValue)
+        }
+    }
+
+    /// Language handed to the system engine. Ignored by Whisper.
+    var language: SpeechLanguage {
+        get { store.speechLanguage }
+        set {
+            guard newValue != store.speechLanguage else { return }
+            store.speechLanguage = newValue
+            guard store.speechEngine == .system, #available(macOS 26, *),
+                  let native = nativeRecognizer else { return }
+            Task {
+                await native.use(newValue.locale)
+                await native.prepare()
+            }
+        }
+    }
+
+    /// The recogniser to hand to `SessionEngine`.
+    ///
+    /// Deliberately the switchable wrapper and not either engine: the engine is
+    /// handed downwards once at launch, so without the wrapper changing it would
+    /// mean rebuilding the session.
+    let recognizer: SwitchableSpeechRecognizer
+
+    /// Whisper is built at launch either way — it is the fallback whenever the
+    /// system engine is unavailable, and building it downloads nothing.
+    ///
+    /// Visible to tests rather than private: which model reached Whisper is not
+    /// observable through the wrapper, and it is exactly what a test about the
+    /// model picker has to check.
+    @ObservationIgnored let whisperRecognizer: WhisperSpeechRecognizer
+
+    /// Built on first use, and only where it exists.
+    @ObservationIgnored private var nativeStorage: AnyObject?
 
     @ObservationIgnored private let store: SettingsStore
 
@@ -63,11 +102,49 @@ final class SpeechModelStatus {
         provider: any SpeechModelProvider = WhisperKitModelProvider()
     ) {
         self.store = store
-        self.recognizer = WhisperSpeechRecognizer(model: store.speechModel, provider: provider)
+        let whisper = WhisperSpeechRecognizer(model: store.speechModel, provider: provider)
+        self.whisperRecognizer = whisper
+        self.recognizer = SwitchableSpeechRecognizer(engine: .whisper, recognizer: whisper)
 
-        let recognizer = self.recognizer
+        activate(store.speechEngine)
+    }
+
+    /// Puts the chosen engine behind the protocol and follows its phase.
+    private func activate(_ engine: SpeechEngine) {
+        observation?.cancel()
+
+        guard engine == .system, #available(macOS 26, *) else {
+            let whisper = whisperRecognizer
+            let recognizer = recognizer
+            Task { await recognizer.swap(to: .whisper, recognizer: whisper) }
+            follow { await whisper.phaseUpdates() }
+            return
+        }
+
+        let native: NativeSpeechRecognizer
+        if let existing = nativeRecognizer {
+            native = existing
+        } else {
+            native = NativeSpeechRecognizer(locale: store.speechLanguage.locale)
+            nativeStorage = native
+        }
+        let recognizer = recognizer
+        Task { await recognizer.swap(to: .system, recognizer: native) }
+        follow { await native.phaseUpdates() }
+    }
+
+    @available(macOS 26, *)
+    private var nativeRecognizer: NativeSpeechRecognizer? {
+        nativeStorage as? NativeSpeechRecognizer
+    }
+
+    /// Mirrors one engine's phases onto the main actor.
+    ///
+    /// The window shows the phase of the engine actually behind the protocol;
+    /// following the other one would say "ready" while turns come back empty.
+    private func follow(_ phases: @escaping @Sendable () async -> AsyncStream<SpeechModelPhase>) {
         observation = Task { [weak self] in
-            for await phase in await recognizer.phaseUpdates() {
+            for await phase in await phases() {
                 Self.log.info("РАСПОЗНАВАНИЕ: \(phase.summary, privacy: .public)")
                 self?.phase = phase
             }
@@ -84,7 +161,11 @@ final class SpeechModelStatus {
     /// settings screen, deliberately, or by the first turn of a call. Starting a
     /// gigabyte-sized download because a window opened would be a surprise.
     func prepare() {
-        let recognizer = recognizer
-        Task { await recognizer.prepare() }
+        if store.speechEngine == .system, #available(macOS 26, *), let native = nativeRecognizer {
+            Task { await native.prepare() }
+            return
+        }
+        let whisper = whisperRecognizer
+        Task { await whisper.prepare() }
     }
 }

@@ -322,7 +322,7 @@ struct SpeechModelSelectionTests {
             status.model = .small
 
             #expect(store.speechModel == .small, "выбор попал в настройки")
-            #expect(await eventually { await status.recognizer.model == .small })
+            #expect(await eventually { await status.whisperRecognizer.model == .small })
         }
     }
 
