@@ -269,6 +269,17 @@
         }
       }
     },
+    "Whisper (на устройстве)": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Whisper (on device)"
+          }
+        }
+      }
+    },
     "_(не распознано)_": {
       "localizations": {
         "en": {
@@ -471,6 +482,17 @@
         }
       }
     },
+    "Английский": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "English"
+          }
+        }
+      }
+    },
     "Базовый адрес": {
       "localizations": {
         "en": {
@@ -507,6 +529,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "Fast, but often garbles technical terms in Russian."
+          }
+        }
+      }
+    },
+    "Быстрее в два-четыре раза и ничего не выдумывает в паузах. На русском теряет термины и знаки препинания; язык звонка нужно выбрать заранее.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Two to four times faster, and invents nothing during pauses. On Russian it loses technical terms and punctuation; the call's language has to be chosen in advance."
           }
         }
       }
@@ -681,6 +714,17 @@
         }
       }
     },
+    "Движок": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Engine"
+          }
+        }
+      }
+    },
     "Действию «%@» не досталось комбинации — выберите её в списке, иначе оно не сработает.": {
       "localizations": {
         "en": {
@@ -811,6 +855,17 @@
         }
       }
     },
+    "Загрузить язык": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Download language"
+          }
+        }
+      }
+    },
     "Загрузка": {
       "localizations": {
         "en": {
@@ -877,6 +932,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "Sound goes to the speakers, and the microphone is %@, which could not be identified. If it sits next to the laptop, the interviewer's voice will land in the You channel. With headphones this never happens at all."
+          }
+        }
+      }
+    },
+    "Звук не удалось привести к формату системного распознавателя": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The audio could not be converted to the format the system recogniser asked for"
           }
         }
       }
@@ -2825,6 +2891,39 @@
         }
       }
     },
+    "Системный (macOS 26)": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "System (macOS 26)"
+          }
+        }
+      }
+    },
+    "Системный распознаватель не знает языка %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The system recogniser does not know the language %@"
+          }
+        }
+      }
+    },
+    "Системный распознаватель нужно предупредить о языке заранее: он не определяет его сам. Реплики на другом языке будут искажены.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The system recogniser has to be told the language in advance — it does not work it out. Turns in another language come back mangled."
+          }
+        }
+      }
+    },
     "Скачивание модели — %lld%%": {
       "localizations": {
         "en": {
@@ -3125,6 +3224,17 @@
         }
       }
     },
+    "Точнее на терминах, ставит знаки препинания и сам определяет язык. Медленнее и требует загрузки модели.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "More accurate on technical terms, punctuates, and works out the language by itself. Slower, and needs a model download."
+          }
+        }
+      }
+    },
     "Удалить": {
       "localizations": {
         "en": {
@@ -3291,6 +3401,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "Language"
+          }
+        }
+      }
+    },
+    "Язык звонка": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Call language"
           }
         }
       }

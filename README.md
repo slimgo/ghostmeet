@@ -182,8 +182,11 @@ Two traps worth knowing before you touch the project file:
 - Both `Them` backends work at **application** granularity. Neither can isolate the browser tab
   with the call from the rest of the browser.
 - The build is not notarised, and will not be without a paid Developer ID.
-- `SpeechAnalyzer` (macOS 26) is faster but has no Russian locale, so it is scoped to
-  English-language calls and is not built yet.
+- The system recogniser (`SpeechAnalyzer`, macOS 26) loses technical terms in Russian and
+  returns no punctuation, so Whisper stays the default there; on English the two are level on
+  words and the system one is three times faster. Either can be chosen in settings, and the
+  system engine has to be told the call's language in advance —
+  [ADR-0013](docs/adr/0013-native-recogniser-knows-russian-but-loses-the-terms.md).
 
 ## Where the decisions live
 
