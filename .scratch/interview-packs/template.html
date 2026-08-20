@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="ru">
+<html lang="__LANG__">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -95,25 +95,11 @@
 <header>
   <h1>__TITLE__</h1>
   <p class="lede">
-    Одно интервью на позицию <b>__ROLE__</b> — от «здравствуйте» до «мы вернёмся с ответом».
-    Страница ведёт его последовательно: задаёт вопрос голосом и <b>ждёт</b>, пока вы ответите. На что-то отвечайте сами,
-    на что-то жмите аккорд GhostMeet — так и проверяется, ради чего всё делалось.
+__T_LEDE__
   </p>
 
   <div class="hint">
-    <b>Перед началом.</b> Выберите этот браузер источником канала <code>Them</code> в настройках GhostMeet и включите
-    прослушивание. <b>Первый прогон делайте без наушников</b> — это худший случай, и проверять надо его.<br><br>
-    <b>Как идти.</b> «Начать интервью» — дальше страница играет вступление и первый вопрос, потом ждёт. Отвечаете вслух
-    сами или жмёте <code>⌥⌘A</code> / <code>⌥⌘Z</code> и читаете подсказку. Ответили — «Дальше».
-    Метка у вопроса — <b>подсказка, а не правило</b>: где я ожидаю, что вы ответите сами, где стоит попросить коротко,
-    а где — развёрнуто.<br><br>
-    <b>Метка «заготовка»</b> — вопрос, ответ на который должен прийти из «Контекста собеседования» в настройках.
-    Если приходит выдуманная вилка или чужая история — это дефект, запишите дословно.<br><br>
-    <b>Паузы здесь не длиннее секунды</b> — короче порога, по которому GhostMeet закрывает реплику (1.5 с),
-    так что вопрос доезжает одной записью. Хотите проверить обратный случай — поднимите ползунок «Паузы»
-    до 2×, и разрывы станут длиннее порога; помеченные красным как раз такие.<br><br>
-    <b>Вкладку не прячьте</b> — в невидимой вкладке браузер загрубляет таймеры до секунды, и паузы поедут.
-    Если синтез звучит мимо браузера, переключите канал <code>Them</code> на Core Audio Process Tap.
+__T_HINT__
   </div>
 </header>
 </div>
@@ -121,57 +107,57 @@
 <div class="controls">
   <div class="wrap controls-inner">
     <div class="field">
-      <label for="voice1">Голос интервьюера</label>
+      <label for="voice1">__T_VOICE1__</label>
       <select id="voice1"></select>
     </div>
     <div class="field">
-      <label for="voice2">Голос второго</label>
+      <label for="voice2">__T_VOICE2__</label>
       <select id="voice2"></select>
     </div>
     <div class="field">
-      <label for="rate">Темп <span class="val" id="rateVal">1.00</span></label>
+      <label for="rate">__T_RATE__<span class="val" id="rateVal">1.00</span></label>
       <input type="range" id="rate" min="0.6" max="1.4" step="0.05" value="1">
     </div>
     <div class="field">
-      <label for="gap">Паузы <span class="val" id="gapVal">1.0×</span></label>
+      <label for="gap">__T_GAP__<span class="val" id="gapVal">1.0×</span></label>
       <input type="range" id="gap" min="0.3" max="2.5" step="0.1" value="1">
     </div>
     <div class="field">
-      <label for="lively">Живость</label>
+      <label for="lively">__T_LIVELY__</label>
       <select id="lively">
-        <option value="on" selected>с запинками</option>
-        <option value="off">ровно</option>
+        <option value="on" selected>__T_FILLER_ON__</option>
+        <option value="off">__T_FILLER_OFF__</option>
       </select>
     </div>
     <div class="field">
       <label>&nbsp;</label>
-      <button id="start" class="primary">Начать интервью</button>
+      <button id="start" class="primary">__T_START__</button>
     </div>
     <div class="field">
       <label>&nbsp;</label>
-      <button id="next" disabled>Дальше →</button>
+      <button id="next" disabled>__T_NEXT__</button>
     </div>
     <div class="field">
       <label>&nbsp;</label>
-      <button id="again" disabled>Повторить вопрос</button>
+      <button id="again" disabled>__T_AGAIN__</button>
     </div>
     <div class="field">
       <label>&nbsp;</label>
-      <button id="stop" class="stop" disabled>Стоп</button>
+      <button id="stop" class="stop" disabled>__T_STOP__</button>
     </div>
   </div>
 </div>
 
 <div class="wrap">
   <div class="stage">
-    <div class="stage-state" id="state">готов</div>
+    <div class="stage-state" id="state">__T_READY__</div>
     <div class="stage-text" id="now">—</div>
     <div class="bar"><i id="progress"></i></div>
-    <div class="stage-meta" id="meta">Нажмите «Начать интервью».</div>
+    <div class="stage-meta" id="meta">__T_PRESS_START__</div>
   </div>
   <div class="track"><i id="track"></i></div>
 
-  <h2>Что вписать в настройки перед прогоном</h2>
+  <h2>__T_SETUP_TITLE__</h2>
   <div class="panel" id="setup"></div>
 
   <div id="list"></div>
@@ -201,17 +187,19 @@
 // последний кусок нарочно короткий — это тот хвост, который терялся при
 // дозакрытии реплики по нажатию.
 // ---------------------------------------------------------------------------
+const LANG = '__LANG__';
+const T = __STRINGS__;
 const SCRIPT = __SCRIPT__;
 const SETUP = __SETUP__;
 
 const HINTS = {
-  self: ['self', 'отвечайте сами'],
-  brief: ['brief', '⌥⌘A — коротко'],
-  detail: ['detail', '⌥⌘Z — подробно'],
-  context: ['context', 'заготовка'],
+  self: ['self', T.hintSelf],
+  brief: ['brief', T.hintBrief],
+  detail: ['detail', T.hintDetail],
+  context: ['context', T.hintContext],
 };
 
-const FILLERS = ['ммм,', 'так,', 'ну,', 'вот,', 'эээ,'];
+const FILLERS = T.fillers;
 
 const synth = window.speechSynthesis;
 const el = (id) => document.getElementById(id);
@@ -229,7 +217,7 @@ function render() {
   SCRIPT.forEach((s, i) => {
     if (s.phase !== phase) { phase = s.phase; html += `<h2>${phase}</h2>`; }
     const body = s.chunks.map(([text, gap]) => {
-      const mark = gap ? `<span class="gap ${gap > 1500 ? 'long' : ''}">▮${(gap / 1000).toFixed(1)}с</span>` : '';
+      const mark = gap ? `<span class="gap ${gap > 1500 ? 'long' : ''}">▮${(gap / 1000).toFixed(1)}${T.secShort}</span>` : '';
       return `<span>${text}</span>${mark}`;
     }).join(' ');
     const cuts = s.chunks.filter((c) => c[1] > 1500).length;
@@ -240,8 +228,8 @@ function render() {
         <div class="item-body">
           <p class="item-text">${body}</p>
           <div class="tags">
-            ${hint ? `<span class="badge ${hint[0]}">${hint[1]}</span>` : '<span class="badge">реплика интервьюера</span>'}
-            ${cuts ? `<b>${cuts}</b> паузы длиннее порога · ` : ''}${s.chunks.length} кусков${s.tail ? ' · короткий хвост' : ''}
+            ${hint ? `<span class="badge ${hint[0]}">${hint[1]}</span>` : `<span class="badge">${T.badgeTalk}</span>`}
+            ${cuts ? `<b>${cuts}</b> ${T.gapsOverThreshold} · ` : ''}${s.chunks.length} ${T.chunks}${s.tail ? ' · ' + T.shortTail : ''}
           </div>
         </div>
       </div>`;
@@ -268,7 +256,11 @@ function render() {
 function loadVoices() {
   const all = synth.getVoices();
   if (!all.length) return;
-  const ru = all.filter((v) => v.lang && v.lang.toLowerCase().startsWith('ru'));
+  // Голоса — только на языке пака. Первая версия показывала все голоса
+  // системы, и второму интервьюеру доставался китайский: сто восемьдесят строк
+  // в списке, из которых нужны две. Язык берётся из сценария, потому что
+  // английский пак с русскими голосами так же бесполезен, как наоборот.
+  const ru = all.filter((v) => v.lang && v.lang.toLowerCase().startsWith(LANG));
   voices = ru.length ? ru : all;
 
   const options = (chosen) => voices
@@ -281,11 +273,11 @@ function loadVoices() {
   el('voice2').innerHTML = options(voices.length > 1 ? 1 : 0);
 
   if (!ru.length) {
-    stage.meta.textContent = 'Русских голосов в системе не нашлось, в списке — все остальные. Поставить русский: «Системные настройки» → «Универсальный доступ» → «Устная речь» → «Системный голос» → «Настроить».';
+    stage.meta.textContent = T.noVoices;
   } else if (ru.length === 1) {
-    stage.meta.textContent = 'Русский голос в системе один — второго интервьюера отличает тембр. Ещё голоса: «Системные настройки» → «Универсальный доступ» → «Устная речь» → «Системный голос» → «Настроить».';
+    stage.meta.textContent = T.oneVoice;
   } else {
-    stage.meta.textContent = `Русских голосов: ${ru.length}. Нажмите «Начать интервью».`;
+    stage.meta.textContent = T.voicesFound.replace('%d', ru.length);
   }
 }
 loadVoices();
@@ -322,7 +314,7 @@ function speak(text, rate, who) {
  * анимация, а не сама пауза.
  */
 function pause(ms, token) {
-  stage.state.textContent = `пауза ${(ms / 1000).toFixed(1)} с`;
+  stage.state.textContent = `${T.pause} ${(ms / 1000).toFixed(1)} ${T.secShort}`;
   stage.state.className = 'stage-state pausing';
   const began = performance.now();
   let frame = requestAnimationFrame(function tick() {
@@ -359,7 +351,7 @@ async function play(index, token) {
   card.classList.remove('done');
   card.scrollIntoView({ block: 'center', behavior: 'smooth' });
 
-  const number = s.kind === 'q' ? `вопрос ${questionNumber(index)} из ${questionCount}` : 'реплика';
+  const number = s.kind === 'q' ? `${T.question} ${questionNumber(index)} ${T.of} ${questionCount}` : T.line;
   el('track').style.width = `${(questionNumber(index) / questionCount) * 100}%`;
 
   for (let i = 0; i < s.chunks.length; i++) {
@@ -371,7 +363,7 @@ async function play(index, token) {
       text = `${FILLERS[Math.floor(Math.random() * FILLERS.length)]} ${text}`;
     }
     const rate = lively ? baseRate * (1 + (Math.random() - 0.5) * 0.16) : baseRate;
-    stage.state.textContent = `говорит · кусок ${i + 1} из ${s.chunks.length}`;
+    stage.state.textContent = `${T.speaking} · ${T.chunk} ${i + 1} ${T.of} ${s.chunks.length}`;
     stage.state.className = 'stage-state speaking';
     stage.now.textContent = text;
     stage.meta.textContent = `${s.phase} · ${number}${elapsed()}`;
@@ -395,9 +387,9 @@ async function advanceFrom(index) {
     if (SCRIPT[i].kind === 'q') {
       waiting = true;
       const hint = SCRIPT[i].hint ? HINTS[SCRIPT[i].hint][1] : '';
-      stage.state.textContent = `ваш ход${hint ? ' — ' + hint : ''}`;
+      stage.state.textContent = `${T.yourTurn}${hint ? ' — ' + hint : ''}`;
       stage.state.className = 'stage-state waiting';
-      stage.meta.textContent = `${SCRIPT[i].phase} · вопрос ${questionNumber(i)} из ${questionCount}${elapsed()} · отвечайте и жмите «Дальше»`;
+      stage.meta.textContent = `${SCRIPT[i].phase} · ${T.question} ${questionNumber(i)} ${T.of} ${questionCount}${elapsed()} · ${T.answerThenNext}`;
       el('next').disabled = false;
       el('again').disabled = false;
       el('stop').disabled = true;
@@ -405,9 +397,9 @@ async function advanceFrom(index) {
     }
   }
 
-  stage.state.textContent = 'интервью закончено';
+  stage.state.textContent = T.finished;
   stage.state.className = 'stage-state';
-  stage.meta.textContent = `Прошло${elapsed()}. Спасибо — теперь запишите, что не сошлось.`;
+  stage.meta.textContent = `${T.elapsedPrefix}${elapsed()}. ${T.thanks}`;
   el('next').disabled = true;
   el('again').disabled = true;
   el('stop').disabled = true;
@@ -423,7 +415,7 @@ function stopAll() {
   synth.cancel();
   waiting = false;
   stage.bar.style.width = '0%';
-  stage.state.textContent = 'пауза';
+  stage.state.textContent = T.pause;
   stage.state.className = 'stage-state';
   el('stop').disabled = true;
   el('next').disabled = cursor < 0;
@@ -437,7 +429,7 @@ el('start').addEventListener('click', () => {
   document.querySelectorAll('.item.done').forEach((n) => n.classList.remove('done'));
   startedAt = null;
   cursor = -1;
-  el('start').textContent = 'Начать заново';
+  el('start').textContent = T.startOver;
   advanceFrom(0);
 });
 el('next').addEventListener('click', () => {
@@ -466,20 +458,20 @@ document.addEventListener('keydown', (e) => {
  */
 function renderSetup() {
   const block = (title, text) => `
-    <h3>${title}<button class="copy" data-copy="${encodeURIComponent(text)}">Скопировать</button></h3>
+    <h3>${title}<button class="copy" data-copy="${encodeURIComponent(text)}">${T.copy}</button></h3>
     <pre>${text.replace(/</g, '&lt;')}</pre>`;
   el('setup').innerHTML =
-    block('Профиль', `Роль: ${SETUP.profile.role}\nОпыт: ${SETUP.profile.experience}\nСтек: ${SETUP.profile.stack}`)
-    + block('Истории из практики', SETUP.context.stories)
-    + block('Почему эта компания', SETUP.context.motivation)
-    + block('Ожидания по деньгам', SETUP.context.compensation)
-    + block('Вопросы к работодателю', SETUP.context.questions);
+    block(T.profile, `${T.role}: ${SETUP.profile.role}\n${T.experience}: ${SETUP.profile.experience}\n${T.stack}: ${SETUP.profile.stack}`)
+    + block(T.stories, SETUP.context.stories)
+    + block(T.motivation, SETUP.context.motivation)
+    + block(T.compensation, SETUP.context.compensation)
+    + block(T.questions, SETUP.context.questions);
 
   el('setup').querySelectorAll('[data-copy]').forEach((b) => {
     b.addEventListener('click', () => {
       navigator.clipboard.writeText(decodeURIComponent(b.dataset.copy));
-      b.textContent = 'скопировано';
-      setTimeout(() => b.textContent = 'Скопировать', 1500);
+      b.textContent = T.copied;
+      setTimeout(() => b.textContent = T.copy, 1500);
     });
   });
 }

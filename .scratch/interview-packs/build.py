@@ -13,6 +13,7 @@
 """
 
 import json
+import re
 import pathlib
 import shutil
 import zipfile
@@ -20,6 +21,7 @@ import zipfile
 HERE = pathlib.Path(__file__).parent
 TEMPLATE = HERE / "template.html"
 SCRIPTS = HERE / "scripts"
+STRINGS = HERE / "strings"
 DIST = HERE / "dist"
 
 # Порог, по которому приложение закрывает реплику, — 1.5 с. Паузы в паках
@@ -40,6 +42,19 @@ def load(path: pathlib.Path) -> dict:
     return data
 
 
+def strings(language: str) -> dict:
+    """Словарь страницы на языке пака.
+
+    Плеер один на оба языка: он редко меняется, а два его экземпляра разошлись
+    бы на первой же правке — ровно так, как расходятся два описания одного
+    порядка. Языковое здесь только это, и оно снаружи.
+    """
+    path = STRINGS / f"{language}.json"
+    if not path.exists():
+        raise SystemExit(f"нет словаря для языка «{language}»: {path}")
+    return json.loads(path.read_text(encoding="utf-8"))
+
+
 def page(data: dict, template: str) -> str:
     script = [
         {
@@ -53,13 +68,29 @@ def page(data: dict, template: str) -> str:
         for e in data["entries"]
     ]
     setup = {"profile": data["profile"], "context": data["context"]}
-    return (
+    # Язык объявлен в самом сценарии: от него зависят и словарь страницы, и —
+    # что важнее — голоса. Английский пак, читаемый русским голосом, не
+    # проверяет ничего.
+    language = data.get("language", "ru")
+    words = strings(language)
+    html = (
         template
-        .replace("__TITLE__", f"Собеседование — {data['title']}")
+        .replace("__LANG__", language)
+        .replace("__TITLE__", f"{words['pageTitle']} — {data['title']}")
         .replace("__ROLE__", data["title"])
+        .replace("__STRINGS__", json.dumps(words, ensure_ascii=False, indent=1))
         .replace("__SCRIPT__", json.dumps(script, ensure_ascii=False, indent=1))
         .replace("__SETUP__", json.dumps(setup, ensure_ascii=False, indent=1))
     )
+    # Плейсхолдеры разметки — то, что подставляется один раз и не участвует в
+    # коде страницы.
+    for key, value in words.items():
+        if key.isupper():
+            html = html.replace(f"__T_{key}__", value)
+    leftover = re.search(r"__T_[A-Z_]+__|__LANG__|__STRINGS__", html)
+    if leftover:
+        raise SystemExit(f"{data['slug']}: в странице остался плейсхолдер {leftover.group(0)}")
+    return html
 
 
 def index(packs: list[dict]) -> str:
