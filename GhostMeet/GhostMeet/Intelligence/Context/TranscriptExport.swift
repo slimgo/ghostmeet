@@ -15,7 +15,7 @@ import Foundation
 /// testable at all.
 nonisolated enum TranscriptExport {
 
-    // MARK: - Что известно о звонке помимо реплик
+    // MARK: - What is known about the call besides the turns
 
     /// The header of the file: what the call was, not what was said in it.
     ///
@@ -65,7 +65,7 @@ nonisolated enum TranscriptExport {
         }
     }
 
-    // MARK: - Одна запись ленты
+    // MARK: - One entry of the feed
 
     /// A line of the file, already on one clock.
     private struct Entry {
@@ -74,7 +74,7 @@ nonisolated enum TranscriptExport {
         let body: String
     }
 
-    // MARK: - Сборка
+    // MARK: - Assembly
 
     /// The whole file.
     ///
@@ -200,7 +200,7 @@ nonisolated enum TranscriptExport {
         return lines.joined(separator: "\n\n")
     }
 
-    // MARK: - Шапка
+    // MARK: - Header
 
     private static func header(metadata: Metadata, entries: [Entry], dropped: Int) -> String {
         var facts: [String] = []
@@ -241,7 +241,7 @@ nonisolated enum TranscriptExport {
         return last.at.timeIntervalSince(first.at)
     }
 
-    // MARK: - Время
+    // MARK: - Time
 
     /// `мм:сс` from the first record. Relative rather than absolute on purpose:
     /// nobody reading a conversation back needs to know it was 15:42, and

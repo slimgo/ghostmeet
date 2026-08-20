@@ -165,8 +165,8 @@ private struct SuggestionCard: View {
         case .streaming: .accentColor
         case .complete: isLatest ? .accentColor : .secondary
         case .superseded: .secondary
-        // Тем же жёлтым, что и отказ, но заголовок другой: ответ на месте и его
-        // можно читать вслух, просто он не дописан.
+        // The same yellow as a failure, but a different heading: the answer is
+        // there and can be read aloud, it simply was not finished.
         case .cut: .orange
         case .failed: .orange
         }
@@ -214,19 +214,20 @@ private struct SuggestionCard: View {
                 // its second of latency back on the first line arriving early).
                 SuggestionMarkupView(text: suggestion.text)
             }
-            // Причина обрыва идёт ПОД текстом, а не вместо него: половина
-            // ответа читается вслух и стоит того, чтобы её видеть, а строка
-            // объясняет, почему фраза кончилась на полуслове.
+            // The reason for the cut-off goes BELOW the text rather than in its
+            // place: half an answer can still be read aloud and is worth seeing,
+            // and the line explains why the sentence stopped mid-word.
             if case .cut(let reason) = suggestion.state {
                 cutLine(reason)
             }
         }
     }
 
-    /// Почему ответ кончился раньше, чем модель договорила.
+    /// Why the answer ended before the model had finished.
     ///
-    /// Не `noticeLine`: та говорит об условиях, при которых ответ собирался, и
-    /// стоит над ним. Эта строка — о том, что с самим ответом, и стоит под ним.
+    /// Not `noticeLine`: that one speaks about the conditions the answer was
+    /// composed under and stands above it. This line is about the answer itself
+    /// and stands below it.
     private func cutLine(_ text: String) -> some View {
         Label {
             Text(text)
@@ -270,7 +271,7 @@ private struct SuggestionCard: View {
             state: .complete,
             startedAt: Date()
         ),
-        // Три одинаковых отказа подряд — на экране одна карточка с «×3».
+        // Three identical failures in a row show as one card marked «×3».
         Suggestion(state: .failed(LLMFailure.missingKey.message), startedAt: Date()),
         Suggestion(state: .failed(LLMFailure.missingKey.message), startedAt: Date()),
         Suggestion(state: .failed(LLMFailure.missingKey.message), startedAt: Date()),

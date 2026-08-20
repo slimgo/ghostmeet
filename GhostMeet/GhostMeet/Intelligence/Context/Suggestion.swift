@@ -36,7 +36,7 @@ nonisolated struct Suggestion: Identifiable, Equatable, Sendable {
     nonisolated enum Kind: Equatable, Sendable {
         /// Жанр «коротко» — the default press.
         case brief
-        /// Жанр «подробно».
+        /// The «подробно» genre.
         case detailed
         /// Mode `Ask`, with the question the user typed.
         case question(String)

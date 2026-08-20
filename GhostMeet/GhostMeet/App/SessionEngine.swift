@@ -440,7 +440,7 @@ final class SessionEngine {
         }
     }
 
-    // MARK: - Что просит пользователь
+    // MARK: - What the user asks for
 
     /// Жанр «коротко» — the default press.
     ///
@@ -566,11 +566,11 @@ final class SessionEngine {
     /// what was said; it does not depend on what became of the suggestion.
     private func closeOpenTurns() {
         defer {
-            // Всё, что записано к этому моменту, уходит в модель прямо сейчас —
-            // значит, следующая реплика начинает новую мысль, как бы близко она
-            // ни стояла по времени. Метка ставится ПОСЛЕ дозакрытия: границей
-            // должна стать последняя реплика вместе с дозакрытым хвостом
-            // вопроса, а не та, что была до него.
+            // Everything recorded up to this point goes to the model right now,
+            // which means the next turn starts a new thought however close it
+            // sits in time. The mark is set AFTER the forced close: the boundary
+            // has to be the last turn together with the closed-off tail of the
+            // question, not the one standing before it.
             if let last = transcript.indices.last { transcript[last].isBeforePress = true }
         }
         for channel in [Channel.them, .you] {
@@ -610,16 +610,17 @@ final class SessionEngine {
     /// is indistinguishable from an answer built from the question, and without a
     /// word the user blames the model for it. `Solve on screen` gets no notice:
     /// it reads no conversation, so listening changes nothing about its answer.
-    /// **Второй случай найден первым же живым прогоном, и он был молчаливым.**
-    /// Интервьюер задал вопрос, пользователь нажал — распознавание последней
-    /// реплики не уложилось в бюджет, запрос ушёл без неё, и модель ответила на
-    /// предыдущий вопрос. Ответ при этом выглядел совершенно обычно: он связный,
-    /// он по теме разговора, он просто не про то, что спросили секунду назад.
-    /// Отличить это от «модель не поняла вопрос» пользователь не мог никак.
+    /// **The second case was found by the very first live run, and it was silent.**
+    /// The interviewer asked a question, the user pressed — recognition of the
+    /// last turn did not fit the budget, the request went without it, and the
+    /// model answered the previous question. The answer looked entirely ordinary:
+    /// coherent, on the topic of the conversation, simply not about what had been
+    /// asked a second earlier. There was no way for the user to tell this apart
+    /// from «модель не поняла вопрос».
     ///
-    /// Запрос по-прежнему уходит: ждать дольше — значит терять то, ради чего
-    /// нажали. Но теперь над ответом стоит строка, и следующее нажатие уже
-    /// застанет слова в транскрипте — распознавание не отменяется никогда.
+    /// The request still goes out: waiting longer means losing the very thing the
+    /// press was for. But a line now stands above the answer, and the next press
+    /// finds the words in the transcript — recognition is never cancelled.
     private func notice(for ask: SuggestionAsk, heardEverything: Bool) -> String? {
         guard ask.readsTranscript else { return nil }
         if !isListening { return String(localized: "Прослушивание выключено — отвечаю только по экрану.") }

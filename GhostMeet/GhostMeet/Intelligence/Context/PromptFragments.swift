@@ -244,15 +244,15 @@ nonisolated enum PromptFragment {
     ///
     /// The code exception is structural: `Assist` answers a screen task with a
     /// fenced block, and nobody reads an identifier out loud.
-    /// Правило скобок **только для русского разговора**.
+    /// The bracket rule is **for a Russian conversation only**.
     ///
-    /// На английском собеседовании ответ приходит английским — язык ответа
-    /// следует разговору, — и кириллический глосс посреди произносимой вслух
-    /// английской фразы делает её нечитаемой. Поэтому на английском правила в
-    /// промпте просто нет: отсутствующее правило нельзя выполнить наполовину,
-    /// а оговорку «только когда по-русски» девять кириллических примеров рядом
-    /// перевесили бы — в этом проекте записано, что образцы исполняются охотнее,
-    /// чем запреты соблюдаются.
+    /// In an English interview the answer comes back in English — the answer
+    /// follows the conversation — and a Cyrillic gloss in the middle of a spoken
+    /// English sentence makes it unreadable. So in English the rule is simply not
+    /// in the prompt: a rule that is absent cannot be half-obeyed, whereas a
+    /// caveat «только когда по-русски» would be outweighed by the nine Cyrillic
+    /// examples beside it — this project has recorded that examples get executed
+    /// more readily than prohibitions get observed.
     static func pronunciation(for language: ConversationLanguage) -> String {
         language == .russian ? pronunciation : ""
     }

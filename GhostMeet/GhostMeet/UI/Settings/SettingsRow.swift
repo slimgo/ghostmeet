@@ -51,9 +51,10 @@ enum SettingsMetrics {
 struct SettingsRow<Control: View>: View {
 
     /// `LocalizedStringKey`, а не `String`, и это важнее, чем выглядит:
-    /// `Text(строка)` не переводится вовсе, а `Text(ключ)` — переводится. С
-    /// `String` подписи полей молча остались бы русскими на английском окне, и
-    /// нашёл это тест, меряющий английские подписи в колонке.
+    /// `Text(строка)` is not localized at all while `Text(ключ)` is. With a
+    /// `String` the field labels would silently stay Russian on an English
+    /// window — which is what the test measuring English labels in the column
+    /// found.
     let title: LocalizedStringKey
     @ViewBuilder let control: Control
 
@@ -100,9 +101,9 @@ struct SettingsRow<Control: View>: View {
 /// as misaligned no matter how wide the column is.
 struct SettingsParagraphRow<Control: View>: View {
 
-    /// Здесь `String`, а не ключ: часть подписей приходит готовой строкой уже на
-    /// языке интерфейса — `InterviewContext.Field.screenLabel`, — и второй раз
-    /// её переводить не по чему.
+    /// A `String` here rather than a key: some labels arrive already built in
+    /// the interface language — `InterviewContext.Field.screenLabel` — and there
+    /// is nothing to translate them against a second time.
     let title: String
     @ViewBuilder let control: Control
 

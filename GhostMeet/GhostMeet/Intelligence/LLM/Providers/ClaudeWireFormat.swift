@@ -88,13 +88,15 @@ nonisolated enum ClaudeWireFormat {
             case "max_tokens", "model_context_window_exceeded":
                 return [.cut(.budget)]
             case "refusal":
-                // Классификатор остановил генерацию и вернул уже написанное.
-                // Пока текста нет — это отказ; появился текст — цикл чтения
-                // сделает из этого обрыв и текст сохранит.
+                // A classifier stopped the generation and returned what had
+                // been written. While there is no text this is a failure; once
+                // text exists the read loop turns it into a cut-off and keeps
+                // what arrived.
                 return [.failure(.provider(String(localized: "Модель отказалась продолжать.")))]
-            // Всё остальное — нормальный конец. Умолчание намеренно доброе:
-            // список причин у Anthropic растёт, и объявлять незнакомую обрывом
-            // значило бы поднимать тревогу на каждом новом слове в протоколе.
+            // Everything else is an ordinary end. The default is generous on
+            // purpose: Anthropic's list of reasons keeps growing, and calling an
+            // unfamiliar one a cut-off would raise an alarm at every new word in
+            // the protocol.
             default:
                 return [.done]
             }

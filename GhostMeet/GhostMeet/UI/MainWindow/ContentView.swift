@@ -77,16 +77,17 @@ struct ContentView: View {
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
         .background(.regularMaterial)
         .clipShape(RoundedRectangle(cornerRadius: controller.cornerRadius, style: .continuous))
-        // Содержимое занимает окно целиком, включая полосу заголовка.
+        // The content fills the whole window, title bar included.
         //
-        // `.fullSizeContentView` растягивает туда contentView, но SwiftUI сам
-        // отступает от заголовка — и карточка начиналась НИЖЕ красной кнопки,
-        // из-за чего та выглядела висящей над окном отдельной полоской.
+        // `.fullSizeContentView` stretches the contentView up there, but SwiftUI
+        // insets itself from the title bar on its own — so the card began BELOW
+        // the red button, which then looked like a separate strip hanging above
+        // the window.
         //
-        // Именно так, а не `NSHostingView.safeAreaRegions = []`: тот путь роняет
-        // приложение на старте. AppKit бросает исключение прямо в цикле
-        // отрисовки, и под тестами это выглядит особенно подло — host-приложение
-        // умирает раньше первого теста, а прогон рапортует «0 tests passed».
+        // This way and not `NSHostingView.safeAreaRegions = []`: that path
+        // crashes the app at launch. AppKit throws inside the draw loop, and
+        // under tests it looks especially nasty — the host application dies
+        // before the first test and the run reports «0 tests passed».
         .ignoresSafeArea()
     }
 
@@ -115,15 +116,15 @@ struct ContentView: View {
 
             precallStrip
         }
-        // Слева отступ больше: там живёт красная кнопка закрытия, и индикаторы
-        // каналов не должны стоять под ней. Кнопка одна, а не три — свернуть и
-        // развернуть у оверлея скрыты, — поэтому 44, а не привычные для полного
-        // светофора семьдесят.
+        // Wider inset on the left: the red close button lives there and the
+        // channel indicators must not sit under it. There is one button rather
+        // than three — miniaturise and zoom are hidden on the overlay — hence 44
+        // instead of the seventy a full set of lights would need.
         .padding(.leading, 44)
         .padding(.trailing, 12)
         .padding(.vertical, 8)
-        // Кнопка гаснет и зажигается вслед за прослушиванием. Правило живёт в
-        // `SessionController.canQuit`, окно только показывает его.
+        // The button dims and lights up with listening. The rule lives in
+        // `SessionController.canQuit`; the window only shows it.
         .onChange(of: session.canQuit) { _, canQuit in controller.setCloseEnabled(canQuit) }
         .onAppear { controller.setCloseEnabled(session.canQuit) }
     }
@@ -137,7 +138,7 @@ struct ContentView: View {
         }
     }
 
-    // MARK: - Окно видно при захвате
+    // MARK: - The window is visible to capture
 
     /// Says out loud that the app's own promise is switched off right now.
     ///
@@ -256,7 +257,7 @@ struct ContentView: View {
         .help(String(localized: "Настройки: профиль, ключ провайдера, пороги нарезки реплик."))
     }
 
-    // MARK: - Невидимость
+    // MARK: - Invisibility
 
     /// The one control that can defeat the product's main promise, which is why
     /// it is here and not in settings: it is flipped to record a demo and has to
@@ -401,7 +402,7 @@ struct ContentView: View {
         NSWorkspace.shared.open(url)
     }
 
-    // MARK: - Маршрут звука
+    // MARK: - Audio route
 
     /// Which way the sound goes, said only when it is worth saying.
     ///
@@ -575,7 +576,7 @@ struct ContentView: View {
             .frame(maxWidth: .infinity, minHeight: 96, maxHeight: 132, alignment: .topLeading)
     }
 
-    // MARK: - Сохранение диалога
+    // MARK: - Saving the conversation
 
     /// Saving the call to a file, under the transcript it saves.
     ///

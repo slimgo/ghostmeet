@@ -245,7 +245,7 @@ nonisolated final class SCKCaptureService: ThemAudioSource, @unchecked Sendable 
         }
     }
 
-    // MARK: - Восстановление после обрыва
+    // MARK: - Recovering from a broken stream
 
     /// What a channel that never came back is called in the window.
     ///

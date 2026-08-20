@@ -74,13 +74,14 @@ struct OverlayWindowConfiguration {
         panel.collectionBehavior = collectionBehavior
         panel.sharingType = sharingType
 
-        // Chromeless, но с одним исключением — красной кнопкой закрытия.
+        // Chromeless, with one exception — the red close button.
         //
-        // Она стоит там, где ей и место на маке: слева сверху. Своя кнопка в
-        // правом углу шапки эту роль уже играла и была неправа дважды — не
-        // системная и не с той стороны; пользователь заметил это в первую же
-        // минуту. Свернуть и развернуть окно по-прежнему нечем: оверлей прячут
-        // аккордом, а разворачивать в нём нечего.
+        // It sits where it belongs on a Mac: top left. A custom button in the
+        // right corner of the header used to play that part and was wrong twice
+        // over — not the system one and on the wrong side; the user noticed
+        // within the first minute. There is still nothing to miniaturise or zoom
+        // with: the overlay is hidden with a chord, and there is nothing in it to
+        // zoom.
         panel.titleVisibility = .hidden
         panel.titlebarAppearsTransparent = true
         panel.isMovableByWindowBackground = true

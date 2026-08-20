@@ -108,13 +108,15 @@ nonisolated struct InterviewContext: Codable, Equatable, Sendable {
         case compensation
         case questions
 
-        /// Подпись, под которой поле уходит **в промпт**.
+        /// The label this field travels under **into the prompt**.
         ///
-        /// Не переводится, и это не недосмотр. Промпт целиком русский и сверяется
-        /// дословно с `docs/GhostMeet-Prompts.md`; английский интерфейс, который
-        /// начал бы слать модели английские подписи, тихо изменил бы промпт — а
-        /// расхождение кода с документом ловится тестом только на русской машине.
-        /// Языку интерфейса тут делать нечего: он про окно, а не про запрос.
+        /// Not translated, and that is not an oversight. The prompt is Russian
+        /// throughout and is checked word for word against
+        /// `docs/GhostMeet-Prompts.md`; an English interface that started sending
+        /// the model English labels would quietly change the prompt — and a
+        /// divergence between code and document is caught by a test on a Russian
+        /// machine only. The interface language has no business here: it is about
+        /// the window, not about the request.
         var label: String {
             switch self {
             case .stories: "Истории из практики"
@@ -124,12 +126,13 @@ nonisolated struct InterviewContext: Codable, Equatable, Sendable {
             }
         }
 
-        /// Подпись **на экране**, на языке интерфейса.
+        /// The label **on screen**, in the interface language.
         ///
-        /// Отдельно от `label` по причине выше. Ценой этому — на английском окне
-        /// подпись поля и подпись в промпте перестают совпадать буквально; они
-        /// продолжают значить одно и то же, а обещание «пользователь видит, что
-        /// сказали модели» держится смыслом, а не побуквенно.
+        /// Separate from `label` for the reason above. The price is that on an
+        /// English window the field's label and the prompt's label stop matching
+        /// literally; they go on meaning the same thing, and the promise that the
+        /// user sees what the model was told holds by meaning rather than
+        /// character by character.
         var screenLabel: String {
             switch self {
             case .stories: String(localized: "Истории из практики")

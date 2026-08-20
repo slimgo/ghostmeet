@@ -138,8 +138,8 @@ nonisolated enum GeminiWireFormat {
         case "MAX_TOKENS":
             events.append(.cut(.budget))
         case .some(let reason):
-            // Отказ, а не обрыв — но только пока на экране пусто; текст, который
-            // уже читают вслух, цикл чтения сохранит.
+            // A failure rather than a cut-off — but only while the screen is
+            // empty; text already being read aloud is kept by the read loop.
             events.append(.failure(.provider(String(localized: "Gemini прервал ответ: \(reason)."))))
         }
         return events

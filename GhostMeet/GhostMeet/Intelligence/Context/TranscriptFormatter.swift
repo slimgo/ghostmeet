@@ -156,7 +156,7 @@ nonisolated enum TranscriptFormatter {
         }
     }
 
-    // MARK: - Склейка
+    // MARK: - Merging
 
     /// One rendered line per run of turns.
     ///
@@ -184,8 +184,8 @@ nonisolated enum TranscriptFormatter {
                 if let finished = run { lines.append(contentsOf: line(of: finished)) }
                 run = (turn.channel, end, turn.spokenText.map { [$0] } ?? [])
             }
-            // Нажатие закрывает серию: следующая реплика того же канала — уже
-            // новая мысль, как бы близко она ни стояла по времени.
+            // A press closes the run: the next turn of the same channel is a
+            // new thought however close it sits in time.
             closedByPress = turn.isBeforePress
         }
         if let finished = run { lines.append(contentsOf: line(of: finished)) }
@@ -199,7 +199,7 @@ nonisolated enum TranscriptFormatter {
         return ["\(label(for: run.channel)): \(run.parts.joined(separator: " "))"]
     }
 
-    // MARK: - Потолок
+    // MARK: - The ceiling
 
     /// Keeps the newest lines that fit and says so when the rest were dropped.
     ///

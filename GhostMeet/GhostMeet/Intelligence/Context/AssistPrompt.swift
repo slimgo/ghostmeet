@@ -81,9 +81,9 @@ nonisolated enum AssistPrompt {
     /// than a slow answer. The `Контекст собеседования` is beside it for the same
     /// reason — the behavioural and motivation branches of the rules answer from
     /// the заготовки, and invented ones are the failure they exist to prevent.
-    /// - Parameter language: язык разговора. Влияет ровно на одно — правило
-    ///   скобок с произношением, которое на английском собеседовании не нужно и
-    ///   вредно; см. `ConversationLanguage`.
+    /// - Parameter language: the language of the conversation. Affects exactly
+    ///   one thing — the pronunciation bracket rule, which in an English
+    ///   interview is unnecessary and harmful; see `ConversationLanguage`.
     static func system(
         profile: UserProfile,
         interviewContext: InterviewContext = .empty,

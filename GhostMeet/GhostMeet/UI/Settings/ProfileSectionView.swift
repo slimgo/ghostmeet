@@ -37,7 +37,7 @@ struct ProfileSectionView: View {
         }
     }
 
-    // MARK: - Выбор профиля
+    // MARK: - Choosing a profile
 
     /// Several resumes mean several profiles: a team lead and a full-stack
     /// senior are different people on paper, and answering an interview from the
@@ -93,7 +93,7 @@ struct ProfileSectionView: View {
         }
     }
 
-    // MARK: - Резюме
+    // MARK: - The résumé
 
     /// The second way to fill the fields in — and the warning that goes with it.
     ///
