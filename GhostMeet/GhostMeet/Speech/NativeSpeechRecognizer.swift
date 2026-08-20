@@ -179,11 +179,12 @@ extension NativeSpeechRecognizer: SpeechRecognizer {
             throw RecognitionError.assetsNotReady(phase)
         }
 
-        // Порядок здесь не случаен: **до установки ассетов
-        // `bestAvailableAudioFormat` возвращает `nil`** — измерено на `en-US`,
-        // где до установки формата не было, а после появился. Поэтому готовность
-        // проверяется выше, а не по отсутствию формата, иначе «язык не скачан»
-        // доехало бы до пользователя как «звук не той формы».
+        // The order matters: **until the assets are installed
+        // `bestAvailableAudioFormat` answers nil** — measured on en-US, where no
+        // format existed before the install and one appeared after it. So
+        // readiness is checked above rather than inferred from a missing format;
+        // otherwise "this language is not downloaded" would reach the user as
+        // "the audio is the wrong shape".
         let module = Self.transcriber(for: locale)
         guard let format = await SpeechAnalyzer.bestAvailableAudioFormat(compatibleWith: [module]),
               let buffer = Self.buffer(from: audio, in: format)
