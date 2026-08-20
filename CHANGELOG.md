@@ -18,6 +18,10 @@ Design decisions referenced below live in [docs/adr/](docs/adr/); the product sp
 
 ## [Unreleased]
 
+Nothing yet.
+
+## [0.5.2] — 2026-08-20
+
 ### Changed
 
 - **Both READMEs open with what the invisibility does not cover.** The window is kept out of screen
