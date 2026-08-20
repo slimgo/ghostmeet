@@ -18,6 +18,15 @@ Design decisions referenced below live in [docs/adr/](docs/adr/); the product sp
 
 ## [Unreleased]
 
+### Changed
+
+- **Both READMEs open with what the invisibility does not cover.** The window is kept out of screen
+  capture, and that is an attempt rather than a guarantee: the protection holds where macOS hands
+  over the picture — a shared window or tab — and covers nothing that goes around system capture,
+  a phone camera included. The process is visible to anything that lists running programs. The note
+  also says plainly that the app hears both sides of a call, that recording the other person needs
+  their consent in many places, and that how the tool is used is the user's own responsibility.
+
 ### Fixed
 
 - **A dead `Them` channel moves to the other backend by itself.** When capture fails,
