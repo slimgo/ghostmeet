@@ -420,6 +420,13 @@ private final class StatusSink: @unchecked Sendable {
         lock.lock(); defer { lock.unlock() }
         return _statuses.last
     }
+
+    /// Всё, что было опубликовано: переход на второй бэкенд — событие в
+    /// середине потока, и по последнему статусу его не увидеть.
+    var all: [ThemCaptureStatus] {
+        lock.lock(); defer { lock.unlock() }
+        return _statuses
+    }
 }
 
 // MARK: - Список приложений под выбранный бэкенд
@@ -584,5 +591,152 @@ struct BackendAwareCatalogTests {
         await denied.refreshCompleted()
 
         #expect(denied.unavailableReason == nil)
+    }
+}
+
+// MARK: - Откат на второй бэкенд
+
+@Suite("Мёртвый бэкенд уступает место второму")
+struct ThemBackendFallbackTests {
+
+    /// Мёртвый `Them` — единственный отказ, который не отменяет подсказку, а
+    /// тихо портит транскрипт: голос собеседника продолжает приходить в
+    /// микрофон через динамики и пишется как речь пользователя. Обе защиты от
+    /// протечки в этом состоянии бесполезны по устройству.
+    @Test("Отказ во время захвата переводит канал на второй бэкенд")
+    func failureSwitchesToTheOtherBackend() throws {
+        let factory = BackendFactory()
+        let source = SwitchableThemSource(
+            backend: .screenCaptureKit,
+            sourceApplicationID: "com.google.Chrome",
+            make: factory.make
+        )
+        let statuses = StatusSink()
+        source.onStatusChange = statuses.handler
+        try source.start(onFrame: { _ in })
+
+        let first = try #require(factory.built.first)
+        first.publish(.failed(reason: "ScreenCaptureKit не видит ни одного приложения"))
+
+        #expect(source.backend == .processTap)
+        #expect(factory.built.count == 2)
+        // Сеанс переезжает целиком: то же приложение-источник и работающий захват.
+        let second = try #require(factory.built.last)
+        #expect(second.sourceApplicationID == "com.google.Chrome")
+        #expect(second.starts == 1)
+    }
+
+    /// Молчаливый откат хуже отказа: у бэкендов разные слепые зоны — SCK видит
+    /// только приложения с окнами, тап видит любой процесс, но звучит тише, —
+    /// и пользователь, которого переключили молча, будет искать причину не там.
+    @Test("Переход назван словами, вместе с причиной")
+    func theSwitchIsSaidOutLoud() throws {
+        let factory = BackendFactory()
+        let source = SwitchableThemSource(
+            backend: .screenCaptureKit,
+            sourceApplicationID: "com.google.Chrome",
+            make: factory.make
+        )
+        let statuses = StatusSink()
+        source.onStatusChange = statuses.handler
+        try source.start(onFrame: { _ in })
+
+        try #require(factory.built.first).publish(.failed(reason: "нет разрешения на запись экрана"))
+
+        let announced = statuses.all.compactMap { status -> String? in
+            if case .switchingBackend(_, let next, let reason) = status {
+                return "\(reason) → \(next.displayName)"
+            }
+            return nil
+        }
+        let line = try #require(announced.first)
+        #expect(line.contains("нет разрешения на запись экрана"))
+        #expect(line.contains("Core Audio Process Tap"))
+    }
+
+    /// Второй `failed` подряд означает, что дело не в бэкенде: занят микрофон,
+    /// не то приложение, разрешения нет нигде. Мигание между двумя мёртвыми
+    /// захватами — шум вместо диагноза.
+    @Test("Откат делается один раз, а не по кругу")
+    func fallsBackOnlyOnce() throws {
+        let factory = BackendFactory()
+        let source = SwitchableThemSource(
+            backend: .screenCaptureKit,
+            sourceApplicationID: "com.google.Chrome",
+            make: factory.make
+        )
+        source.onStatusChange = StatusSink().handler
+        try source.start(onFrame: { _ in })
+
+        try #require(factory.built.first).publish(.failed(reason: "первый отказ"))
+        #expect(source.backend == .processTap)
+
+        try #require(factory.built.last).publish(.failed(reason: "второй отказ"))
+        #expect(source.backend == .processTap, "второй отказ не должен возвращать канал обратно")
+        #expect(factory.built.count == 2)
+    }
+
+    /// Выбор пользователя главнее аварийной меры: он только что нажал, и отказ
+    /// по его выбору обязан быть виден. Молча вернуть прежний бэкенд — значит
+    /// поспорить и не сказать об этом; человек решит, что переключатель сломан.
+    ///
+    /// Речь именно о бэкенде, который **не заработал ни разу**. Тот, что
+    /// поработал и сломался, — уже поломка, а не спор с выбором, и его откат
+    /// чинит.
+    @Test("Выбранный руками бэкенд, не сумевший стартовать, не подменяется")
+    func aManualChoiceIsNotUndone() throws {
+        let factory = BackendFactory(failing: [.processTap])
+        let source = SwitchableThemSource(
+            backend: .screenCaptureKit,
+            sourceApplicationID: "com.google.Chrome",
+            make: factory.make
+        )
+        let statuses = StatusSink()
+        source.onStatusChange = statuses.handler
+        try source.start(onFrame: { _ in })
+
+        source.backend = .processTap
+
+        #expect(source.backend == .processTap, "выбор пользователя остаётся в силе")
+        #expect(statuses.last?.isFailure == true, "отказ по его выбору обязан быть виден")
+        #expect(factory.built.count == 2, "обратно на прежний бэкенд никто не возвращался")
+    }
+
+    /// А вот бэкенд, который поработал и сломался, откат чинит — даже если его
+    /// выбрали руками: выбор состоялся, и дальше речь о поломке.
+    @Test("Заработавший и сломавшийся бэкенд откатывается, даже выбранный руками")
+    func aWorkingChoiceStillFallsBack() throws {
+        let factory = BackendFactory()
+        let source = SwitchableThemSource(
+            backend: .screenCaptureKit,
+            sourceApplicationID: "com.google.Chrome",
+            make: factory.make
+        )
+        source.onStatusChange = StatusSink().handler
+        try source.start(onFrame: { _ in })
+
+        source.backend = .processTap
+        try #require(factory.built.last).publish(.failed(reason: "тап умер посреди звонка"))
+
+        #expect(source.backend == .screenCaptureKit)
+        #expect(factory.built.count == 3)
+    }
+
+    /// Пока прослушивание выключено, откатывать нечего: канал не работает, и
+    /// смена бэкенда под ним ничего не чинит.
+    @Test("Без прослушивания откат не срабатывает")
+    func doesNotFallBackWhileIdle() throws {
+        let factory = BackendFactory()
+        let source = SwitchableThemSource(
+            backend: .screenCaptureKit,
+            sourceApplicationID: "com.google.Chrome",
+            make: factory.make
+        )
+        source.onStatusChange = StatusSink().handler
+
+        try #require(factory.built.first).publish(.failed(reason: "отказ до старта"))
+
+        #expect(source.backend == .screenCaptureKit)
+        #expect(factory.built.count == 1)
     }
 }

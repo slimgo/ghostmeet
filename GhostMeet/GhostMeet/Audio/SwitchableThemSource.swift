@@ -38,6 +38,21 @@ nonisolated final class SwitchableThemSource: ThemAudioSource, @unchecked Sendab
     private var _sourceApplicationID: String?
     private var _isRunning = false
     private var _lastPublished: ThemCaptureStatus = .idle
+    /// Выбран ли текущий бэкенд руками и ещё ни разу не заработал.
+    ///
+    /// Пока это так, откат **не** срабатывает: пользователь только что сделал
+    /// выбор, и отказ по его выбору он обязан увидеть. Молча вернуть его на
+    /// прежний бэкенд — значит поспорить с ним и не сказать об этом; человек
+    /// решит, что переключатель не работает.
+    private var _awaitingManualChoice = false
+
+    /// Был ли уже аварийный переход на второй бэкенд.
+    ///
+    /// Ровно один за сеанс. Второй `failed` подряд означает, что дело не в
+    /// бэкенде — микрофон занят, приложение-источник не то, разрешения нет
+    /// нигде, — и мигание между двумя мёртвыми захватами это шум вместо
+    /// диагноза.
+    private var _didFallBack = false
     private var onFrame: AudioFrameHandler?
 
     init(
@@ -144,10 +159,11 @@ nonisolated final class SwitchableThemSource: ThemAudioSource, @unchecked Sendab
     /// doing, and the window would show the wrong thing until the next status
     /// change — which, on a machine where the new backend cannot start at all,
     /// is never.
-    private func swap(to backend: ThemCaptureBackend) {
+    private func swap(to backend: ThemCaptureBackend, isFallback: Bool = false) {
         lock.lock()
         guard backend != _backend else { lock.unlock(); return }
         _backend = backend
+        if isFallback { _didFallBack = true } else { _awaitingManualChoice = true }
         let previous = _source
         let handler = onFrame
         let running = _isRunning
@@ -183,8 +199,38 @@ nonisolated final class SwitchableThemSource: ThemAudioSource, @unchecked Sendab
         let changed = _lastPublished != status
         _lastPublished = status
         let handler = onStatusChange
+        // Откат решается здесь и только здесь: это единственное место, куда
+        // приходит «сломалось и само не починится», и единственное, что знает
+        // про оба бэкенда сразу (ADR-0001 — выше об этом знать нельзя).
+        // Успешный захват снимает «выбрано руками»: выбор пользователя
+        // состоялся, и дальше отказ уже про поломку, а не про его решение.
+        if case .capturing = status { _awaitingManualChoice = false }
+        let shouldFallBack = status.isFailure && !_didFallBack && !_awaitingManualChoice && _isRunning
+        let from = _backend
         lock.unlock()
+
+        if shouldFallBack {
+            fallBack(from: from, because: status)
+            return
+        }
         if changed { handler?(status) }
+    }
+
+    /// Переводит канал на второй бэкенд, потому что текущий объявил себя мёртвым.
+    ///
+    /// **Не трогает сохранённую настройку.** Выбор бэкенда принадлежит
+    /// пользователю, а это аварийная мера на сеанс: молча переписанная настройка
+    /// оставила бы человека с бэкендом, которого он не выбирал, и без объяснения,
+    /// откуда тот взялся. При следующем запуске приложение снова попробует то,
+    /// что он выбрал, — разрешение могло появиться.
+    ///
+    /// **Молчать здесь нельзя.** У бэкендов разные слепые зоны: SCK видит только
+    /// приложения с окнами, тап видит любой процесс со звуком, но приходит тише.
+    /// Пользователь, которого переключили молча, будет искать причину не там.
+    private func fallBack(from failed: ThemCaptureBackend, because status: ThemCaptureStatus) {
+        let next = failed.other
+        onStatusChange?(.switchingBackend(from: failed, to: next, reason: status.message))
+        swap(to: next, isFallback: true)
     }
 }
 

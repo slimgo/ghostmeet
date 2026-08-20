@@ -18,7 +18,38 @@ Design decisions referenced below live in [docs/adr/](docs/adr/); the product sp
 
 ## [Unreleased]
 
-Nothing yet.
+### Changed
+
+- **Both READMEs open with what the invisibility does not cover.** The window is kept out of screen
+  capture, and that is an attempt rather than a guarantee: the protection holds where macOS hands
+  over the picture — a shared window or tab — and covers nothing that goes around system capture,
+  a phone camera included. The process is visible to anything that lists running programs. The note
+  also says plainly that the app hears both sides of a call, that recording the other person needs
+  their consent in many places, and that how the tool is used is the user's own responsibility.
+
+### Fixed
+
+- **A dead `Them` channel moves to the other backend by itself.** When capture fails,
+  the app switches ScreenCaptureKit ⇄ Process Tap and says so in one line instead of
+  leaving the channel silent. This finishes the work [0.3.3](#033--2026-08-15) started:
+  re-attaching a broken stream helps when the stream is at fault, and does nothing when
+  the backend itself is. A silent `Them` is the one failure that must never be quiet —
+  both leak defences stop working in that state, and the transcript goes on looking
+  normal while the interviewer's voice is filed under `You`.
+
+  The fallback happens once per run: a second failure is the machine's answer, not
+  something to keep retrying. A backend the user picked by hand is never overridden —
+  that is a choice, not a fault.
+
+- **Pronunciation brackets are tidied up in the suggestion card.** The prompt asks for
+  `nginx (энджин-икс)` and mostly delivers it; the leftovers were a bracket repeating
+  the Russian word it followed («кластер (кластер)») and an inverted pair
+  («(кубернетис) Kubernetes»), both of which are read aloud and both of which make the
+  reader say a word twice. They are now fixed where the card is built, and deliberately
+  not by an eleventh rewording of the rule — see
+  [docs/GhostMeet-Prompts.md](docs/GhostMeet-Prompts.md) §6 for why. Formulas like
+  `O(n log n)`, brackets inside code blocks and ordinary Russian asides are left exactly
+  as they were, and the saved call keeps the model's raw answer.
 
 ## [0.5.1] — 2026-08-18
 

@@ -10,7 +10,31 @@ while staying out of screen sharing.
 
 Русская версия — [README.ru.md](README.ru.md).
 
-> **Status: 0.3.0.** The MVP is closed and was walked end to end on a live call. It is a personal
+![The GhostMeet window over a video call: both channels in the transcript, a suggestion card, and the line about invisibility](img-eng.webp)
+
+> ### Read this before you switch it on
+>
+> **GhostMeet keeps its window out of screen capture, but that is an attempt, not a guarantee.**
+>
+> The protection holds where macOS itself hands over the picture: sharing a **window or a tab.**
+> Whole-screen sharing is outside the product by decision rather than by omission
+> ([ADR-0004](docs/adr/0004-invisibility-scope.md)). Live, the window stayed hidden there too — but
+> that is one run, in one service, on one version of the system, and it is not something to rely
+> on. Calling apps capture the screen in different ways, and the behaviour of `sharingType` has
+> already changed between macOS versions: a system update can weaken the protection without
+> telling anybody.
+>
+> Everything that bypasses system capture is outside it entirely: a phone camera pointed at the
+> screen, somebody behind you, a second monitor. So is the process itself — the app does not hide
+> from whoever lists running programs, which means proctoring software sees it.
+>
+> **The app hears both sides of the conversation and transcribes them.** In many jurisdictions
+> recording the other person requires their consent, and a hidden assistant during a proctored
+> exam, an interview or a recorded meeting breaks the platform's rules. GhostMeet is built for what
+> is lawful: your own notes, reviewing a call afterwards, practice, accessibility. How you use it
+> is your decision and your responsibility.
+
+> **Status: 0.5.2.** The MVP is closed and was walked end to end on a live call. It is a personal
 > BYOK tool, not a product: there is no backend of ours, no account, and no notarised build.
 
 ---
@@ -153,7 +177,8 @@ Two traps worth knowing before you touch the project file:
 ## Limits
 
 - **Whole-display sharing is out of scope**, by decision, not by omission — see
-  [ADR-0004](docs/adr/0004-invisibility-scope.md). Share a window or a tab.
+  [ADR-0004](docs/adr/0004-invisibility-scope.md). Share a window or a tab; what the protection
+  does not cover at all is in the note at the top.
 - Both `Them` backends work at **application** granularity. Neither can isolate the browser tab
   with the call from the rest of the browser.
 - The build is not notarised, and will not be without a paid Developer ID.
