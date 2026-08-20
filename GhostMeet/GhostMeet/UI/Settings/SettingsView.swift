@@ -327,24 +327,80 @@ struct SettingsView: View {
     /// downloading happens in the recogniser, and the form stays usable.
     private var recognitionSection: some View {
         Section("Распознавание речи") {
-            SettingsRow("Модель") {
-                Picker("Модель", selection: modelSelection) {
-                    ForEach(WhisperModel.allCases) { model in
-                        Text("\(model.title) · \(model.approximateDownloadSize)").tag(model)
+            // Выбор движка появляется только там, где есть из чего выбирать: на
+            // macOS младше 26 системного распознавателя не существует, и ряд с
+            // одним пунктом — это вопрос без выбора.
+            if SpeechEngine.available.count > 1 {
+                SettingsRow("Движок") {
+                    Picker("Движок", selection: engineSelection) {
+                        ForEach(SpeechEngine.available, id: \.self) { engine in
+                            Text(engine.displayName).tag(engine)
+                        }
                     }
                 }
+
+                Text(recognition.engine.tradeOff)
+                    .font(.footnote)
+                    .foregroundStyle(.secondary)
             }
 
-            Text(recognition.model.summary)
-                .font(.footnote)
-                .foregroundStyle(.secondary)
+            if recognition.engine.needsExplicitLanguage {
+                SettingsRow("Язык звонка") {
+                    Picker("Язык звонка", selection: languageSelection) {
+                        ForEach(SpeechLanguage.allCases, id: \.self) { language in
+                            Text(language.displayName).tag(language)
+                        }
+                    }
+                }
 
-            modelPhaseRow
+                Text("Системный распознаватель нужно предупредить о языке заранее: он не определяет его сам. Реплики на другом языке будут искажены.")
+                    .font(.footnote)
+                    .foregroundStyle(.secondary)
 
-            Text("Все модели в списке многоязычные: русский и английский распознаются без переключения настроек — язык определяется по каждой реплике.")
-                .font(.footnote)
-                .foregroundStyle(.secondary)
+                modelPhaseRow
+            } else {
+                SettingsRow("Модель") {
+                    Picker("Модель", selection: modelSelection) {
+                        ForEach(WhisperModel.allCases) { model in
+                            Text("\(model.title) · \(model.approximateDownloadSize)").tag(model)
+                        }
+                    }
+                }
+
+                Text(recognition.model.summary)
+                    .font(.footnote)
+                    .foregroundStyle(.secondary)
+
+                modelPhaseRow
+
+                Text("Все модели в списке многоязычные: русский и английский распознаются без переключения настроек — язык определяется по каждой реплике.")
+                    .font(.footnote)
+                    .foregroundStyle(.secondary)
+            }
         }
+    }
+
+    /// У Whisper качается модель, у системного движка — языковые файлы. Слово
+    /// «модель» на кнопке системного движка обещало бы не то, что произойдёт.
+    private var phaseButtonTitle: String {
+        if recognition.phase.isBusy { return String(localized: "Загружается…") }
+        return recognition.engine == .system
+            ? String(localized: "Загрузить язык")
+            : String(localized: "Загрузить модель")
+    }
+
+    private var engineSelection: Binding<SpeechEngine> {
+        Binding(
+            get: { recognition.engine },
+            set: { recognition.engine = $0 }
+        )
+    }
+
+    private var languageSelection: Binding<SpeechLanguage> {
+        Binding(
+            get: { recognition.language },
+            set: { recognition.language = $0 }
+        )
     }
 
     private var modelSelection: Binding<WhisperModel> {
@@ -360,7 +416,7 @@ struct SettingsView: View {
             HStack {
                 phaseLabel
                 Spacer()
-                Button(recognition.phase.isBusy ? String(localized: "Загружается…") : String(localized: "Загрузить модель")) {
+                Button(phaseButtonTitle) {
                     recognition.prepare()
                 }
                 .disabled(recognition.phase.isBusy || recognition.phase.isReady)

@@ -50,7 +50,7 @@ Them: А почему не Mongo?
 Движков тоже два, за общим протоколом (см. [ADR-0002](adr/0002-stt-engine-choice.md)):
 
 - **WhisperKit** (пакет `argmax-oss-swift`, CoreML/ANE) — основной, работает с русским и английским. Модель выбирается в настройках, а не зашита.
-- **`SpeechAnalyzer`** (macOS 26) — вдвое быстрее `large-v3-turbo`, VAD в комплекте, но **русского среди его 30 локалей нет**, поэтому применим только к англоязычным звонкам и закрыт `@available`.
+- **`SpeechAnalyzer`** (macOS 26) — второй движок, закрыт `@available`. В два-четыре раза быстрее `large-v3-turbo` и ничего не выдумывает в паузах. **Русский у него есть** — через `DictationTranscriber` (54 локали), а не `SpeechTranscriber` (30 без единой кириллической), — но на русском теряет термины и не ставит знаков препинания, а язык звонка ему надо назвать заранее. Замеры и выбор — [ADR-0013](adr/0013-native-recogniser-knows-russian-but-loses-the-terms.md).
 - `SFSpeechRecognizer` — аварийный запасной путь; русский поддерживает.
 - MLX как рантайм для Whisper **отклонён**: под Swift экосистема сырая.
 
@@ -161,7 +161,7 @@ Them: А почему не Mongo?
    [cue/main.js](https://github.com/Blueturboguy07/cue/blob/main/main.js) не используется: половина окна уходила бы в задержку впустую.
 
 3. **STT**  
-   WhisperKit на каждый канал независимо (для англоязычных звонков — нативный `SpeechAnalyzer`).
+   Выбранный движок на каждый канал независимо: WhisperKit или нативный `SpeechAnalyzer`.
    Текст, целиком совпавший с фантомной фразой, отбрасывается здесь же (`PhantomSpeech`):
    реплика остаётся в транскрипте без слов, как и любая нераспознанная.
 
@@ -223,7 +223,7 @@ Them: А почему не Mongo?
 | Always-on-top + hide | `NSWindow` level, `sharingType = .none` | [cue](https://github.com/Blueturboguy07/cue) (`setContentProtection`) |
 | Them audio | ScreenCaptureKit (дефолт) + Core Audio Process Tap | [CallCapture](https://github.com/bodharma/callcapture), [Recap](https://github.com/RecapAI/Recap), [AudioCap](https://github.com/insidegui/AudioCap), [Muesli](https://github.com/Muesli-HQ/muesli) |
 | You audio | AVAudioEngine без VPIO + свои слои от протечки | [Muesli](https://github.com/Muesli-HQ/muesli) (свой AEC на опорном сигнале); [Scripta](https://github.com/thehwang/Scripta) включает VPIO безусловно и побочного эффекта не знает |
-| STT | WhisperKit (CoreML/ANE) + `SpeechAnalyzer` для англ. | [argmax-oss-swift](https://github.com/argmaxinc/argmax-oss-swift) |
+| STT | WhisperKit (CoreML/ANE) + нативный `SpeechAnalyzer`, оба языка | [argmax-oss-swift](https://github.com/argmaxinc/argmax-oss-swift) |
 | OCR | Vision Framework | — |
 | LLM | Протокол + URLSession / local HTTP / CLI | идея фабрики как в [cue/src/llm.js](https://github.com/Blueturboguy07/cue/blob/main/src/llm.js) |
 | Min OS | macOS 14.4+ (Process Tap) | — |
@@ -286,6 +286,10 @@ GhostMeet/GhostMeet/          ← синхронизированная груп�
 │   ├── SpeechModelPhase.swift
 │   ├── SpeechAudio+Resampling.swift  # приведение к 16 кГц, которых ждёт Whisper
 │   ├── PhantomSpeech.swift           # фантомные фразы: слова без речи не пишутся
+│   ├── NativeSpeechRecognizer.swift  # системный SpeechAnalyzer, macOS 26 и новее
+│   ├── SpeechAssetInstaller.swift    # шов установки языковых файлов: подменяется в тестах
+│   ├── SpeechEngine.swift            # выбор движка и языка звонка, с ценой каждого
+│   ├── SwitchableSpeechRecognizer.swift  # подмена движка под работающей сессией
 │   └── StubSpeechRecognizer.swift
 ├── Intelligence/
 │   ├── Context/
@@ -422,7 +426,7 @@ MVP затачивается под **техническое интервью, �
 - [x] Выбор приложения-источника в UI
 - [x] Проверка новой версии при запуске со ссылкой на страницу релиза ([ADR-0010](adr/0010-update-check-at-launch.md)); выключается в настройках
 - [x] Обновление без переустановки: приложение скачивает образ, проверяет подпись и заменяет себя (Sparkle, [ADR-0012](adr/0012-sparkle-installs-the-update.md)). Сделано не ради кнопки, а ради карантина — установленное самим приложением обновление его не получает, и `xattr -dr com.apple.quarantine` нужен только на первую установку. Прежняя проверка версии при этом **удалена**, а не оставлена рядом: запрос, которого пользователь не просил, в приложении остаётся один
-- [ ] `SpeechAnalyzer` как второй STT-движок для англоязычных звонков
+- [x] `SpeechAnalyzer` как второй STT-движок. Шире, чем было записано: не только для англоязычных звонков — русский у нативного пути есть, но с потерей терминов и знаков препинания, поэтому выбор оставлен пользователю, а цена названа на экране ([ADR-0013](adr/0013-native-recogniser-knows-russian-but-loses-the-terms.md))
 - [ ] Контекст с саммаризацией — **отложено осознанно**: интервью целиком это ~10k токенов и влезает в один запрос, `{{#if summary}}` остаётся пустым до сценария длиннее собеседования
 - [x] Прозрачность и ресайз окна — сделаны; **профили промптов** остаются единственным незакрытым пунктом этой строки
 - [x] Два языка интерфейса, русский и английский: системный по умолчанию, переключение в настройках. Язык **окна**, не подсказки — та следует разговору; одно правило промпта (скобки с русским произношением) теперь тоже следует разговору и на английском не отправляется вовсе

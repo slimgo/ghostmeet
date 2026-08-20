@@ -18,7 +18,25 @@ Design decisions referenced below live in [docs/adr/](docs/adr/); the product sp
 
 ## [Unreleased]
 
-Nothing yet.
+### Added
+
+- **A second recognition engine: the system's own `SpeechAnalyzer`, on macOS 26 and
+  later.** Two to four times faster than Whisper, and it invents nothing during
+  pauses — three seconds of silence make Whisper produce «Продолжение следует...»
+  and the system engine produce nothing. On English the two return the same words
+  and the system one is three times quicker; on Russian it drops technical terms
+  («воркеры» came back as «квартиры» under noise) and returns no punctuation at
+  all. So Whisper stays the default, the choice is in settings, and the price of
+  each is stated under the picker rather than left to be discovered mid-interview.
+
+  The system engine has to be told the call's language in advance — it does not
+  work it out the way Whisper does — so choosing it adds one more picker. Its
+  language files download once, taking about half a minute.
+
+  Recognition can be switched without restarting a call; a turn already being
+  transcribed finishes on the engine it started on. Below macOS 26 nothing
+  changes and no extra setting appears. See
+  [ADR-0013](docs/adr/0013-native-recogniser-knows-russian-but-loses-the-terms.md).
 
 ## [0.5.2] — 2026-08-20
 
