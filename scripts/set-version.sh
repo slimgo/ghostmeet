@@ -40,5 +40,9 @@ echo "✓ $OLD → $VERSION, сборка $BUILD → $NEXT_BUILD"
 echo
 echo "Дальше:"
 echo "  1. допишите раздел ## [$VERSION] в CHANGELOG.md"
-echo "  2. git commit -am \"Версия $VERSION\""
+# Строка английская не по вкусу, а по правилу из CLAUDE.md: репозиторий
+# публичный, историю читают по той же ссылке, что и README. Русская подсказка
+# стояла здесь до 0.5.2 и вышла четырьмя русскими заголовками подряд — её
+# копировали, не сверяясь с правилом. Отклоняет такой заголовок .githooks/commit-msg.
+echo "  2. git commit -am \"Version $VERSION\""
 echo "  3. ./scripts/release.sh $VERSION"
