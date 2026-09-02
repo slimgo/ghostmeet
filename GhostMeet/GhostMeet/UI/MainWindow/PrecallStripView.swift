@@ -45,6 +45,8 @@ struct PrecallStripView: View {
         HStack(spacing: 5) {
             profileMenu(readiness.profile)
             separator
+            languageMenu
+            separator
             settingsLink(readiness.provider)
             separator
             settingsLink(readiness.source)
@@ -94,6 +96,45 @@ struct PrecallStripView: View {
         // user chose is a smaller loss than losing the other two fields.
         .help(item.detail)
         .accessibilityLabel(item.detail)
+    }
+
+    // MARK: - The language of the call
+
+    /// The interview's language, declared before the call rather than guessed.
+    ///
+    /// It sits here and not in settings because it belongs to *this call*, like
+    /// the profile beside it — the same person interviews in Russian on Monday
+    /// and in English on Tuesday, and neither is a property of the machine.
+    ///
+    /// Auto is the default and reads the transcript, which is enough to decide
+    /// the pronunciation rule and was measured not to be enough to decide the
+    /// answer's language: against 96 % Cyrillic in the assembled prompt, a model
+    /// answers in the language of its instructions.
+    private var languageMenu: some View {
+        Menu {
+            ForEach(InterviewLanguage.allCases, id: \.self) { language in
+                Button {
+                    settings.interviewLanguage = language
+                } label: {
+                    if language == settings.interviewLanguage {
+                        Label(language.displayName, systemImage: "checkmark")
+                    } else {
+                        Text(language.displayName)
+                    }
+                }
+            }
+        } label: {
+            HStack(spacing: 3) {
+                Image(systemName: "character.bubble")
+                    .font(.system(size: 9))
+                Text(settings.interviewLanguage.displayName)
+            }
+            .foregroundStyle(.secondary)
+        }
+        .menuStyle(.borderlessButton)
+        .fixedSize()
+        .help(settings.interviewLanguage.explanation)
+        .accessibilityLabel(settings.interviewLanguage.explanation)
     }
 
     // MARK: - Provider and source

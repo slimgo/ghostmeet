@@ -49,16 +49,16 @@ final class SpeechModelStatus {
         }
     }
 
-    /// Language handed to the system engine. Ignored by Whisper.
-    var language: SpeechLanguage {
-        get { store.speechLanguage }
+    /// The interview's language. Reaches the system engine; Whisper ignores it.
+    var language: InterviewLanguage {
+        get { store.interviewLanguage }
         set {
-            guard newValue != store.speechLanguage else { return }
-            store.speechLanguage = newValue
+            guard newValue != store.interviewLanguage else { return }
+            store.interviewLanguage = newValue
             guard store.speechEngine == .system, #available(macOS 26, *),
                   let native = nativeRecognizer else { return }
             Task {
-                await native.use(newValue.locale)
+                await native.use(newValue.spoken.locale)
                 await native.prepare()
             }
         }
@@ -90,6 +90,12 @@ final class SpeechModelStatus {
     /// overlay is excluded from screen capture — so when the app misbehaves on
     /// someone else's machine, this log is the only way to tell "the model was
     /// still loading" apart from "recognition is broken".
+    ///
+    /// **`notice`, not `info`, and that is the whole point of the line.** `info`
+    /// is kept in memory and dropped: after a live run where capture came up dead,
+    /// `log show --info --last 6h` returned not one line from this process. A
+    /// lifecycle log that does not survive the session cannot answer the question
+    /// it exists for.
     @ObservationIgnored private static let log = Logger(
         subsystem: "Mixxy.GhostMeet",
         category: "speech"
@@ -125,7 +131,7 @@ final class SpeechModelStatus {
         if let existing = nativeRecognizer {
             native = existing
         } else {
-            native = NativeSpeechRecognizer(locale: store.speechLanguage.locale)
+            native = NativeSpeechRecognizer(locale: store.interviewLanguage.spoken.locale)
             nativeStorage = native
         }
         let recognizer = recognizer
@@ -145,7 +151,7 @@ final class SpeechModelStatus {
     private func follow(_ phases: @escaping @Sendable () async -> AsyncStream<SpeechModelPhase>) {
         observation = Task { [weak self] in
             for await phase in await phases() {
-                Self.log.info("РАСПОЗНАВАНИЕ: \(phase.summary, privacy: .public)")
+                Self.log.notice("РАСПОЗНАВАНИЕ: \(phase.summary, privacy: .public)")
                 self?.phase = phase
             }
         }

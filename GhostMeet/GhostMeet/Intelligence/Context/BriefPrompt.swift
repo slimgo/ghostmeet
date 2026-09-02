@@ -66,13 +66,14 @@ nonisolated enum BriefPrompt {
         profile: UserProfile,
         interviewContext: InterviewContext = .empty,
         screenText: String = "",
-        screenshot: Data? = nil
+        screenshot: Data? = nil,
+        language declared: ConversationLanguage? = nil
     ) -> SuggestionRequest {
         let started = TranscriptFormatter.hasStartedAnswering(transcript)
-        // The language of the conversation is read here rather than arriving as
-        // a setting: it belongs to this call, and it changes exactly one rule of
-        // the prompt.
-        let language = ConversationLanguage.detected(in: transcript)
+        // A declared language wins over the script. Detection stays underneath
+        // it for `Авто`, which is still the default — it decides a Russian call
+        // correctly, and a Russian call is the scenario this is built for.
+        let language = declared ?? ConversationLanguage.detected(in: transcript)
         return SuggestionRequest(
             systemPrompt: system(
                 profile: profile,
@@ -233,6 +234,8 @@ nonisolated enum BriefPrompt {
     - Язык ответа — язык разговора. Разговор по-русски — скобки с произношением обязательны; разговор по-английски — термины идут как есть.
 
     \(PromptFragment.questionKinds)
+
+    \(PromptFragment.answerLanguage(language))
 
     **Главное, ещё раз: ты пишешь фразу, которую пользователь через секунду скажет вслух своим голосом. Первое лицо, живые глаголы, не больше 45 слов и каждая мысль с новой строки, у каждого термина латиницей — скобка с произношением, ни одного факта о нём, которого нет в контексте, — и ответ по существу, когда тема не из его стека. Образцы в этих правилах — чужой текст: ни одной их строки в ответе.**
     """

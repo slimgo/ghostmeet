@@ -193,6 +193,17 @@ final class SessionController {
         context.forget(turns: engine.transcript, suggestions: engine.suggestions)
     }
 
+    // MARK: - Checking that sound is arriving
+
+    /// Starts counting what reaches the channels. See `CaptureProbe`.
+    func beginCaptureProbe() {
+        engine.beginProbe()
+    }
+
+    func endCaptureProbe() -> CaptureProbe {
+        engine.endProbe()
+    }
+
     // MARK: - Start and stop
 
     func toggle() {
@@ -546,6 +557,7 @@ extension SessionController {
                     context: context,
                     wrapped: PromptComposer(
                         profile: { settings.profile },
+                        interviewLanguage: { settings.interviewLanguage },
                         interviewContext: { settings.interviewContext }
                     )
                 ),

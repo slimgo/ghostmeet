@@ -67,7 +67,7 @@ nonisolated final class ScreenCaptureService: ScreenCapturer {
         // more (ADR-0008). Dropped rather than reported: a superseded capture is
         // not a failure the user has anything to do about.
         guard !Task.isCancelled else {
-            Self.log.info(
+            Self.log.notice(
                 "СНИМОК ЭКРАНА ОТМЕНЁН снимок_мс=\(Self.milliseconds(startedAt, captured), privacy: .public)"  // не переводится: журнал
             )
             return .none
@@ -81,7 +81,7 @@ nonisolated final class ScreenCaptureService: ScreenCapturer {
         let png = ScreenImage.png(from: frame)
         let encoded = ContinuousClock.now
 
-        Self.log.info(
+        Self.log.notice(
             """
             СНИМОК ЭКРАНА пиксели=\(frame.width, privacy: .public)x\(frame.height, privacy: .public) \
             снимок_мс=\(Self.milliseconds(startedAt, captured), privacy: .public) \

@@ -53,6 +53,9 @@ struct ContentView: View {
     /// it is about an action the user just took, not about the state of the
     /// session, and the session has no business remembering it.
     @State private var saveFailure: String?
+    @State private var isConfirmingClear = false
+    @State private var isChecking = false
+    @State private var checkResults: [CheckResult]?
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
@@ -109,12 +112,17 @@ struct ContentView: View {
 
                 Spacer(minLength: 12)
 
+                checkButton
                 visibilityButton
                 listenButton
                 settingsButton
             }
 
             precallStrip
+
+            if let checkResults {
+                CheckResultsView(results: checkResults)
+            }
         }
         // Wider inset on the left: the red close button lives there and the
         // channel indicators must not sit under it. There is one button rather
@@ -199,6 +207,45 @@ struct ContentView: View {
     /// The state of both channels and of the model, recomputed from the session
     /// on every redraw. Nothing about it is stored: an indicator that can go
     /// stale is worse than no indicator.
+    // MARK: - Checking that everything is connected
+
+    /// Runs the check and shows what came back.
+    ///
+    /// **Next to the channel indicators, because that is what it is about.** The
+    /// indicators say a channel is on; this says sound is actually arriving —
+    /// which is the difference the app could not tell on a live call, where
+    /// capture was running, the microphone delivered nothing, and nothing said so.
+    @ViewBuilder
+    private var checkButton: some View {
+        Button {
+            runConnectionCheck()
+        } label: {
+            Image(systemName: isChecking ? "waveform.badge.magnifyingglass" : "stethoscope")
+                .font(.system(size: 12))
+        }
+        .buttonStyle(.plain)
+        .disabled(isChecking || settings == nil)
+        .help(String(localized: "Проверить, что звук доходит, а провайдер отвечает. Занимает несколько секунд и стоит одного короткого запроса к модели."))
+        .accessibilityLabel(String(localized: "Проверить связь"))
+    }
+
+    private func runConnectionCheck() {
+        // With no settings there is no provider to ask: that is the window the
+        // plumbing tests build, not the one a user sees.
+        guard !isChecking, let settings else { return }
+        isChecking = true
+        checkResults = nil
+        Task {
+            let check = ConnectionCheck(source: LiveConnectionCheckSource(
+                controller: session,
+                recognition: recognition,
+                settings: settings
+            ))
+            checkResults = await check.run()
+            isChecking = false
+        }
+    }
+
     private var indicators: SessionIndicators {
         SessionIndicators.make(
             isListening: session.isListening,
@@ -611,6 +658,8 @@ struct ContentView: View {
             }
 
             Spacer(minLength: 0)
+
+            clearButton
         }
         .padding(.horizontal, 12)
         .padding(.vertical, 6)
@@ -622,6 +671,43 @@ struct ContentView: View {
     /// only place where both clocks can be read at once — see
     /// `TranscriptExport.Anchor` for why one of them is uptime and the other a
     /// date, and what happens to the ordering without the pair.
+    /// Clears the conversation — the same thing the ⌥⌘K chord does.
+    ///
+    /// **On the far side of the row from saving, and that is not only layout.**
+    /// The two buttons are opposites: one keeps the conversation, the other
+    /// destroys it, and destroying it cannot be undone. Putting them next to each
+    /// other would make a hand aiming for one land on the other, in a window that
+    /// sits a hand's width from chords pressed without looking.
+    ///
+    /// **It asks before clearing, unlike the chord.** A chord is deliberate — it
+    /// takes two modifiers and a letter — while a button is one stray click, and
+    /// what it destroys is the interview so far. Confirming costs one press and
+    /// returns nothing that is lost.
+    @ViewBuilder
+    private var clearButton: some View {
+        Button {
+            isConfirmingClear = true
+        } label: {
+            Label(String(localized: "Очистить"), systemImage: "eraser")
+                .font(.system(size: 11))
+        }
+        .controlSize(.small)
+        .disabled(session.transcript.isEmpty && session.suggestions.isEmpty)
+        .help(String(localized: "Стереть транскрипт и подсказки этого звонка. Профиль и контекст собеседования остаются."))
+        .confirmationDialog(
+            String(localized: "Стереть разговор?"),
+            isPresented: $isConfirmingClear,
+            titleVisibility: .visible
+        ) {
+            Button(String(localized: "Стереть"), role: .destructive) {
+                session.clearContext()
+            }
+            Button(String(localized: "Отмена"), role: .cancel) {}
+        } message: {
+            Text("Транскрипт и подсказки будут удалены без возможности вернуть. Профиль и контекст собеседования останутся.")
+        }
+    }
+
     private func saveTranscript() {
         let now = Date()
         let readiness = settings.map { PrecallReadiness.make(settings: $0) }

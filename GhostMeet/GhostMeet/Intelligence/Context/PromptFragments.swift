@@ -253,6 +253,40 @@ nonisolated enum PromptFragment {
     /// caveat «только когда по-русски» would be outweighed by the nine Cyrillic
     /// examples beside it — this project has recorded that examples get executed
     /// more readily than prohibitions get observed.
+    /// The language of the answer, stated at the very end of the system prompt.
+    ///
+    /// **Measured, not assumed.** The prompt already said «Язык ответа — язык
+    /// разговора» in the middle of a list, and on an English interview
+    /// claude-haiku-4.5 answered in English **once in five runs** — the rest came
+    /// back in Russian, which is what the user reported from a live call. With
+    /// this line at the end: **ten out of ten in English**, and a Russian call
+    /// stayed Russian three out of three.
+    ///
+    /// Two things make it work, and neither is the wording.
+    ///
+    /// 1. **Position.** This project has already recorded that a long prompt is
+    ///    obeyed at its edges while its middle is background. The old sentence sat
+    ///    third from the end of a list of ten.
+    /// 2. **It names the trap instead of ignoring it.** The system prompt is 1328
+    ///    words and 96 % Cyrillic, so the strongest signal about the answer's
+    ///    language is the prompt itself. Saying «эти инструкции написаны
+    ///    по-русски, но отвечать нужно по-английски» disarms exactly that signal;
+    ///    an instruction that pretends the surrounding language does not exist
+    ///    leaves the model to weigh one line against twelve hundred words.
+    ///
+    /// This is why the whole prompt is **not** translated into English. That was
+    /// the obvious fix and it would have cost the Russian samples their register —
+    /// «я бы взял», «у нас это упиралось в» is what teaches spoken Russian, and an
+    /// English sample cannot teach it. One measured line does the same work.
+    static func answerLanguage(_ language: ConversationLanguage) -> String {
+        switch language {
+        case .russian:
+            "**ЯЗЫК ОТВЕТА — РУССКИЙ.** Разговор идёт на русском, и твой текст пользователь произнесёт вслух собеседнику."
+        case .english:
+            "**ЯЗЫК ОТВЕТА — АНГЛИЙСКИЙ.** Эти инструкции написаны по-русски, но отвечать нужно только по-английски: разговор идёт на английском, и твой текст пользователь произнесёт вслух собеседнику."
+        }
+    }
+
     static func pronunciation(for language: ConversationLanguage) -> String {
         language == .russian ? pronunciation : ""
     }

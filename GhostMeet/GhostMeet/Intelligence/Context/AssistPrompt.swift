@@ -60,13 +60,14 @@ nonisolated enum AssistPrompt {
         profile: UserProfile,
         interviewContext: InterviewContext = .empty,
         screenText: String = "",
-        screenshot: Data? = nil
+        screenshot: Data? = nil,
+        language declared: ConversationLanguage? = nil
     ) -> SuggestionRequest {
         SuggestionRequest(
             systemPrompt: system(
                 profile: profile,
                 interviewContext: interviewContext,
-                language: ConversationLanguage.detected(in: transcript)
+                language: declared ?? ConversationLanguage.detected(in: transcript)
             ),
             userPrompt: user(transcript: transcript, screenText: screenText),
             screenshot: screenshot,
@@ -164,6 +165,8 @@ nonisolated enum AssistPrompt {
         - Язык ответа — язык разговора / задачи на экране (обычно русский или английский).
 
         \(PromptFragment.questionKinds)
+
+        \(PromptFragment.answerLanguage(language))
 
         **Главное, ещё раз: разговорную часть ответа пользователь через секунду скажет вслух своим голосом. Первое лицо, живые глаголы, у каждого термина латиницей — скобка с произношением, ни одного факта о нём, которого нет в контексте, — и ответ по существу, когда тема не из его стека. Образцы в этих правилах — чужой текст: ни одной их строки в ответе.**
         """

@@ -104,7 +104,7 @@ final class CarbonHotkeyRegistry: HotkeyRegistry {
             .map { "\($0.action.rawValue)=\(bindings[$0.action]?.displayString ?? "?")" }
             .sorted()
             .joined(separator: " ")
-        Self.log.info("ХОТКЕИ ЗАРЕГИСТРИРОВАНЫ: \(granted, privacy: .public)")  // не переводится: журнал
+        Self.log.notice("ХОТКЕИ ЗАРЕГИСТРИРОВАНЫ: \(granted, privacy: .public)")  // не переводится: журнал
 
         return refused
     }
