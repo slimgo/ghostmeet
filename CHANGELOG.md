@@ -18,6 +18,10 @@ Design decisions referenced below live in [docs/adr/](docs/adr/); the product sp
 
 ## [Unreleased]
 
+Nothing yet.
+
+## [0.7.0] — 2026-09-02
+
 ### Added
 
 - **The interview's language is declared before the call, next to the profile.**
