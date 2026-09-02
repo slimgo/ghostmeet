@@ -23,6 +23,12 @@ struct LiveConnectionCheckSource: ConnectionCheckSource {
 
     var recognitionPhase: SpeechModelPhase { recognition.phase }
 
+    var activeMicrophone: String? {
+        controller.activeMicrophoneName
+            ?? AudioInputDevices.device(uid: settings.microphoneUID)?.name
+            ?? AudioInputDevices.systemDefault()?.name
+    }
+
     func measureChannels(for seconds: TimeInterval) async -> CaptureProbe {
         controller.beginCaptureProbe()
         try? await Task.sleep(for: .seconds(seconds))
