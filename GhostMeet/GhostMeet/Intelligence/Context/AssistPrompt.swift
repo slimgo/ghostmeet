@@ -60,13 +60,14 @@ nonisolated enum AssistPrompt {
         profile: UserProfile,
         interviewContext: InterviewContext = .empty,
         screenText: String = "",
-        screenshot: Data? = nil
+        screenshot: Data? = nil,
+        language declared: ConversationLanguage? = nil
     ) -> SuggestionRequest {
         SuggestionRequest(
             systemPrompt: system(
                 profile: profile,
                 interviewContext: interviewContext,
-                language: ConversationLanguage.detected(in: transcript)
+                language: declared ?? ConversationLanguage.detected(in: transcript)
             ),
             userPrompt: user(transcript: transcript, screenText: screenText),
             screenshot: screenshot,

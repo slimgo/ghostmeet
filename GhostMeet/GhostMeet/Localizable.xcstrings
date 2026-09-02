@@ -436,6 +436,17 @@
         }
       }
     },
+    "Авто": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Auto"
+          }
+        }
+      }
+    },
     "Адрес API «%@» не похож на адрес — проверьте настройки.": {
       "localizations": {
         "en": {
@@ -2277,6 +2288,28 @@
         }
       }
     },
+    "Подсказки на английском. Скобок с произношением нет — вслух они читаются как мусор.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Suggestions in English. No pronunciation brackets — read aloud they are noise."
+          }
+        }
+      }
+    },
+    "Подсказки на русском, со скобками произношения за латиницей.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Suggestions in Russian, with pronunciation brackets after Latin terms."
+          }
+        }
+      }
+    },
     "Подсказок пока нет": {
       "localizations": {
         "en": {
@@ -2946,6 +2979,17 @@
         }
       }
     },
+    "Системный распознаватель работает на языке звонка — он выбирается в окне, рядом с профилем. Реплики на другом языке будут искажены: сам язык он не определяет.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The system recogniser works in the call's language, chosen in the window next to the profile. Turns in another language come back mangled: it does not work the language out itself."
+          }
+        }
+      }
+    },
     "Скачивание модели — %lld%%": {
       "localizations": {
         "en": {
@@ -3488,6 +3532,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "Interface language"
+          }
+        }
+      }
+    },
+    "Язык определяется по разговору. Системному распознавателю при этом достаётся язык интерфейса.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The language is worked out from the conversation. The system recogniser gets the interface language meanwhile."
           }
         }
       }

@@ -245,8 +245,8 @@ struct SpeechEngineChoiceTests {
     func theChoiceIsRemembered() {
         withOwnDefaults { defaults in
             let store = SettingsStore(defaults: defaults, secrets: InMemorySecretStore())
-            store.speechLanguage = .english
-            #expect(SettingsStore(defaults: defaults, secrets: InMemorySecretStore()).speechLanguage == .english)
+            store.interviewLanguage = .english
+            #expect(SettingsStore(defaults: defaults, secrets: InMemorySecretStore()).interviewLanguage == .english)
         }
     }
 
@@ -316,4 +316,62 @@ private func withOwnDefaults<T>(_ body: (UserDefaults) throws -> T) rethrows -> 
         UserDefaults.standard.removeSuite(named: name)
     }
     return try body(defaults)
+}
+
+@Suite("Язык собеседования объявляется, а не угадывается")
+struct InterviewLanguageTests {
+
+    /// Объявленный язык бьёт письменность транскрипта. Ради этого настройка и
+    /// заведена: на живом английском звонке определение по буквам сработало один
+    /// раз, а дальше модель отвечала на языке инструкций.
+    @Test("Объявленный язык сильнее транскрипта")
+    func aDeclaredLanguageBeatsTheScript() {
+        let russianTurns = [Turn(channel: .them, text: "Расскажите про очереди сообщений и как вы их масштабировали", timestamp: 0, duration: 3)]
+        #expect(InterviewLanguage.english.conversation(given: russianTurns) == .english)
+
+        let englishTurns = [Turn(channel: .them, text: "Tell me how you scaled the message queues in that project", timestamp: 0, duration: 3)]
+        #expect(InterviewLanguage.russian.conversation(given: englishTurns) == .russian)
+    }
+
+    @Test("Авто ведёт себя ровно как прежнее определение")
+    func autoMatchesDetection() {
+        for turns in [
+            [Turn(channel: .them, text: "Расскажите про очереди сообщений и как вы их масштабировали", timestamp: 0, duration: 3)],
+            [Turn(channel: .them, text: "Tell me how you scaled the message queues in that project", timestamp: 0, duration: 3)],
+            [Turn]()
+        ] {
+            #expect(InterviewLanguage.automatic.conversation(given: turns)
+                    == ConversationLanguage.detected(in: turns))
+        }
+    }
+
+    /// Системный распознаватель язык не определяет, поэтому «авто» обязано дать
+    /// ему конкретный — иначе он молча слушает не тот.
+    @Test("Даже на авто у распознавателя есть язык")
+    func autoStillGivesTheRecogniserALanguage() {
+        for language in InterviewLanguage.allCases {
+            #expect(SpeechLanguage.allCases.contains(language.spoken))
+        }
+    }
+
+    @Test("Выбор языка переживает перезапуск")
+    @MainActor
+    func theChoiceSurvivesARestart() {
+        withOwnDefaults { defaults in
+            let store = SettingsStore(defaults: defaults, secrets: InMemorySecretStore())
+            #expect(store.interviewLanguage == .automatic, "по умолчанию — авто")
+
+            store.interviewLanguage = .english
+            #expect(SettingsStore(defaults: defaults, secrets: InMemorySecretStore()).interviewLanguage == .english)
+        }
+    }
+
+    @Test("У каждого значения есть имя и объяснение, и они разные")
+    func everyChoiceExplainsItself() {
+        let explanations = Set(InterviewLanguage.allCases.map(\.explanation))
+        #expect(explanations.count == InterviewLanguage.allCases.count)
+        for language in InterviewLanguage.allCases {
+            #expect(language.displayName.isEmpty == false)
+        }
+    }
 }

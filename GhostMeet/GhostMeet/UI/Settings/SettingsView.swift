@@ -345,15 +345,11 @@ struct SettingsView: View {
             }
 
             if recognition.engine.needsExplicitLanguage {
-                SettingsRow("Язык звонка") {
-                    Picker("Язык звонка", selection: languageSelection) {
-                        ForEach(SpeechLanguage.allCases, id: \.self) { language in
-                            Text(language.displayName).tag(language)
-                        }
-                    }
-                }
-
-                Text("Системный распознаватель нужно предупредить о языке заранее: он не определяет его сам. Реплики на другом языке будут искажены.")
+                // The call's language is chosen in the window, before the call,
+                // next to the profile: it is a decision about this call rather
+                // than about this machine. All that is said here is that it
+                // reaches recognition too.
+                Text("Системный распознаватель работает на языке звонка — он выбирается в окне, рядом с профилем. Реплики на другом языке будут искажены: сам язык он не определяет.")
                     .font(.footnote)
                     .foregroundStyle(.secondary)
 
@@ -394,13 +390,6 @@ struct SettingsView: View {
         Binding(
             get: { recognition.engine },
             set: { recognition.engine = $0 }
-        )
-    }
-
-    private var languageSelection: Binding<SpeechLanguage> {
-        Binding(
-            get: { recognition.language },
-            set: { recognition.language = $0 }
         )
     }
 

@@ -60,7 +60,7 @@ final class SettingsStore {
         static let turnSegmentationVersion = "settings.turnSegmentation.version"
         static let speechModel = "settings.speechModel"
         static let speechEngine = "settings.speechEngine"
-        static let speechLanguage = "settings.speechLanguage"
+        static let interviewLanguage = "settings.interviewLanguage"
         static let themSourceApplication = "settings.themSourceApplication"
         static let themCaptureBackend = "settings.themCaptureBackend"
         static let providerSelection = "settings.providerSelection"
@@ -142,13 +142,13 @@ final class SettingsStore {
         didSet { persist(speechEngine, forKey: DefaultsKey.speechEngine) }
     }
 
-    /// Language handed to the system engine.
+    /// The language this interview is conducted in.
     ///
-    /// Read only when that engine is selected: Whisper works the language out of
-    /// the audio, while the system engine has to be told before it hears
-    /// anything (ADR-0013).
-    var speechLanguage: SpeechLanguage {
-        didSet { persist(speechLanguage, forKey: DefaultsKey.speechLanguage) }
+    /// One setting for one language: it decides what the model answers in and
+    /// which locale the system recogniser gets. Whisper works the language out of
+    /// the audio; the system engine and the prompt layer cannot, so they are told.
+    var interviewLanguage: InterviewLanguage {
+        didSet { persist(interviewLanguage, forKey: DefaultsKey.interviewLanguage) }
     }
 
     /// Stable id of the application whose sound becomes the `Them` channel, or
@@ -374,8 +374,8 @@ final class SettingsStore {
         // than leaving recognition pointing at something that does not exist.
         let storedEngine = Self.decode(SpeechEngine.self, from: defaults, key: DefaultsKey.speechEngine)
         self.speechEngine = (storedEngine?.isAvailable ?? false) ? storedEngine! : .whisper
-        self.speechLanguage = Self.decode(SpeechLanguage.self, from: defaults, key: DefaultsKey.speechLanguage)
-            ?? .russian
+        self.interviewLanguage = Self.decode(InterviewLanguage.self, from: defaults, key: DefaultsKey.interviewLanguage)
+            ?? .automatic
         self.themSourceApplicationID = defaults.string(forKey: DefaultsKey.themSourceApplication)
         self.themCaptureBackend = defaults.string(forKey: DefaultsKey.themCaptureBackend)
             .flatMap(ThemCaptureBackend.init(rawValue:)) ?? .default

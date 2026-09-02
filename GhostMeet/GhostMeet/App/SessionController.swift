@@ -546,6 +546,7 @@ extension SessionController {
                     context: context,
                     wrapped: PromptComposer(
                         profile: { settings.profile },
+                        interviewLanguage: { settings.interviewLanguage },
                         interviewContext: { settings.interviewContext }
                     )
                 ),

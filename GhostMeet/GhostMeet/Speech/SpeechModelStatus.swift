@@ -49,16 +49,16 @@ final class SpeechModelStatus {
         }
     }
 
-    /// Language handed to the system engine. Ignored by Whisper.
-    var language: SpeechLanguage {
-        get { store.speechLanguage }
+    /// The interview's language. Reaches the system engine; Whisper ignores it.
+    var language: InterviewLanguage {
+        get { store.interviewLanguage }
         set {
-            guard newValue != store.speechLanguage else { return }
-            store.speechLanguage = newValue
+            guard newValue != store.interviewLanguage else { return }
+            store.interviewLanguage = newValue
             guard store.speechEngine == .system, #available(macOS 26, *),
                   let native = nativeRecognizer else { return }
             Task {
-                await native.use(newValue.locale)
+                await native.use(newValue.spoken.locale)
                 await native.prepare()
             }
         }
@@ -125,7 +125,7 @@ final class SpeechModelStatus {
         if let existing = nativeRecognizer {
             native = existing
         } else {
-            native = NativeSpeechRecognizer(locale: store.speechLanguage.locale)
+            native = NativeSpeechRecognizer(locale: store.interviewLanguage.spoken.locale)
             nativeStorage = native
         }
         let recognizer = recognizer

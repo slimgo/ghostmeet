@@ -121,6 +121,13 @@ struct PromptComposer: SuggestionComposer {
     /// not to the call, and so survives clearing the context.
     private let profile: () -> UserProfile
 
+    /// The interview's language as the user declared it, read at request time.
+    ///
+    /// A closure like the profile beside it, and for the same reason: the choice
+    /// lives in settings and may change between one press and the next, so it is
+    /// asked for rather than captured.
+    private let interviewLanguage: () -> InterviewLanguage
+
     /// Read the same way and for the same reason: the заготовки are typed in
     /// before the call, live in user-scoped storage beside the profile, and a
     /// line added to them between two presses has to reach the second one.
@@ -128,9 +135,11 @@ struct PromptComposer: SuggestionComposer {
 
     init(
         profile: @escaping () -> UserProfile = { .empty },
+        interviewLanguage: @escaping () -> InterviewLanguage = { .automatic },
         interviewContext: @escaping () -> InterviewContext = { .empty }
     ) {
         self.profile = profile
+        self.interviewLanguage = interviewLanguage
         self.interviewContext = interviewContext
     }
 
@@ -155,7 +164,8 @@ struct PromptComposer: SuggestionComposer {
                 profile: profile(),
                 interviewContext: interviewContext(),
                 screenText: screen.text,
-                screenshot: screenshot
+                screenshot: screenshot,
+                language: interviewLanguage().conversation(given: transcript)
             )
         case .detailed:
             return AssistPrompt.request(
@@ -163,7 +173,8 @@ struct PromptComposer: SuggestionComposer {
                 profile: profile(),
                 interviewContext: interviewContext(),
                 screenText: screen.text,
-                screenshot: screenshot
+                screenshot: screenshot,
+                language: interviewLanguage().conversation(given: transcript)
             )
         case .question(let text):
             return AskPrompt.request(

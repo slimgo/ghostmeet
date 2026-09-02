@@ -66,13 +66,14 @@ nonisolated enum BriefPrompt {
         profile: UserProfile,
         interviewContext: InterviewContext = .empty,
         screenText: String = "",
-        screenshot: Data? = nil
+        screenshot: Data? = nil,
+        language declared: ConversationLanguage? = nil
     ) -> SuggestionRequest {
         let started = TranscriptFormatter.hasStartedAnswering(transcript)
-        // The language of the conversation is read here rather than arriving as
-        // a setting: it belongs to this call, and it changes exactly one rule of
-        // the prompt.
-        let language = ConversationLanguage.detected(in: transcript)
+        // A declared language wins over the script. Detection stays underneath
+        // it for `Авто`, which is still the default — it decides a Russian call
+        // correctly, and a Russian call is the scenario this is built for.
+        let language = declared ?? ConversationLanguage.detected(in: transcript)
         return SuggestionRequest(
             systemPrompt: system(
                 profile: profile,
