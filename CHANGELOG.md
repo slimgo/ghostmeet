@@ -20,6 +20,26 @@ Design decisions referenced below live in [docs/adr/](docs/adr/); the product sp
 
 Nothing yet.
 
+## [0.7.1] — 2026-09-02
+
+### Added
+
+- **The microphone is selectable, and the check says which one is being heard.**
+  Until now capture bound to whatever macOS calls the default input, with no way
+  to choose another and no way to see what had been chosen — so a live run had
+  somebody speaking into the laptop's microphone while the app listened to a
+  Fifine across the room, silently. The choice is stored by device UID rather than
+  by `AudioDeviceID`, which macOS hands out per boot and reuses: a stored number
+  would point at a different microphone after a restart, which is the failure the
+  setting exists to prevent.
+
+### Fixed
+
+- **The connection check panel closes.** Pressing the button again used to replace
+  the list with an identical list, leaving no way to put it away. It now closes on
+  a second press and retires itself after half a minute — it describes a moment,
+  and a panel still saying it tomorrow would be believed.
+
 ## [0.7.0] — 2026-09-02
 
 ### Added
