@@ -2105,12 +2105,34 @@
         }
       }
     },
+    "Отмена": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cancel"
+          }
+        }
+      }
+    },
     "Отменить": {
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
             "value": "Cancel"
+          }
+        }
+      }
+    },
+    "Очистить": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Clear"
           }
         }
       }
@@ -3134,6 +3156,39 @@
         }
       }
     },
+    "Стереть": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Clear"
+          }
+        }
+      }
+    },
+    "Стереть разговор?": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Clear the conversation?"
+          }
+        }
+      }
+    },
+    "Стереть транскрипт и подсказки этого звонка. Профиль и контекст собеседования остаются.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Erase this call's transcript and suggestions. The profile and the interview notes stay."
+          }
+        }
+      }
+    },
     "Стирает транскрипт и подсказки текущего звонка. Профиль и контекст собеседования остаются — они заполнены заранее.": {
       "localizations": {
         "en": {
@@ -3231,6 +3286,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "More accurate on technical terms, punctuates, and works out the language by itself. Slower, and needs a model download."
+          }
+        }
+      }
+    },
+    "Транскрипт и подсказки будут удалены без возможности вернуть. Профиль и контекст собеседования останутся.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The transcript and the suggestions will be deleted with no way back. The profile and the interview notes will remain."
           }
         }
       }
