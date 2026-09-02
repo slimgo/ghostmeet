@@ -725,6 +725,17 @@
         }
       }
     },
+    "Готово.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ready."
+          }
+        }
+      }
+    },
     "Движок": {
       "extractionState": "manual",
       "localizations": {
@@ -812,6 +823,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "If the interviewer's turns never appear, check System Settings → Privacy & Security → Screen & System Audio Recording: without that permission capture runs but only silence arrives."
+          }
+        }
+      }
+    },
+    "За %@ с не пришло ни одного кадра. Захват числится запущенным, но звук до него не доходит — помогает «Стоп», затем «Слушать».": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Not a single frame arrived in %@ s. Capture counts as running, but no sound reaches it — «Stop» and then «Listen» usually fixes it."
           }
         }
       }
@@ -947,6 +969,17 @@
         }
       }
     },
+    "Звук идёт, пик %@ %.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sound is coming through, peak %@ %."
+          }
+        }
+      }
+    },
     "Звук не удалось привести к формату системного распознавателя": {
       "extractionState": "manual",
       "localizations": {
@@ -954,6 +987,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "The audio could not be converted to the format the system recogniser asked for"
+          }
+        }
+      }
+    },
+    "Звук собеседника": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Their audio"
           }
         }
       }
@@ -1040,6 +1084,28 @@
           "stringUnit": {
             "state": "translated",
             "value": "Source: %@"
+          }
+        }
+      }
+    },
+    "Кадры идут, но звука в них нет. Скажите что-нибудь и проверьте снова — если тихо и во второй раз, микрофон отдаёт пустоту.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Frames are arriving with no sound in them. Say something and check again — if it is still silent, the microphone is handing over emptiness."
+          }
+        }
+      }
+    },
+    "Кадры идут, но звука в них нет. Это нормально, пока собеседник молчит; включите звук в звонилке и проверьте снова.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Frames are arriving with no sound in them. That is normal while the other side is quiet; make some sound in the call app and check again."
           }
         }
       }
@@ -1214,12 +1280,34 @@
         }
       }
     },
+    "Микрофон": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Microphone"
+          }
+        }
+      }
+    },
     "Микрофон замолчал после того, как звуковое устройство сменилось, и не вернулся. Обычно это делает другое приложение, включившее у себя обработку голоса. Выключите и включите «Слушать» — или проверьте устройство ввода в «Системных настройках» → «Звук».": {
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
             "value": "The microphone went quiet after the audio device changed, and did not come back. Usually this is another application turning on voice processing of its own. Turn Listen off and on — or check the input device in System Settings → Sound."
+          }
+        }
+      }
+    },
+    "Микрофон и запись экрана разрешены.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Microphone and screen recording are granted."
           }
         }
       }
@@ -1788,12 +1876,45 @@
         }
       }
     },
+    "Нет доступа к записи экрана — не будет ни скриншота, ни звука собеседника через ScreenCaptureKit.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No screen recording access — no screenshot and no interlocutor audio through ScreenCaptureKit."
+          }
+        }
+      }
+    },
+    "Нет доступа к микрофону — канал You будет пустым.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No microphone access — the You channel will be empty."
+          }
+        }
+      }
+    },
     "Нет доступа к микрофону. Разрешите его в «Системных настройках» → «Конфиденциальность и безопасность» → «Микрофон», затем нажмите «Слушать» ещё раз.": {
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
             "value": "No access to the microphone. Grant it in System Settings → Privacy & Security → Microphone, then press Listen again."
+          }
+        }
+      }
+    },
+    "Нет доступа ни к микрофону, ни к записи экрана.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Neither microphone nor screen recording access."
           }
         }
       }
@@ -2050,6 +2171,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "The answer appears on one line in the GhostMeet window — it floats above this one."
+          }
+        }
+      }
+    },
+    "Ответил.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Answered."
           }
         }
       }
@@ -2530,6 +2662,17 @@
         }
       }
     },
+    "Провайдер не настроен — некому отвечать на подсказки.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No provider configured — there is nobody to answer a suggestion."
+          }
+        }
+      }
+    },
     "Провайдер не ответил: %@.": {
       "localizations": {
         "en": {
@@ -2546,6 +2689,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "The provider rate-limited the request."
+          }
+        }
+      }
+    },
+    "Провайдер ответил пустотой. Обычно это модель, которая потратила бюджет на невидимые токены.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The provider answered with nothing. Usually a model that spent the budget on invisible tokens."
           }
         }
       }
@@ -2590,12 +2744,34 @@
         }
       }
     },
+    "Проверить связь": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Check the connection"
+          }
+        }
+      }
+    },
     "Проверить сейчас": {
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
             "value": "Check now"
+          }
+        }
+      }
+    },
+    "Проверить, что звук доходит, а провайдер отвечает. Занимает несколько секунд и стоит одного короткого запроса к модели.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Check that sound is arriving and the provider answers. Takes a few seconds and costs one short request to the model."
           }
         }
       }
@@ -2690,6 +2866,17 @@
         }
       }
     },
+    "Прослушивание не идёт — включите его, иначе проверять нечего.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Listening is off — turn it on, otherwise there is nothing to check."
+          }
+        }
+      }
+    },
     "Профилей: %lld": {
       "localizations": {
         "en": {
@@ -2776,6 +2963,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "An empty field means “as in the preset”. Your own address and your own model are the way to connect a provider that is not in the list."
+          }
+        }
+      }
+    },
+    "Разрешения": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Permissions"
           }
         }
       }

@@ -24,4 +24,9 @@
 
 **Blocked by:** None.
 
-**Status:** ready-for-agent
+**Status:** done
+
+## Комментарий
+
+Пять строк подняты с `info` до `notice`. Причина записана прямо в `SpeechModelStatus`,
+рядом с логгером: иначе следующий, кто увидит `info`, посчитает уровень случайным.

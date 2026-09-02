@@ -18,7 +18,44 @@ Design decisions referenced below live in [docs/adr/](docs/adr/); the product sp
 
 ## [Unreleased]
 
-Nothing yet.
+### Added
+
+- **The interview's language is declared before the call, next to the profile.**
+  Until now nothing chose it: detection by script decided one prompt rule, and the
+  answer's language rested on a single line inside a prompt that is 96 % Cyrillic.
+  On a live English interview the model answered in English once and spent the rest
+  of the call answering in Russian. Auto stays the default and behaves exactly as
+  before.
+
+  The prompt now states the answer's language outright, near its end. Measured on
+  claude-haiku-4.5 with the question from that call: as it shipped, English came
+  back **1 run in 5**; with the line, **10 out of 10**. A Russian call with the
+  same construction stayed Russian. Translating the whole prompt into English —
+  the obvious fix — would have cost the Russian samples their spoken register, and
+  one measured line does the same work.
+
+- **A button that checks the connection.** It measures data passing through rather
+  than settings being present: whether frames reach each channel and carry any
+  sound, whether the provider answers a real (short) request, where recognition
+  has got to, and which permissions are granted.
+
+  It exists because of a failure the app could not report. Capture counts as
+  started when the source does not throw, and nothing afterwards notices that no
+  frames arrive — so on a live call the microphone was dead, the app said nothing,
+  and a Stop/Listen cycle fixed it. The check has three outcomes rather than two:
+  silence in a channel is not a pass, because a green tick on a dead microphone is
+  worse than no tick at all.
+
+- **A button that clears the conversation**, at the far end of the row from
+  saving. It asks before clearing — a chord is deliberate, a stray click is not,
+  and what it destroys is the interview so far.
+
+### Fixed
+
+- **Lifecycle logs now survive the session.** They were written at `info`, which
+  macOS keeps in memory and drops: after a live run that went wrong, `log show
+  --info --last 6h` returned not one line from the app. The handful of lines that
+  exist for exactly that question are `notice` now.
 
 ## [0.6.0] — 2026-08-20
 

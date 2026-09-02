@@ -227,8 +227,28 @@ final class SessionEngine {
         }
         isListening = true
         let started = sources.map { String(describing: type(of: $0)) }.joined(separator: ", ")
-        Self.log.info("ЗАХВАТ СТАРТОВАЛ источники=\(started, privacy: .public)")
+        Self.log.notice("ЗАХВАТ СТАРТОВАЛ источники=\(started, privacy: .public)")
         startPauseWatchdog()
+    }
+
+    // MARK: - Checking that sound is arriving
+
+    /// Frame accounting, present only while a check is running.
+    ///
+    /// `nil` the rest of the time, and the `ingest` path checks it before doing
+    /// any work: the audio investigation ended with every permanent level probe
+    /// removed, and this must not quietly restore them.
+    private(set) var probe: CaptureProbe?
+
+    /// Starts counting what arrives. Idempotent — a second press restarts it.
+    func beginProbe() {
+        probe = CaptureProbe()
+    }
+
+    /// Stops counting and hands over what was seen.
+    func endProbe() -> CaptureProbe {
+        defer { probe = nil }
+        return probe ?? CaptureProbe()
     }
 
     /// Stops listening and closes the turn that was in progress.
@@ -252,6 +272,11 @@ final class SessionEngine {
     /// The channel comes from the frame, that is from the source that produced
     /// it, and never from what was said.
     func ingest(_ frame: AudioFrame) {
+        // Counted before anything can drop the frame: a leak suppressed by strict
+        // mode still proves the microphone is alive, and a check that missed it
+        // would report a dead channel while sound was arriving.
+        if probe != nil { probe?.take(frame) }
+
         guard let segmenter = segmenters[frame.channel] else { return }
         let now = clock.now
         guard !isLeakFromSpeakers(frame, at: now) else { return }

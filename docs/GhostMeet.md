@@ -258,7 +258,7 @@ GhostMeet/GhostMeet/          ← синхронизированная груп�
 │   ├── SuggestionComposer.swift  # шов: движок не знает, какой промпт собирается под нажатие
 │   ├── SettingsWindowController.swift
 │   └── AppDefaults.swift         # одноразовые настройки под тестами
-├── Audio/
+├── Audio/                            # CaptureProbe — учёт кадров на время проверки
 │   ├── AudioSource.swift             # контракт захвата: кадры и канал
 │   ├── MicCaptureService.swift       # You: AVAudioEngine, без VPIO (ADR-0009)
 │   ├── AudioRoute.swift              # маршрут звука: течёт / не течёт / неизвестно
@@ -330,6 +330,7 @@ GhostMeet/GhostMeet/          ← синхронизированная груп�
 │   │                                 # PronunciationBrackets — скобки произношения в карточке
 │   │                                 # SuggestionFeedEntry — свёртка повторяющихся отказов
 │   │                                 # UpdateNoticeView — строка обновления, до звонка
+│   │                                 # CheckResultsView — результат проверки связи
 │   │                                 # TranscriptSaving — панель сохранения и запись файла
 │   └── Settings/                     # экран настроек, пять вкладок; ProfileSectionView — профили и резюме
 │                                     # InterviewContextSectionView — заготовки к звонку

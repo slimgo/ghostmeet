@@ -54,6 +54,8 @@ struct ContentView: View {
     /// session, and the session has no business remembering it.
     @State private var saveFailure: String?
     @State private var isConfirmingClear = false
+    @State private var isChecking = false
+    @State private var checkResults: [CheckResult]?
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
@@ -110,12 +112,17 @@ struct ContentView: View {
 
                 Spacer(minLength: 12)
 
+                checkButton
                 visibilityButton
                 listenButton
                 settingsButton
             }
 
             precallStrip
+
+            if let checkResults {
+                CheckResultsView(results: checkResults)
+            }
         }
         // Wider inset on the left: the red close button lives there and the
         // channel indicators must not sit under it. There is one button rather
@@ -200,6 +207,45 @@ struct ContentView: View {
     /// The state of both channels and of the model, recomputed from the session
     /// on every redraw. Nothing about it is stored: an indicator that can go
     /// stale is worse than no indicator.
+    // MARK: - Checking that everything is connected
+
+    /// Runs the check and shows what came back.
+    ///
+    /// **Next to the channel indicators, because that is what it is about.** The
+    /// indicators say a channel is on; this says sound is actually arriving —
+    /// which is the difference the app could not tell on a live call, where
+    /// capture was running, the microphone delivered nothing, and nothing said so.
+    @ViewBuilder
+    private var checkButton: some View {
+        Button {
+            runConnectionCheck()
+        } label: {
+            Image(systemName: isChecking ? "waveform.badge.magnifyingglass" : "stethoscope")
+                .font(.system(size: 12))
+        }
+        .buttonStyle(.plain)
+        .disabled(isChecking || settings == nil)
+        .help(String(localized: "Проверить, что звук доходит, а провайдер отвечает. Занимает несколько секунд и стоит одного короткого запроса к модели."))
+        .accessibilityLabel(String(localized: "Проверить связь"))
+    }
+
+    private func runConnectionCheck() {
+        // With no settings there is no provider to ask: that is the window the
+        // plumbing tests build, not the one a user sees.
+        guard !isChecking, let settings else { return }
+        isChecking = true
+        checkResults = nil
+        Task {
+            let check = ConnectionCheck(source: LiveConnectionCheckSource(
+                controller: session,
+                recognition: recognition,
+                settings: settings
+            ))
+            checkResults = await check.run()
+            isChecking = false
+        }
+    }
+
     private var indicators: SessionIndicators {
         SessionIndicators.make(
             isListening: session.isListening,
