@@ -331,3 +331,53 @@ struct MicCaptureErrorTests {
         #expect(MicCaptureService.CaptureError.engineExplanation(-10877).contains("не найдено"))
     }
 }
+
+@Suite("Восстановление не реагирует на собственную перенастройку")
+struct RecoverySuppressionTests {
+
+    /// Замер на живом API: назначение устройства входному узлу порождает ровно
+    /// одно `AVAudioEngineConfigurationChange`. Оно приходит после того, как
+    /// перезапуск закончился, — и запускает следующий, который снова назначает.
+    /// Вживую это вышло потоком реплик `You` по 0.08 с без единого слова.
+    @Test("Уведомление, вызванное нами, не запускает восстановление")
+    func ourOwnChangeIsIgnored() async {
+        let restarted = Counter()
+        let recovery = CaptureRecovery(
+            delays: [0],
+            restart: { restarted.increment() },
+            report: { _ in }
+        )
+
+        recovery.suppressChanges(for: 1)
+        recovery.configurationChanged()
+
+        try? await Task.sleep(for: .milliseconds(150))
+        #expect(restarted.value == 0, "перезапуск случился по нашему же уведомлению")
+    }
+
+    /// Окно, а не счётчик: пропущенное уведомление стоит одной задержки, а
+    /// застрявший счётчик оглушил бы канал до конца звонка.
+    @Test("После окна настоящая смена устройства снова слышна")
+    func arealChangeStillWorks() async {
+        let restarted = Counter()
+        let recovery = CaptureRecovery(
+            delays: [0],
+            restart: { restarted.increment() },
+            report: { _ in }
+        )
+
+        recovery.suppressChanges(for: 0.05)
+        try? await Task.sleep(for: .milliseconds(120))
+        recovery.configurationChanged()
+
+        try? await Task.sleep(for: .milliseconds(200))
+        #expect(restarted.value == 1, "настоящая смена устройства должна восстанавливать канал")
+    }
+}
+
+private final class Counter: @unchecked Sendable {
+    private let lock = NSLock()
+    private var count = 0
+    var value: Int { lock.lock(); defer { lock.unlock() }; return count }
+    func increment() { lock.lock(); count += 1; lock.unlock() }
+}

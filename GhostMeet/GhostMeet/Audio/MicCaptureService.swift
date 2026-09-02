@@ -285,6 +285,15 @@ nonisolated final class MicCaptureService: AudioSource, @unchecked Sendable {
         // no error code, just sound from the wrong place.
         let chosen = preferredDevice()
         if let chosen, let unit = input.audioUnit {
+            // Our own announcement is not news. Binding posts a configuration
+            // change, and acting on it would restart the tap, which would bind
+            // again — the loop that reached the transcript as a stream of
+            // 0.08-second turns.
+            lock.lock()
+            let recovery = self.recovery
+            lock.unlock()
+            recovery?.suppressChanges()
+
             var deviceID = chosen.deviceID
             let status = AudioUnitSetProperty(
                 unit,

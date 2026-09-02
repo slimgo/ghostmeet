@@ -138,14 +138,28 @@ struct ConnectionCheck {
         case .silent:
             CheckResult(subject: subject, outcome: .noSound, detail: quiet)
         case .sound(let peak):
+            // **Громкости мало — важно, проходит ли она гейт.** Реплика не
+            // откроется, пока RMS ниже `silenceGateRMS`, и встроенный микрофон
+            // ноутбука на замере давал пик втрое ниже внешнего. Пользователь,
+            // который видит «звук есть» и не получает ни одной реплики, будет
+            // искать поломку где угодно, кроме порога.
             CheckResult(
                 subject: subject,
-                outcome: .works,
-                detail: subject == .microphone
-                    ? String(localized: "Звук идёт, пик \(String(Int(peak * 100))) %. Слушаю: \(source.activeMicrophone ?? String(localized: "устройство по умолчанию")).")
-                    : String(localized: "Звук идёт, пик \(String(Int(peak * 100))) %.")
+                outcome: peak < TurnSegmentationConfig.default.silenceGateRMS * 2 ? .noSound : .works,
+                detail: quietPeakDetail(subject: subject, peak: peak)
             )
         }
+    }
+
+    private func quietPeakDetail(subject: CheckResult.Subject, peak: Float) -> String {
+        let gate = TurnSegmentationConfig.default.silenceGateRMS
+        let device = subject == .microphone
+            ? " " + String(localized: "Слушаю: \(source.activeMicrophone ?? String(localized: "устройство по умолчанию")).")
+            : ""
+        if peak < gate * 2 {
+            return String(localized: "Звук есть, но тихий: пик \(String(Int(peak * 100))) % при пороге тишины \(String(Int(gate * 100))) %. Реплики будут открываться через раз — говорите ближе или добавьте громкости устройству в системных настройках.") + device
+        }
+        return String(localized: "Звук идёт, пик \(String(Int(peak * 100))) %.") + device
     }
 
     // MARK: - The rest

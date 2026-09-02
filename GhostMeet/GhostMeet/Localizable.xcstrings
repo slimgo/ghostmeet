@@ -31,6 +31,17 @@
         }
       }
     },
+    " Слушаю: %@.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": " Listening to: %@."
+          }
+        }
+      }
+    },
     "%.0f с": {
       "localizations": {
         "en": {
@@ -945,6 +956,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "Sound is taken from the whole application: the call's tab cannot be separated from the browser's other tabs, so anything playing in the same application lands in the Them channel."
+          }
+        }
+      }
+    },
+    "Звук есть, но тихий: пик %@ % при пороге тишины %@ %. Реплики будут открываться через раз — говорите ближе или добавьте громкости устройству в системных настройках.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "There is sound, but it is quiet: peak %@ % against a silence gate of %@ %. Turns will open only some of the time — speak closer, or raise the device's input volume in System Settings."
           }
         }
       }

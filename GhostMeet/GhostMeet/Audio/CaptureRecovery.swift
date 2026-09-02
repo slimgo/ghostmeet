@@ -106,6 +106,8 @@ nonisolated final class CaptureRecovery: @unchecked Sendable {
     /// scheduled by an older one finds itself stale and does nothing.
     private var generation = 0
     private var isRecovering = false
+    /// Until when our own configuration changes are ignored.
+    private var suppressedUntil: TimeInterval = 0
 
     init(
         delays: [TimeInterval] = CaptureRecovery.defaultDelays,
@@ -154,6 +156,25 @@ nonisolated final class CaptureRecovery: @unchecked Sendable {
         if let observer { center.removeObserver(observer) }
     }
 
+    /// Ignores configuration changes for a moment, because we caused them.
+    ///
+    /// **Binding the input node to a chosen device is itself a configuration
+    /// change** — measured: exactly one `AVAudioEngineConfigurationChange` per
+    /// bind. It arrives after the restart has finished and cleared `isRecovering`,
+    /// so the restart announced itself, the announcement started another
+    /// recovery, and that one announced itself in turn. The loop closed the open
+    /// `Реплика` through `sourceInterrupted` on every lap, which reached the
+    /// transcript as a stream of 0.08-second turns with no words in them.
+    ///
+    /// A window rather than a counter: a missed notification here is at worst one
+    /// delayed recovery — a real device switch keeps producing them — while a
+    /// stuck counter would deafen the channel for the rest of the call.
+    func suppressChanges(for interval: TimeInterval = 1) {
+        lock.lock()
+        suppressedUntil = Date().timeIntervalSinceReferenceDate + interval
+        lock.unlock()
+    }
+
     /// Takes one configuration change.
     ///
     /// A single switch of the input device produces a burst of these; only the
@@ -161,6 +182,10 @@ nonisolated final class CaptureRecovery: @unchecked Sendable {
     /// competing restarts of the same engine.
     func configurationChanged() {
         lock.lock()
+        guard Date().timeIntervalSinceReferenceDate >= suppressedUntil else {
+            lock.unlock()
+            return
+        }
         guard !isRecovering else { lock.unlock(); return }
         isRecovering = true
         generation += 1

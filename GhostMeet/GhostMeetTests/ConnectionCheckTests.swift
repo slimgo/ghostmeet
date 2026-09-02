@@ -107,6 +107,24 @@ struct ConnectionCheckTests {
         }
     }
 
+    /// Замер: встроенный микрофон ноутбука на речи давал пик RMS 0.0133 при
+    /// пороге 0.01 — звук «есть», а реплики открываются через раз. Зелёная
+    /// строка тут отправила бы искать поломку куда угодно, кроме громкости.
+    @Test("Тихий звук у порога — не зелёная строка")
+    func aQuietPeakIsNotAPass() async {
+        let spy = CheckSourceSpy()
+        var probe = CaptureProbe()
+        probe.take(frame(.you, level: 0.013))
+        probe.take(frame(.them, level: 0.5))
+        spy.probe = probe
+
+        let results = await ConnectionCheck(source: spy).run()
+
+        #expect(outcome(results, .microphone) == .noSound)
+        #expect(outcome(results, .them) == .works, "громкий канал остаётся зелёным")
+        #expect(results.first { $0.subject == .microphone }?.detail.contains("порог") == true)
+    }
+
     @Test("Без прослушивания каналы не проверяются, и это сказано")
     func channelsNeedListening() async {
         let spy = CheckSourceSpy()
