@@ -20,6 +20,30 @@ Design decisions referenced below live in [docs/adr/](docs/adr/); the product sp
 
 Nothing yet.
 
+## [0.7.2] — 2026-09-02
+
+### Fixed
+
+- **Choosing a microphone no longer restarts capture in a loop.** Binding the
+  input node to a device posts an `AVAudioEngineConfigurationChange` of its own —
+  one per bind, measured — and that is the notification capture recovery restarts
+  on. It arrives after the restart has finished, so the restart announced itself
+  and the announcement started another restart: **18 taps opened in 4 seconds**
+  before the fix, 1 after.
+
+  Both symptoms of 0.7.1 came from that one loop. Every lap closed the open turn
+  through the path that deliberately skips the minimum length — a turn cut short
+  by us is not a cough — so the transcript filled with 0.08-second turns showing a
+  dash instead of words. And a channel restarting five times a second never
+  accumulates enough audio to recognise, which is why selecting the built-in
+  microphone looked like no reaction at all.
+
+- **The connection check compares the peak against the silence gate.** The
+  built-in microphone measured a peak RMS of 0.0133 against a gate of 0.01 —
+  sound that is present and barely opens a turn. It now says «звук есть, но
+  тихий» with both numbers instead of a green line, because a green line there
+  sends somebody looking for the fault anywhere except the volume.
+
 ## [0.7.1] — 2026-09-02
 
 ### Added
