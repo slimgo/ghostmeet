@@ -65,6 +65,8 @@ protocol ConnectionCheckSource {
     var recognitionPhase: SpeechModelPhase { get }
     /// Permissions, as the system reports them right now.
     func permissions() async -> (microphone: Bool, screen: Bool)
+    /// The microphone capture is actually bound to, if it is known.
+    var activeMicrophone: String? { get }
 }
 
 /// Checks that everything the call needs is actually working, on request.
@@ -120,7 +122,7 @@ struct ConnectionCheck {
 
         let probe = await source.measureChannels(for: Self.window)
         return [
-            result(for: .microphone, probe[.you], quiet: String(localized: "Кадры идут, но звука в них нет. Скажите что-нибудь и проверьте снова — если тихо и во второй раз, микрофон отдаёт пустоту.")),
+            result(for: .microphone, probe[.you], quiet: String(localized: "Кадры идут, но звука в них нет. Слушаю: \(source.activeMicrophone ?? String(localized: "устройство по умолчанию")) — говорить нужно в него. Если это не тот микрофон, смените его в настройках.")),
             result(for: .them, probe[.them], quiet: String(localized: "Кадры идут, но звука в них нет. Это нормально, пока собеседник молчит; включите звук в звонилке и проверьте снова.")),
         ]
     }
@@ -139,7 +141,9 @@ struct ConnectionCheck {
             CheckResult(
                 subject: subject,
                 outcome: .works,
-                detail: String(localized: "Звук идёт, пик \(String(Int(peak * 100))) %.")
+                detail: subject == .microphone
+                    ? String(localized: "Звук идёт, пик \(String(Int(peak * 100))) %. Слушаю: \(source.activeMicrophone ?? String(localized: "устройство по умолчанию")).")
+                    : String(localized: "Звук идёт, пик \(String(Int(peak * 100))) %.")
             )
         }
     }

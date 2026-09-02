@@ -195,6 +195,16 @@ final class SessionController {
 
     // MARK: - Checking that sound is arriving
 
+    /// The microphone capture is bound to right now, if capture has run.
+    ///
+    /// Read from the service rather than from settings: the two differ exactly
+    /// when it matters — a chosen device that was unplugged, or a system default
+    /// that changed under a running app.
+    var activeMicrophoneName: String? { microphone?.activeDevice?.name }
+
+    /// The microphone service, kept only so the check can ask what it bound to.
+    var microphone: MicCaptureService?
+
     /// Starts counting what reaches the channels. See `CaptureProbe`.
     func beginCaptureProbe() {
         engine.beginProbe()
@@ -531,7 +541,11 @@ extension SessionController {
         // swapped inside it. Which of the two it is stays a setting the user can
         // change mid-call: they fail on different machines, and a choice that
         // needed a relaunch would be made blind, once, and never revisited.
-        let mic = MicCaptureService()
+        // Asked at tap time, not captured now: a microphone unplugged between
+        // two calls has to fall back to the system default at the moment of use.
+        let mic = MicCaptureService(preferredDevice: {
+            AudioInputDevices.device(uid: settings.microphoneUID)
+        })
 
         let them = SwitchableThemSource(backend: settings.themCaptureBackend)
         them.followSourceSelection(of: settings)
@@ -602,6 +616,7 @@ extension SessionController {
             }
         }
 
+        controller.microphone = mic
         return controller
     }
 }

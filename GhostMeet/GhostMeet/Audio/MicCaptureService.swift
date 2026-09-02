@@ -6,7 +6,9 @@
 // AVFAudio has not been audited for concurrency: its buffers travel from the
 // realtime capture thread by design, and the SDK does not say so in types yet.
 @preconcurrency import AVFoundation
+import CoreAudio
 import Foundation
+import os
 
 /// Microphone capture: the source of the `You` channel.
 ///
@@ -104,6 +106,30 @@ nonisolated final class MicCaptureService: AudioSource, @unchecked Sendable {
     private var recovery: CaptureRecovery?
     private let restartDelays: [TimeInterval]
 
+    /// Only failures, and only once per tap: a per-frame line here would write
+    /// the conversation to disk.
+    private static let log = Logger(subsystem: "Mixxy.GhostMeet", category: "capture")
+
+    /// Which microphone to bind to, asked afresh every time a tap is opened.
+    ///
+    /// A closure rather than a stored value because the choice lives in settings
+    /// and may change between two starts — and because a device that was unplugged
+    /// has to resolve to the system default at the moment of use, not at the
+    /// moment of construction.
+    private let preferredDevice: @Sendable () -> AudioInputDevice?
+
+    /// The device the last successful tap actually bound to.
+    ///
+    /// Reported, not just remembered: the failure this exists for is listening to
+    /// the wrong microphone without knowing it.
+    private var _activeDevice: AudioInputDevice?
+
+    var activeDevice: AudioInputDevice? {
+        lock.lock()
+        defer { lock.unlock() }
+        return _activeDevice
+    }
+
     /// Holds the converter for whatever format the tap turns out to deliver.
     ///
     /// Built on the first buffer instead of up front: the format an input node
@@ -136,9 +162,11 @@ nonisolated final class MicCaptureService: AudioSource, @unchecked Sendable {
     ///   attempts there are. A parameter so a test does not sit through them.
     init(
         sampleRate: Double = 16_000,
-        restartDelays: [TimeInterval] = CaptureRecovery.defaultDelays
+        restartDelays: [TimeInterval] = CaptureRecovery.defaultDelays,
+        preferredDevice: @escaping @Sendable () -> AudioInputDevice? = { nil }
     ) {
         self.restartDelays = restartDelays
+        self.preferredDevice = preferredDevice
         targetFormat = AVAudioFormat(
             commonFormat: .pcmFormatFloat32,
             sampleRate: sampleRate,
@@ -248,6 +276,33 @@ nonisolated final class MicCaptureService: AudioSource, @unchecked Sendable {
         lock.unlock()
 
         let input = fresh.inputNode
+
+        // **Bound before the format is read, and that order is the whole trick.**
+        // `inputNode` latches onto the system default input and caches its format
+        // the first time it is touched; setting the device afterwards leaves the
+        // engine describing one microphone and recording another. That is the
+        // same class of failure as the format traps in `docs/audio-traps.md` —
+        // no error code, just sound from the wrong place.
+        let chosen = preferredDevice()
+        if let chosen, let unit = input.audioUnit {
+            var deviceID = chosen.deviceID
+            let status = AudioUnitSetProperty(
+                unit,
+                kAudioOutputUnitProperty_CurrentDevice,
+                kAudioUnitScope_Global,
+                0,
+                &deviceID,
+                UInt32(MemoryLayout<AudioDeviceID>.size)
+            )
+            if status != noErr {
+                Self.log.error("МИКРОФОН НЕ ВЫБРАН устройство=\(chosen.name, privacy: .public) код=\(String(status), privacy: .public)")
+            }
+        }
+        lock.lock()
+        // What was asked for, or what the system will hand over instead. Reported
+        // either way: «слушаю не тот микрофон» has to be visible, not deduced.
+        _activeDevice = chosen ?? AudioInputDevices.systemDefault()
+        lock.unlock()
 
         let inputFormat = input.outputFormat(forBus: 0)
         guard inputFormat.sampleRate > 0, inputFormat.channelCount > 0 else {

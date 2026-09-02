@@ -80,6 +80,7 @@ struct SettingsView: View {
             }
             page(.sound) {
                 captureBackendSection.id(SettingsSection.captureBackend)
+                microphoneSection
                 sourceApplicationSection.id(SettingsSection.sourceApplication)
                 segmentationSection.id(SettingsSection.segmentation)
             }
@@ -221,6 +222,37 @@ struct SettingsView: View {
     /// ScreenCaptureKit knows every application that owns a window. Neither list
     /// contains the other, and showing the wrong one would let the user pick
     /// something the running backend cannot see.
+    /// Which microphone the `You` channel listens to.
+    ///
+    /// **Added because the app listened to the wrong one silently.** On a live run
+    /// the user spoke into the MacBook's microphone while capture was bound to a
+    /// Fifine standing across the room; `AVAudioEngine` binds to the system
+    /// default input, and nothing here chose otherwise or said what had been
+    /// chosen. The check in the window now names the device as well.
+    private var microphoneSection: some View {
+        Section("Микрофон") {
+            SettingsRow("Слушать") {
+                Picker("Слушать", selection: microphoneSelection) {
+                    Text("Системный по умолчанию").tag(String?.none)
+                    ForEach(AudioInputDevices.all()) { device in
+                        Text(device.name).tag(String?.some(device.uid))
+                    }
+                }
+            }
+
+            Text("Меняется на следующем включении прослушивания: работающий захват привязан к устройству, выбранному при старте.")
+                .font(.footnote)
+                .foregroundStyle(.secondary)
+        }
+    }
+
+    private var microphoneSelection: Binding<String?> {
+        Binding(
+            get: { store.microphoneUID },
+            set: { store.microphoneUID = $0 }
+        )
+    }
+
     private var sourceApplicationSection: some View {
         Section("Приложение-источник") {
             SettingsRow("Слушать") {

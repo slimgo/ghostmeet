@@ -56,6 +56,7 @@ struct ContentView: View {
     @State private var isConfirmingClear = false
     @State private var isChecking = false
     @State private var checkResults: [CheckResult]?
+    @State private var checkDismissal: Task<Void, Never>?
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
@@ -225,11 +226,25 @@ struct ContentView: View {
         }
         .buttonStyle(.plain)
         .disabled(isChecking || settings == nil)
-        .help(String(localized: "Проверить, что звук доходит, а провайдер отвечает. Занимает несколько секунд и стоит одного короткого запроса к модели."))
+        .help(checkResults == nil
+              ? String(localized: "Проверить, что звук доходит, а провайдер отвечает. Занимает несколько секунд и стоит одного короткого запроса к модели.")
+              : String(localized: "Убрать результат проверки."))
         .accessibilityLabel(String(localized: "Проверить связь"))
     }
 
+    /// Runs a check, or puts away the results of the last one.
+    ///
+    /// **The same button does both, because the panel has no other way out.**
+    /// The first version only ever started a new check, so pressing again
+    /// replaced the list with an identical list and there was no way to close it
+    /// — the ticket asked for a result that does not stay on screen for ever, and
+    /// this is the half that was missing.
     private func runConnectionCheck() {
+        if checkResults != nil, !isChecking {
+            checkResults = nil
+            checkDismissal?.cancel()
+            return
+        }
         // With no settings there is no provider to ask: that is the window the
         // plumbing tests build, not the one a user sees.
         guard !isChecking, let settings else { return }
@@ -243,6 +258,19 @@ struct ContentView: View {
             ))
             checkResults = await check.run()
             isChecking = false
+            scheduleCheckDismissal()
+        }
+    }
+
+    /// The panel describes a moment — sound was arriving three seconds ago — so it
+    /// puts itself away. A panel still saying that tomorrow morning would be worse
+    /// than none, because it would be believed.
+    private func scheduleCheckDismissal() {
+        checkDismissal?.cancel()
+        checkDismissal = Task {
+            try? await Task.sleep(for: .seconds(30))
+            guard !Task.isCancelled else { return }
+            checkResults = nil
         }
     }
 

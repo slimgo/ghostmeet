@@ -980,6 +980,17 @@
         }
       }
     },
+    "Звук идёт, пик %@ %. Слушаю: %@.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sound is coming through, peak %@ %. Listening to: %@."
+          }
+        }
+      }
+    },
     "Звук не удалось привести к формату системного распознавателя": {
       "extractionState": "manual",
       "localizations": {
@@ -1095,6 +1106,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "Frames are arriving with no sound in them. Say something and check again — if it is still silent, the microphone is handing over emptiness."
+          }
+        }
+      }
+    },
+    "Кадры идут, но звука в них нет. Слушаю: %@ — говорить нужно в него. Если это не тот микрофон, смените его в настройках.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Frames are arriving with no sound in them. Listening to: %@ — that is the one to speak into. If it is the wrong microphone, change it in settings."
           }
         }
       }
@@ -1276,6 +1298,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "The audio route could not be determined: output is “%@”. If those are headphones, all is well; if they are speakers, the interviewer's voice will land in the You channel."
+          }
+        }
+      }
+    },
+    "Меняется на следующем включении прослушивания: работающий захват привязан к устройству, выбранному при старте.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Takes effect the next time listening starts: a running capture stays bound to the device it started on."
           }
         }
       }
@@ -3155,6 +3188,17 @@
         }
       }
     },
+    "Системный по умолчанию": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "System default"
+          }
+        }
+      }
+    },
     "Системный распознаватель не знает языка %@": {
       "extractionState": "manual",
       "localizations": {
@@ -3539,6 +3583,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "The transcript and the suggestions will be deleted with no way back. The profile and the interview notes will remain."
+          }
+        }
+      }
+    },
+    "Убрать результат проверки.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Put the check results away."
           }
         }
       }
@@ -4057,6 +4112,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "stale"
+          }
+        }
+      }
+    },
+    "устройство по умолчанию": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "the default device"
           }
         }
       }

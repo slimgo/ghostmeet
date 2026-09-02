@@ -61,6 +61,7 @@ final class SettingsStore {
         static let speechModel = "settings.speechModel"
         static let speechEngine = "settings.speechEngine"
         static let interviewLanguage = "settings.interviewLanguage"
+        static let microphoneUID = "settings.microphoneUID"
         static let themSourceApplication = "settings.themSourceApplication"
         static let themCaptureBackend = "settings.themCaptureBackend"
         static let providerSelection = "settings.providerSelection"
@@ -149,6 +150,16 @@ final class SettingsStore {
     /// the audio; the system engine and the prompt layer cannot, so they are told.
     var interviewLanguage: InterviewLanguage {
         didSet { persist(interviewLanguage, forKey: DefaultsKey.interviewLanguage) }
+    }
+
+    /// Which microphone the `You` channel listens to; `nil` means the system's.
+    ///
+    /// Stored as a UID rather than an `AudioDeviceID` because the numeric id is
+    /// handed out per boot and reused — a stored one would point at a different
+    /// microphone after a restart, which is the exact failure this setting exists
+    /// to prevent.
+    var microphoneUID: String? {
+        didSet { defaults.set(microphoneUID, forKey: DefaultsKey.microphoneUID) }
     }
 
     /// Stable id of the application whose sound becomes the `Them` channel, or
@@ -376,6 +387,7 @@ final class SettingsStore {
         self.speechEngine = (storedEngine?.isAvailable ?? false) ? storedEngine! : .whisper
         self.interviewLanguage = Self.decode(InterviewLanguage.self, from: defaults, key: DefaultsKey.interviewLanguage)
             ?? .automatic
+        self.microphoneUID = defaults.string(forKey: DefaultsKey.microphoneUID)
         self.themSourceApplicationID = defaults.string(forKey: DefaultsKey.themSourceApplication)
         self.themCaptureBackend = defaults.string(forKey: DefaultsKey.themCaptureBackend)
             .flatMap(ThemCaptureBackend.init(rawValue:)) ?? .default

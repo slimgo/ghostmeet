@@ -14,6 +14,7 @@ private final class CheckSourceSpy: ConnectionCheckSource {
     var providerAnswer: Result<String, any Error> = .success("ok")
     var recognitionPhase: SpeechModelPhase = .ready
     var granted: (microphone: Bool, screen: Bool) = (true, true)
+    var activeMicrophone: String? = "MacBook Air"
     private(set) var measuredFor: TimeInterval?
 
     func measureChannels(for seconds: TimeInterval) async -> CaptureProbe {
@@ -87,6 +88,23 @@ struct ConnectionCheckTests {
 
         #expect(outcome(results, .microphone) == .noSound)
         #expect(outcome(results, .them) == .noSound)
+    }
+
+    /// Отказ, который вскрылся вживую: пользователь говорил в микрофон ноутбука,
+    /// а приложение слушало внешний, стоявший в стороне, — и молчало об этом.
+    @Test("Микрофон назван по имени — и когда слышно, и когда нет")
+    func theMicrophoneIsNamed() async {
+        for level in [Float(0.4), 0] {
+            let spy = CheckSourceSpy()
+            spy.activeMicrophone = "Fifine K669"
+            var probe = CaptureProbe()
+            probe.take(frame(.you, level: level))
+            spy.probe = probe
+
+            let results = await ConnectionCheck(source: spy).run()
+            let detail = results.first { $0.subject == .microphone }?.detail ?? ""
+            #expect(detail.contains("Fifine K669"), "при уровне \(level) имя пропало")
+        }
     }
 
     @Test("Без прослушивания каналы не проверяются, и это сказано")
