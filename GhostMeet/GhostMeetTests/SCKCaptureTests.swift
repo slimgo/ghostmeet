@@ -776,3 +776,105 @@ struct ThemCaptureBackendSettingsTests {
     // эхоподавление не включается вообще, ни под каким бэкендом. Сторожит это
     // теперь `VoiceProcessingOffTests`.
 }
+
+
+@Suite("Поток Them, умерший без ошибки")
+struct SilentStreamDeathTests {
+
+    private static func buffer() -> AVAudioPCMBuffer {
+        let format = AVAudioFormat(commonFormat: .pcmFormatFloat32, sampleRate: 48_000, channels: 1, interleaved: false)!
+        let buffer = AVAudioPCMBuffer(pcmFormat: format, frameCapacity: 480)!
+        buffer.frameLength = 480
+        return buffer
+    }
+
+    private static func service(stream: FakeThemStream, pauses: Pauses, timeout: TimeInterval = 0.2) -> SCKCaptureService {
+        SCKCaptureService(
+            sourceApplicationID: "com.google.Chrome",
+            stream: stream,
+            retryDelays: [0],
+            pause: { seconds in await pauses.take(seconds) },
+            silenceTimeout: timeout
+        )
+    }
+
+    /// Живой прогон: первый вопрос ответили, дальше слышно только `You`. Поток
+    /// не оборвался — он просто перестал отдавать буферы, и ни один слой этого
+    /// не заметил. Теперь замечает сторож: тишина без единого буфера дольше
+    /// порога — это восстановление, тем же путём, что и обрыв с ошибкой.
+    @Test("Поток, переставший отдавать буферы, восстанавливается")
+    func aStreamThatStopsDeliveringIsRecovered() async throws {
+        let stream = FakeThemStream(applications: [Fixtures.chrome])
+        let pauses = Pauses()
+        let service = Self.service(stream: stream, pauses: pauses)
+        let seen = StatusSink()
+        service.onStatusChange = { seen.record($0) }
+
+        try service.start { _ in }
+        await service.waitForAttach()
+        #expect(stream.starts == 1)
+
+        // Живой поток: буферы идут, сторож молчит.
+        stream.deliver(Self.buffer())
+        await pauses.release(count: 2)
+        #expect(stream.starts == 1, "живой поток перезапускать не за что")
+
+        // Поток замолк без ошибки — и это единственное, чего раньше не ловили.
+        try? await Task.sleep(for: .milliseconds(250))
+        await pauses.release(count: 4)
+
+        // Ожидание условия, а не `waitForRecovery`: тот спрашивает про
+        // восстановление, которое сторож мог ещё не успеть запустить.
+        var waited: Duration = .zero
+        while stream.starts < 2, waited < .seconds(3) {
+            try? await Task.sleep(for: .milliseconds(20))
+            waited += .milliseconds(20)
+            await pauses.release(count: 1)
+        }
+
+        #expect(stream.starts >= 2, "тишина дольше порога обязана дать перезапуск")
+        #expect(seen.all.contains { if case .restarting = $0 { return true }; return false })
+    }
+
+    @Test("Живой поток с пустыми буферами не считается мёртвым")
+    func emptyBuffersCountAsAlive() async throws {
+        let stream = FakeThemStream(applications: [Fixtures.chrome])
+        let pauses = Pauses()
+        let service = Self.service(stream: stream, pauses: pauses, timeout: 0.3)
+
+        try service.start { _ in }
+        await service.waitForAttach()
+
+        for _ in 0..<6 {
+            stream.deliver(Self.buffer())
+            try? await Task.sleep(for: .milliseconds(60))
+            await pauses.release(count: 1)
+        }
+        #expect(stream.starts == 1, "буферы шли всё время — сторож не должен был сработать")
+    }
+}
+
+/// Замена `Task.sleep` в сторожe: каждая пауза ждёт, пока тест её отпустит.
+private actor Pauses {
+    private var waiters: [CheckedContinuation<Void, Never>] = []
+    private var credits = 0
+
+    func take(_ seconds: TimeInterval) async {
+        if credits > 0 { credits -= 1; return }
+        await withCheckedContinuation { waiters.append($0) }
+    }
+
+    func release(count: Int) {
+        for _ in 0..<count {
+            if waiters.isEmpty { credits += 1 } else { waiters.removeFirst().resume() }
+        }
+        // Дать сторожу выполнить проверку после отпуска.
+    }
+}
+
+private final class StatusSink: @unchecked Sendable {
+    private let lock = NSLock()
+    private var _all: [ThemCaptureStatus] = []
+    var all: [ThemCaptureStatus] { lock.lock(); defer { lock.unlock() }; return _all }
+    func record(_ s: ThemCaptureStatus) { lock.lock(); _all.append(s); lock.unlock() }
+}

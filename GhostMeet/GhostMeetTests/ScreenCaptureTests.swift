@@ -195,15 +195,17 @@ struct ScreenCaptureTests {
     /// Проверка на живой машине: своё окно в снимок не попадает.
     ///
     /// Не в общем прогоне, потому что требует экрана, выданного разрешения на
-    /// запись и пары секунд. Запускать так:
+    /// запись и пары секунд. Переменная окружения перед `xcodebuild` **не доходит
+    /// до хоста с 0.5.1** (`shouldUseLaunchSchemeArgsEnv = NO` в схеме), и с тех пор
+    /// этот тест молча пропускался. Запускать так — см. `LiveTestGate`:
     ///
     /// ```
-    /// GHOSTMEET_LIVE_SCREEN=1 xcodebuild ... test \
+    /// touch .build/live-tests && xcodebuild ... test \
     ///   -only-testing:GhostMeetTests/ScreenCaptureTests/overlayStaysOutOfTheScreenshot
     /// ```
     @Test(
         "Живьём: окно с sharingType = .none в снимок не попадает",
-        .enabled(if: ProcessInfo.processInfo.environment["GHOSTMEET_LIVE_SCREEN"] == "1")
+        .enabled(if: LiveTestGate.isEnabled("GHOSTMEET_LIVE_SCREEN"))
     )
     func overlayStaysOutOfTheScreenshot() async throws {
         let hidden = Self.marker(NSWindow.SharingType.none, text: "GHOSTMEETHIDDEN")

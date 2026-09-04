@@ -2567,6 +2567,17 @@
         }
       }
     },
+    "Поток звука собеседника перестал отдавать данные и не сообщил об этом — %@ с без единого буфера": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The interlocutor's audio stream stopped delivering without reporting it — %@ s without a single buffer"
+          }
+        }
+      }
+    },
     "Почему эта компания": {
       "localizations": {
         "en": {

@@ -47,6 +47,30 @@ nonisolated final class SCKCaptureService: ThemAudioSource, @unchecked Sendable 
 
     /// How long to wait before each attempt to bring the stream back.
     private let retryDelays: [TimeInterval]
+
+    /// How long a `.capturing` stream may deliver nothing before it is declared dead.
+    ///
+    /// **Measured against a live stream on a silent source.** ScreenCaptureKit
+    /// keeps delivering buffers while the application it captures makes no
+    /// sound: 403 non-empty buffers in 8 seconds from Finder, about fifty a
+    /// second (`SCKIdleStreamLiveTests`). So five seconds without a single buffer
+    /// is not a quiet interviewer — it is a stream that stopped without saying so.
+    /// Five is 250 buffers of margin, and short enough that the interviewer's next
+    /// question is still the one being answered when the channel comes back.
+    static let defaultSilenceTimeout: TimeInterval = 5
+    private let silenceTimeout: TimeInterval
+
+    /// When the last buffer arrived, `.capturing` only. Reset on every attach.
+    private var lastBufferAt: TimeInterval = 0
+    private var silenceWatch: Task<Void, Never>?
+
+    /// What the watchdog reports when the stream went quiet without an error.
+    nonisolated struct StreamWentSilent: LocalizedError {
+        let seconds: TimeInterval
+        var errorDescription: String? {
+            String(localized: "Поток звука собеседника перестал отдавать данные и не сообщил об этом — \(String(Int(seconds))) с без единого буфера")
+        }
+    }
     /// Injected so the retry rule can be checked without waiting it out.
     private let pause: @Sendable (TimeInterval) async -> Void
 
@@ -61,12 +85,14 @@ nonisolated final class SCKCaptureService: ThemAudioSource, @unchecked Sendable 
         stream: any ThemAudioStream = SCKAudioStream(),
         sampleRate: Double = 16_000,
         retryDelays: [TimeInterval] = CaptureRecovery.defaultDelays,
-        pause: @escaping @Sendable (TimeInterval) async -> Void = SCKCaptureService.sleep
+        pause: @escaping @Sendable (TimeInterval) async -> Void = SCKCaptureService.sleep,
+        silenceTimeout: TimeInterval = SCKCaptureService.defaultSilenceTimeout
     ) {
         self._sourceApplicationID = sourceApplicationID
         self.stream = stream
         self.retryDelays = retryDelays.isEmpty ? CaptureRecovery.defaultDelays : retryDelays
         self.pause = pause
+        self.silenceTimeout = silenceTimeout
         self.targetFormat = AVAudioFormat(
             commonFormat: .pcmFormatFloat32,
             sampleRate: sampleRate,
@@ -153,6 +179,7 @@ nonisolated final class SCKCaptureService: ThemAudioSource, @unchecked Sendable 
         // user left the call, and a channel that comes back afterwards would
         // start recording a room nobody asked it to record.
         recovery?.cancel()
+        stopSilenceWatch()
         stopObservingProcessList()
         stream.stop()
         publish(.idle)
@@ -236,13 +263,70 @@ nonisolated final class SCKCaptureService: ThemAudioSource, @unchecked Sendable 
             lock.unlock()
 
             try await stream.start(scope: scope) { [weak self] buffer in
-                guard let self, let frame = self.makeFrame(from: buffer) else { return }
+                guard let self else { return }
+                // Counted before `makeFrame` can drop it: an unconvertible buffer
+                // still proves the stream is alive, and that is all the watchdog
+                // asks.
+                self.lock.lock()
+                self.lastBufferAt = ProcessInfo.processInfo.systemUptime
+                self.lock.unlock()
+                guard let frame = self.makeFrame(from: buffer) else { return }
                 handler(frame)
             }
+            lock.lock()
+            lastBufferAt = ProcessInfo.processInfo.systemUptime
+            lock.unlock()
             publish(.capturing(application: name))
+            startSilenceWatch()
         } catch {
             publish(.failed(reason: error.localizedDescription))
         }
+    }
+
+    // MARK: - Noticing a stream that died without saying so
+
+    /// Watches for the failure `didStopWithError` never reports.
+    ///
+    /// The live run this exists for: the interviewer's first question was
+    /// answered, and from then on only `You` was heard. No error, no status
+    /// change, no recovery — the stream simply stopped delivering, and every
+    /// layer above went on believing the channel was alive. The same shape as
+    /// 0.3.3, where the stream at least reported its death; this one did not.
+    ///
+    /// Only one check is made, and it is the one that cannot be confused with a
+    /// quiet interlocutor: **no buffer at all** for `silenceTimeout`. Empty
+    /// buffers count as alive.
+    private func startSilenceWatch() {
+        lock.lock()
+        silenceWatch?.cancel()
+        let timeout = silenceTimeout
+        let task = Task { [weak self] in
+            while !Task.isCancelled {
+                await self?.pause(timeout / 2)
+                guard let self, !Task.isCancelled else { return }
+                self.lock.lock()
+                let running = self._isRunning
+                let capturing: Bool = { if case .capturing = self._status { return true }; return false }()
+                let quietFor = ProcessInfo.processInfo.systemUptime - self.lastBufferAt
+                self.lock.unlock()
+                guard running else { return }
+                guard capturing else { continue }
+                if quietFor >= timeout {
+                    self.recover(from: StreamWentSilent(seconds: quietFor))
+                    return
+                }
+            }
+        }
+        silenceWatch = task
+        lock.unlock()
+    }
+
+    private func stopSilenceWatch() {
+        lock.lock()
+        let task = silenceWatch
+        silenceWatch = nil
+        lock.unlock()
+        task?.cancel()
     }
 
     // MARK: - Recovering from a broken stream
