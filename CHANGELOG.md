@@ -18,6 +18,10 @@ Design decisions referenced below live in [docs/adr/](docs/adr/); the product sp
 
 ## [Unreleased]
 
+Nothing yet.
+
+## [0.7.4] — 2026-09-04
+
 ### Fixed
 
 - **A `Them` stream that dies without saying so is noticed and restarted.** The
