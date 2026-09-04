@@ -18,6 +18,10 @@ Design decisions referenced below live in [docs/adr/](docs/adr/); the product sp
 
 ## [Unreleased]
 
+Nothing yet.
+
+## [0.7.3] — 2026-09-04
+
 ### Fixed
 
 - **A chosen microphone starts even when headphones are the system default.**
