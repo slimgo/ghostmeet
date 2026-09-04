@@ -18,7 +18,24 @@ Design decisions referenced below live in [docs/adr/](docs/adr/); the product sp
 
 ## [Unreleased]
 
-Nothing yet.
+### Fixed
+
+- **A chosen microphone starts even when headphones are the system default.**
+  The input node latches the *default* device's format when it is created, and
+  binding another device afterwards changes what it records but not what it
+  reports. With every device at 48 kHz that never showed; with Bluetooth
+  headphones as the default (16 kHz) every chosen microphone failed with `-10868`
+  and only «системный по умолчанию» worked. The tap is now pinned to the format
+  read back from the AudioUnit after binding — the one of four measured variants
+  that both starts and delivers frames; an explicit 48 kHz format started and
+  delivered **nothing**, the silent failure this project keeps meeting.
+
+  That format is interleaved, and the first-channel extraction used to drop
+  interleaved buffers — the fix alone would have produced a capture that starts
+  and stays silent. It takes interleaved and integer layouts now.
+
+- **The microphone list follows the hardware.** Headphones connected while
+  settings were open did not appear until the screen was reopened.
 
 ## [0.7.2] — 2026-09-02
 

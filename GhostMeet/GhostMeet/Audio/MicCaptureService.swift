@@ -313,7 +313,22 @@ nonisolated final class MicCaptureService: AudioSource, @unchecked Sendable {
         _activeDevice = chosen ?? AudioInputDevices.systemDefault()
         lock.unlock()
 
-        let inputFormat = input.outputFormat(forBus: 0)
+        // **The node's reported format is stale once a device has been bound to
+        // it, and starting on it is -10868.** `inputNode` latches the default
+        // device's format the moment it is created; binding another device
+        // afterwards changes what the node records and not what it reports. With
+        // the default at 48 kHz that never showed — every device here ran at
+        // 48 kHz — and with Bluetooth headphones as the default (16 kHz) the
+        // chosen 48 kHz microphone failed to start every time.
+        //
+        // Measured, four ways: tap on `nil` → -10868; `engine.reset()` first →
+        // -10868; a tap pinned to an explicit 48 kHz format → starts and delivers
+        // **zero frames**, the silent failure `docs/audio-traps.md` is about; a tap
+        // pinned to the format read back from the AudioUnit *after* binding →
+        // starts and delivers. So the format comes from the unit, not the node.
+        let boundFormat: AVAudioFormat? = chosen == nil ? nil : Self.unitFormat(of: input)
+
+        let inputFormat = boundFormat ?? input.outputFormat(forBus: 0)
         guard inputFormat.sampleRate > 0, inputFormat.channelCount > 0 else {
             throw CaptureError.inputFormatUnavailable
         }
@@ -329,7 +344,9 @@ nonisolated final class MicCaptureService: AudioSource, @unchecked Sendable {
         // the device into a multi-channel mode at any moment (ADR-0009).
         let targetFormat = targetFormat
         let converterBox = ConverterBox()
-        input.installTap(onBus: 0, bufferSize: 4096, format: nil) { buffer, _ in
+        // `nil` for the default device — see above; the bound device's own
+        // format when one was chosen, because `nil` there means the stale one.
+        input.installTap(onBus: 0, bufferSize: 4096, format: boundFormat) { buffer, _ in
             guard let mono = Self.firstChannel(of: buffer) else { return }
             guard let converter = converterBox.converter(for: mono.format, to: targetFormat) else {
                 return
@@ -359,6 +376,29 @@ nonisolated final class MicCaptureService: AudioSource, @unchecked Sendable {
         recovery?.watch(fresh)
     }
 
+    /// The format the input unit will actually deliver for the device bound to it.
+    ///
+    /// Read from the AudioUnit's input scope rather than from the node: the node
+    /// answers with the format it cached at creation, which is the default
+    /// device's, and that is exactly the number that has to be wrong here.
+    private static func unitFormat(of input: AVAudioInputNode) -> AVAudioFormat? {
+        guard let unit = input.audioUnit else { return nil }
+        var description = AudioStreamBasicDescription()
+        var size = UInt32(MemoryLayout<AudioStreamBasicDescription>.size)
+        let status = AudioUnitGetProperty(
+            unit,
+            kAudioUnitProperty_StreamFormat,
+            kAudioUnitScope_Input,
+            1,
+            &description,
+            &size
+        )
+        guard status == noErr, description.mSampleRate > 0, description.mChannelsPerFrame > 0 else {
+            return nil
+        }
+        return AVAudioFormat(streamDescription: &description)
+    }
+
     /// Takes channel 0 of a captured buffer as a mono buffer at the same rate.
     ///
     /// This exists because of a trap that costs a whole debugging session if you
@@ -374,12 +414,24 @@ nonisolated final class MicCaptureService: AudioSource, @unchecked Sendable {
     /// of it — never ask a converter to fold more than two channels — is not tied
     /// to who enabled what.
     /// Internal rather than private so the regression test can reach it.
+    ///
+    /// **Interleaved and integer buffers are taken too, since 0.7.3.** A tap pinned
+    /// to the format read back from the AudioUnit — the only pinning that starts
+    /// on a bound device, see `openTap` — delivers whatever the unit's native
+    /// layout is, and on this machine that is interleaved. The first version of
+    /// this function returned `nil` for interleaved input, which would have turned
+    /// the -10868 fix into a capture that starts and delivers nothing: every frame
+    /// dropped here, no error anywhere. Caught by reading, not by the probe — the
+    /// probe bypassed this function, which is the lesson.
     static func firstChannel(of buffer: AVAudioPCMBuffer) -> AVAudioPCMBuffer? {
         let format = buffer.format
-        guard buffer.frameLength > 0, !format.isInterleaved, let source = buffer.floatChannelData else {
-            return nil
+        let frames = Int(buffer.frameLength)
+        guard frames > 0 else { return nil }
+
+        // The common case, unchanged: planar float, one channel — nothing to do.
+        if !format.isInterleaved, format.channelCount == 1, format.commonFormat == .pcmFormatFloat32 {
+            return buffer
         }
-        guard format.channelCount > 1 else { return buffer }
 
         guard let monoFormat = AVAudioFormat(
             commonFormat: .pcmFormatFloat32,
@@ -387,12 +439,29 @@ nonisolated final class MicCaptureService: AudioSource, @unchecked Sendable {
             channels: 1,
             interleaved: false
         ), let mono = AVAudioPCMBuffer(pcmFormat: monoFormat, frameCapacity: buffer.frameLength),
-           let destination = mono.floatChannelData else {
+           let destination = mono.floatChannelData?[0] else {
             return nil
         }
-
         mono.frameLength = buffer.frameLength
-        destination[0].update(from: source[0], count: Int(buffer.frameLength))
+
+        // Interleaved: channel 0 is every `channelCount`-th sample of plane 0.
+        // Planar: channel 0 is plane 0 whole. Same loop, different stride.
+        let channels = Int(format.channelCount)
+        let stride = format.isInterleaved ? channels : 1
+
+        switch format.commonFormat {
+        case .pcmFormatFloat32:
+            guard let source = buffer.floatChannelData?[0] else { return nil }
+            for i in 0..<frames { destination[i] = source[i * stride] }
+        case .pcmFormatInt16:
+            guard let source = buffer.int16ChannelData?[0] else { return nil }
+            for i in 0..<frames { destination[i] = Float(source[i * stride]) / 32_768 }
+        case .pcmFormatInt32:
+            guard let source = buffer.int32ChannelData?[0] else { return nil }
+            for i in 0..<frames { destination[i] = Float(source[i * stride]) / 2_147_483_648 }
+        default:
+            return nil
+        }
         return mono
     }
 

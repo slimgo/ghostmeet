@@ -259,6 +259,7 @@ GhostMeet/GhostMeet/          ← синхронизированная груп�
 │   ├── SettingsWindowController.swift
 │   └── AppDefaults.swift         # одноразовые настройки под тестами
 ├── Audio/                            # CaptureProbe — учёт кадров на время проверки
+│   │                                 # AudioInputDevices/AudioInputDeviceCatalog — микрофоны, живой список
 │   ├── AudioSource.swift             # контракт захвата: кадры и канал
 │   ├── MicCaptureService.swift       # You: AVAudioEngine, без VPIO (ADR-0009)
 │   ├── AudioRoute.swift              # маршрут звука: течёт / не течёт / неизвестно

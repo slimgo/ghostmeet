@@ -229,12 +229,16 @@ struct SettingsView: View {
     /// Fifine standing across the room; `AVAudioEngine` binds to the system
     /// default input, and nothing here chose otherwise or said what had been
     /// chosen. The check in the window now names the device as well.
+    /// Follows the hardware: headphones plugged in while this screen is open
+    /// show up without reopening it.
+    @State private var microphones = AudioInputDeviceCatalog()
+
     private var microphoneSection: some View {
         Section("Микрофон") {
             SettingsRow("Слушать") {
                 Picker("Слушать", selection: microphoneSelection) {
                     Text("Системный по умолчанию").tag(String?.none)
-                    ForEach(AudioInputDevices.all()) { device in
+                    ForEach(microphones.devices) { device in
                         Text(device.name).tag(String?.some(device.uid))
                     }
                 }
