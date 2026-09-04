@@ -18,7 +18,24 @@ Design decisions referenced below live in [docs/adr/](docs/adr/); the product sp
 
 ## [Unreleased]
 
-Nothing yet.
+### Fixed
+
+- **A `Them` stream that dies without saying so is noticed and restarted.** The
+  only place the app learned of a dead stream was ScreenCaptureKit's own error
+  callback; a stream that simply stopped delivering left every layer believing
+  the channel was alive, and a live call heard only `You` after the first
+  answer. A watchdog now treats five seconds without a single buffer as death and
+  runs the same recovery as a reported one. The threshold rests on a measurement:
+  a live stream on a silent source still delivers about fifty buffers a second,
+  so silence in the audio is not silence in the stream.
+
+- **Every lifecycle log line survives the session.** The `Them` status, the `You`
+  status and the audio route were still written at `info`, which macOS drops.
+
+- **Live tests run again.** `GHOSTMEET_LIVE_SCREEN=1` has been silently skipping
+  its test since 0.5.1, when the test action stopped passing the shell's
+  environment through. A file next to the project, `.build/live-tests`, gates
+  them now.
 
 ## [0.7.3] — 2026-09-04
 
