@@ -370,7 +370,14 @@ struct RecoverySuppressionTests {
         try? await Task.sleep(for: .milliseconds(120))
         recovery.configurationChanged()
 
-        try? await Task.sleep(for: .milliseconds(200))
+        // Ожидание условия, а не фиксированная пауза: под параллельным прогоном
+        // перезапуск с нулевой задержкой один раз не уложился в 200 мс, и тест
+        // упал на гонке, которой в коде нет.
+        var waited: Duration = .zero
+        while restarted.value == 0, waited < .seconds(3) {
+            try? await Task.sleep(for: .milliseconds(20))
+            waited += .milliseconds(20)
+        }
         #expect(restarted.value == 1, "настоящая смена устройства должна восстанавливать канал")
     }
 }
